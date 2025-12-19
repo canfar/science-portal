@@ -1,0 +1,90 @@
+version: '3.8'
+
+services:
+  # Next.js application
+  nextjs:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_LOGIN_API: https://ws-cadc.canfar.net/ac
+        NEXT_PUBLIC_SKAHA_API: https://ws-uv.canfar.net/skaha
+        NEXT_PUBLIC_SRC_SKAHA_API: https://src.canfar.net/skaha
+        NEXT_PUBLIC_SRC_CAVERN_API: https://src.canfar.net/cavern
+        NEXT_PUBLIC_API_TIMEOUT: "30000"
+        NEXT_PUBLIC_USE_CANFAR: "true"
+        NEXT_PUBLIC_ENABLE_QUERY_DEVTOOLS: "false"
+    container_name: science-portal-nextjs
+    restart: unless-stopped
+    environment:
+      # Server-side API configuration
+      - SERVICE_STORAGE_API=https://ws-uv.canfar.net/arc/nodes/home/
+      - LOGIN_API=https://ws-cadc.canfar.net/ac
+      - SKAHA_API=https://ws-uv.canfar.net/skaha
+      - SRC_SKAHA_API=https://src.canfar.net/skaha
+      - SRC_CAVERN_API=https://src.canfar.net/cavern
+      - API_TIMEOUT=30000
+
+      # Client-side configuration
+      - NEXT_PUBLIC_LOGIN_API=https://ws-cadc.canfar.net/ac
+      - NEXT_PUBLIC_SKAHA_API=https://ws-uv.canfar.net/skaha
+      - NEXT_PUBLIC_SRC_SKAHA_API=https://src.canfar.net/skaha
+      - NEXT_PUBLIC_SRC_CAVERN_API=https://src.canfar.net/cavern
+      - NEXT_PUBLIC_API_TIMEOUT=30000
+      - NEXT_PUBLIC_ENABLE_QUERY_DEVTOOLS=false
+
+      # Authentication mode
+      - NEXT_USE_CANFAR=true
+      - NEXT_PUBLIC_USE_CANFAR=true
+
+      # NextAuth configuration
+      - AUTH_SECRET=${AUTH_SECRET:-your-super-secret-key-change-this-in-production-32-chars-minimum}
+      - AUTH_TRUST_HOST=true
+      - NEXTAUTH_URL=http://localhost
+
+      # OIDC configuration
+      - NEXT_OIDC_URI=${NEXT_OIDC_URI:-https://ska-iam.stfc.ac.uk/}
+      - NEXT_OIDC_CLIENT_ID=${NEXT_OIDC_CLIENT_ID}
+      - NEXT_OIDC_CLIENT_SECRET=${NEXT_OIDC_CLIENT_SECRET}
+      - NEXT_OIDC_CALLBACK_URI=${NEXT_OIDC_CALLBACK_URI:-http://localhost/science-portal}
+      - NEXT_OIDC_REDIRECT_URI=${NEXT_OIDC_REDIRECT_URI:-http://localhost/api/auth/callback/oidc}
+      - NEXT_OIDC_SCOPE=openid profile offline_access
+
+      # Public OIDC configuration
+      - NEXT_PUBLIC_OIDC_URI=${NEXT_OIDC_URI:-https://ska-iam.stfc.ac.uk/}
+      - NEXT_PUBLIC_OIDC_CLIENT_ID=${NEXT_OIDC_CLIENT_ID}
+      - NEXT_PUBLIC_OIDC_CALLBACK_URI=${NEXT_OIDC_CALLBACK_URI:-http://localhost/science-portal}
+      - NEXT_PUBLIC_OIDC_REDIRECT_URI=${NEXT_OIDC_REDIRECT_URI:-http://localhost/api/auth/callback/oidc}
+      - NEXT_PUBLIC_OIDC_SCOPE=openid profile offline_access
+    networks:
+      - app-network
+    # Uncomment to expose Next.js directly (without nginx)
+    # ports:
+    #   - "3000:3000"
+
+  # Nginx reverse proxy
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+      target: nginx
+      args:
+        NEXT_PUBLIC_LOGIN_API: https://ws-cadc.canfar.net/ac
+        NEXT_PUBLIC_SKAHA_API: https://ws-uv.canfar.net/skaha
+        NEXT_PUBLIC_SRC_SKAHA_API: https://src.canfar.net/skaha
+        NEXT_PUBLIC_SRC_CAVERN_API: https://src.canfar.net/cavern
+        NEXT_PUBLIC_API_TIMEOUT: "30000"
+        NEXT_PUBLIC_USE_CANFAR: "true"
+        NEXT_PUBLIC_ENABLE_QUERY_DEVTOOLS: "false"
+    container_name: science-portal-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - nextjs
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

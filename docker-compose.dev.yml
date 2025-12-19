@@ -1,0 +1,62 @@
+version: '3.8'
+
+# Simple docker-compose for development/testing
+# This runs only the Next.js app without Nginx
+
+services:
+  nextjs:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_LOGIN_API: https://ws-cadc.canfar.net/ac
+        NEXT_PUBLIC_SKAHA_API: https://ws-uv.canfar.net/skaha
+        NEXT_PUBLIC_SRC_SKAHA_API: https://src.canfar.net/skaha
+        NEXT_PUBLIC_SRC_CAVERN_API: https://src.canfar.net/cavern
+        NEXT_PUBLIC_API_TIMEOUT: "30000"
+        NEXT_PUBLIC_USE_CANFAR: "false"
+        NEXT_PUBLIC_ENABLE_QUERY_DEVTOOLS: "true"
+    container_name: science-portal-nextjs
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      # Server-side API configuration
+      - SERVICE_STORAGE_API=https://src.canfar.net/cavern
+      - LOGIN_API=https://ws-cadc.canfar.net/ac
+      - SKAHA_API=https://src.canfar.net/skaha
+      - SRC_SKAHA_API=https://src.canfar.net/skaha
+      - SRC_CAVERN_API=https://src.canfar.net/cavern
+      - API_TIMEOUT=30000
+
+      # Client-side configuration
+      - NEXT_PUBLIC_LOGIN_API=https://ws-cadc.canfar.net/ac
+      - NEXT_PUBLIC_SKAHA_API=https://ws-uv.canfar.net/skaha
+      - NEXT_PUBLIC_SRC_SKAHA_API=https://src.canfar.net/skaha
+      - NEXT_PUBLIC_SRC_CAVERN_API=https://src.canfar.net/cavern
+      - NEXT_PUBLIC_API_TIMEOUT=30000
+      - NEXT_PUBLIC_ENABLE_QUERY_DEVTOOLS=true
+
+      # Authentication mode - OIDC (SRC)
+      - NEXT_USE_CANFAR=false
+      - NEXT_PUBLIC_USE_CANFAR=false
+
+      # NextAuth configuration
+      - AUTH_SECRET=${AUTH_SECRET:-your-super-secret-key-change-this-in-production-32-chars-minimum}
+      - AUTH_TRUST_HOST=true
+      - NEXTAUTH_URL=http://localhost:3000
+
+      # OIDC configuration - SKA IAM
+      - NEXT_OIDC_URI=${NEXT_OIDC_URI:-https://ska-iam.stfc.ac.uk/}
+      - NEXT_OIDC_CLIENT_ID=${NEXT_OIDC_CLIENT_ID}
+      - NEXT_OIDC_CLIENT_SECRET=${NEXT_OIDC_CLIENT_SECRET}
+      - NEXT_OIDC_CALLBACK_URI=http://localhost:3000/science-portal
+      - NEXT_OIDC_REDIRECT_URI=http://localhost:3000/api/auth/callback/oidc
+      - NEXT_OIDC_SCOPE=openid profile offline_access
+
+      # Public OIDC configuration
+      - NEXT_PUBLIC_OIDC_URI=${NEXT_OIDC_URI:-https://ska-iam.stfc.ac.uk/}
+      - NEXT_PUBLIC_OIDC_CLIENT_ID=${NEXT_OIDC_CLIENT_ID}
+      - NEXT_PUBLIC_OIDC_CALLBACK_URI=http://localhost:3000/science-portal
+      - NEXT_PUBLIC_OIDC_REDIRECT_URI=http://localhost:3000/api/auth/callback/oidc
+      - NEXT_PUBLIC_OIDC_SCOPE=openid profile offline_access

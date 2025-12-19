@@ -1,0 +1,103 @@
+version: '3.8'
+
+# =============================================================================
+# PRODUCTION - OIDC MODE (SRC) (EXAMPLE)
+# =============================================================================
+# This configuration uses OIDC authentication (e.g., SKA IAM)
+# and SRC backend APIs (src.canfar.net)
+#
+# Copy this file to docker-compose.oidc.yml and configure as needed.
+# Set environment variables before running:
+#   export NEXT_OIDC_CLIENT_ID="your-client-id"
+#   export NEXT_OIDC_CLIENT_SECRET="your-client-secret"
+#   export AUTH_SECRET="$(openssl rand -base64 32)"
+#
+# Usage:
+#   docker-compose -f docker-compose.oidc.yml up -d
+# =============================================================================
+
+services:
+  # Next.js application
+  nextjs:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_LOGIN_API: https://ws-cadc.canfar.net/ac
+        NEXT_PUBLIC_SKAHA_API: https://ws-uv.canfar.net/skaha
+        NEXT_PUBLIC_SRC_SKAHA_API: https://src.canfar.net/skaha
+        NEXT_PUBLIC_SRC_CAVERN_API: https://src.canfar.net/cavern/nodes/home/
+        NEXT_PUBLIC_API_TIMEOUT: "30000"
+        NEXT_PUBLIC_USE_CANFAR: "false"
+        NEXT_PUBLIC_ENABLE_QUERY_DEVTOOLS: "false"
+    container_name: science-portal-nextjs-oidc
+    restart: unless-stopped
+    environment:
+      # Server-side API configuration - SRC APIs
+      - SERVICE_STORAGE_API=https://src.canfar.net/cavern/nodes/home/
+      - LOGIN_API=https://ws-cadc.canfar.net/ac
+      - SKAHA_API=https://src.canfar.net/skaha
+      - SRC_SKAHA_API=https://src.canfar.net/skaha
+      - SRC_CAVERN_API=https://src.canfar.net/cavern/nodes/home/
+      - API_TIMEOUT=30000
+
+      # Client-side configuration
+      - NEXT_PUBLIC_LOGIN_API=https://ws-cadc.canfar.net/ac
+      - NEXT_PUBLIC_SKAHA_API=https://ws-uv.canfar.net/skaha
+      - NEXT_PUBLIC_SRC_SKAHA_API=https://src.canfar.net/skaha
+      - NEXT_PUBLIC_SRC_CAVERN_API=https://src.canfar.net/cavern/nodes/home/
+      - NEXT_PUBLIC_API_TIMEOUT=30000
+      - NEXT_PUBLIC_ENABLE_QUERY_DEVTOOLS=false
+
+      # Authentication mode - OIDC
+      - NEXT_USE_CANFAR=false
+      - NEXT_PUBLIC_USE_CANFAR=false
+
+      # NextAuth configuration
+      - AUTH_SECRET=${AUTH_SECRET:-REPLACE_WITH_SECURE_RANDOM_STRING}
+      - AUTH_TRUST_HOST=true
+      - NEXTAUTH_URL=http://localhost
+
+      # OIDC configuration
+      - NEXT_OIDC_URI=${NEXT_OIDC_URI:-https://ska-iam.stfc.ac.uk/}
+      - NEXT_OIDC_CLIENT_ID=${NEXT_OIDC_CLIENT_ID:-your-oidc-client-id}
+      - NEXT_OIDC_CLIENT_SECRET=${NEXT_OIDC_CLIENT_SECRET:-your-oidc-client-secret}
+      - NEXT_OIDC_CALLBACK_URI=${NEXT_OIDC_CALLBACK_URI:-http://localhost/science-portal}
+      - NEXT_OIDC_REDIRECT_URI=${NEXT_OIDC_REDIRECT_URI:-http://localhost/api/auth/callback/oidc}
+      - NEXT_OIDC_SCOPE=openid profile offline_access
+
+      # Public OIDC configuration
+      - NEXT_PUBLIC_OIDC_URI=${NEXT_OIDC_URI:-https://ska-iam.stfc.ac.uk/}
+      - NEXT_PUBLIC_OIDC_CLIENT_ID=${NEXT_OIDC_CLIENT_ID:-your-oidc-client-id}
+      - NEXT_PUBLIC_OIDC_CALLBACK_URI=${NEXT_OIDC_CALLBACK_URI:-http://localhost/science-portal}
+      - NEXT_PUBLIC_OIDC_REDIRECT_URI=${NEXT_OIDC_REDIRECT_URI:-http://localhost/api/auth/callback/oidc}
+      - NEXT_PUBLIC_OIDC_SCOPE=openid profile offline_access
+    networks:
+      - app-network
+
+  # Nginx reverse proxy
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+      target: nginx
+      args:
+        NEXT_PUBLIC_LOGIN_API: https://ws-cadc.canfar.net/ac
+        NEXT_PUBLIC_SKAHA_API: https://ws-uv.canfar.net/skaha
+        NEXT_PUBLIC_SRC_SKAHA_API: https://src.canfar.net/skaha
+        NEXT_PUBLIC_SRC_CAVERN_API: https://src.canfar.net/cavern/nodes/home/
+        NEXT_PUBLIC_API_TIMEOUT: "30000"
+        NEXT_PUBLIC_USE_CANFAR: "false"
+        NEXT_PUBLIC_ENABLE_QUERY_DEVTOOLS: "false"
+    container_name: science-portal-nginx-oidc
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - nextjs
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

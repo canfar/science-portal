@@ -1,36 +1,86 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
-/node_modules
+# Dependencies
+node_modules
 /.pnp
 .pnp.js
 
-# testing
+# Testing
 /coverage
 
-# next.js
+# Next.js
 /.next/
 /out/
 
-# production
+# Production
 /build
+.next
+out
 
-# misc
+# Misc
 .DS_Store
 *.pem
 
-# debug
+# Debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
 
-# local env files
+# Local env files
 .env*.local
 .env
+.env.production
+.env.development
 
-# vercel
+# Docker Compose files with secrets (use .example versions)
+docker-compose.canfar.yml
+docker-compose.dev.canfar.yml
+docker-compose.oidc.yml
+docker-compose.dev.oidc.yml
+docker-compose.override.yml
+*.local.yml
+
+# Sensitive Kubernetes files
+k8s-secrets.yaml
+secrets/
+.secrets
+
+# Helm values with sensitive data
+helm/**/values-production.yaml
+helm/**/values-staging.yaml
+helm/**/values-*.local.yaml
+
+# Vercel
 .vercel
 
-# typescript
+# TypeScript
 *.tsbuildinfo
 next-env.d.ts
+
+# IDE and Editor
+.idea
+.vscode
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+*.sublime-workspace
+*.sublime-project
+
+# Claude Code
+.claude
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Logs
+logs
+*.log
+
+# Temporary files
+tmp/
+temp/
+*.tmp

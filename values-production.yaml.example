@@ -1,0 +1,228 @@
+# Production values for Science Portal Helm Chart
+#
+# Copy this file to values-production.yaml and customize for your environment
+# DO NOT commit values-production.yaml with real secrets!
+#
+# Usage:
+#   helm upgrade --install science-portal ./helm/science-portal -f values-production.yaml
+
+replicaCount: 3
+
+image:
+  repository: your-registry.com/science-portal
+  pullPolicy: IfNotPresent
+  tag: "v0.1.0"
+
+# If using private registry
+# imagePullSecrets:
+#   - name: registry-credentials
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "3000"
+  prometheus.io/path: "/api/metrics"
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+  runAsGroup: 1001
+  fsGroup: 1001
+  seccompProfile:
+    type: RuntimeDefault
+
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: false
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 3000
+  annotations: {}
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    # Optional: OAuth2 proxy for additional auth
+    # nginx.ingress.kubernetes.io/auth-url: "https://oauth2.example.com/oauth2/auth"
+    # nginx.ingress.kubernetes.io/auth-signin: "https://oauth2.example.com/oauth2/start?rd=$escaped_request_uri"
+  hosts:
+    - host: science-portal.yourdomain.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: science-portal-tls
+      hosts:
+        - science-portal.yourdomain.com
+
+# Resource limits - adjust based on your workload
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+  requests:
+    cpu: 200m
+    memory: 512Mi
+
+# Horizontal Pod Autoscaler
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+# Health checks
+livenessProbe:
+  httpGet:
+    path: /api/health
+    port: 3000
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /api/health/ready
+    port: 3000
+  initialDelaySeconds: 10
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+# Node selector - for dedicated node pools
+# nodeSelector:
+#   workload: web-apps
+
+# Tolerations - for tainted nodes
+# tolerations:
+#   - key: "workload"
+#     operator: "Equal"
+#     value: "web-apps"
+#     effect: "NoSchedule"
+
+# Pod anti-affinity - spread pods across nodes
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - science-portal
+          topologyKey: kubernetes.io/hostname
+    # For multi-zone deployment
+    # requiredDuringSchedulingIgnoredDuringExecution:
+    #   - labelSelector:
+    #       matchExpressions:
+    #         - key: app.kubernetes.io/name
+    #           operator: In
+    #           values:
+    #             - science-portal
+    #     topologyKey: topology.kubernetes.io/zone
+
+# Environment variables
+env:
+  # Server-side API configuration
+  - name: SERVICE_STORAGE_API
+    value: "https://ws-uv.canfar.net/arc/nodes/home/"
+  - name: LOGIN_API
+    value: "https://ws-cadc.canfar.net/ac"
+  - name: SKAHA_API
+    value: "https://ws-uv.canfar.net/skaha"
+  - name: SRC_SKAHA_API
+    value: "https://src.canfar.net/skaha"
+  - name: SRC_CAVERN_API
+    value: "https://src.canfar.net/cavern"
+  - name: API_TIMEOUT
+    value: "30000"
+
+  # Client-side configuration (exposed to browser)
+  - name: NEXT_PUBLIC_LOGIN_API
+    value: "https://ws-cadc.canfar.net/ac"
+  - name: NEXT_PUBLIC_SKAHA_API
+    value: "https://ws-uv.canfar.net/skaha"
+  - name: NEXT_PUBLIC_SRC_SKAHA_API
+    value: "https://src.canfar.net/skaha"
+  - name: NEXT_PUBLIC_SRC_CAVERN_API
+    value: "https://src.canfar.net/cavern"
+  - name: NEXT_PUBLIC_API_TIMEOUT
+    value: "30000"
+  - name: NEXT_PUBLIC_ENABLE_QUERY_DEVTOOLS
+    value: "false"
+
+  # Authentication mode
+  - name: NEXT_USE_CANFAR
+    value: "false"
+  - name: NEXT_PUBLIC_USE_CANFAR
+    value: "false"
+
+  # NextAuth configuration
+  - name: AUTH_TRUST_HOST
+    value: "true"
+  - name: NEXTAUTH_URL
+    value: "https://science-portal.yourdomain.com"
+
+# Kubernetes secrets reference
+# Create with: ./scripts/create-secrets.sh <namespace> <oidc-secret>
+secrets:
+  existingSecret: "science-portal-secrets"
+  keys:
+    authSecret: "auth-secret"
+    oidcClientSecret: "oidc-client-secret"
+
+# OIDC Configuration
+oidc:
+  uri: "https://ska-iam.stfc.ac.uk/"
+  clientId: "your-oidc-client-id"
+  callbackUri: "https://science-portal.yourdomain.com/science-portal"
+  redirectUri: "https://science-portal.yourdomain.com/api/auth/callback/oidc"
+  scope: "openid profile offline_access"
+
+# Network Policy
+networkPolicy:
+  enabled: true
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 3000
+  egress:
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 53
+      - protocol: UDP
+          port: 53
+
+# Pod Disruption Budget
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1

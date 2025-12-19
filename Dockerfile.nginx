@@ -1,0 +1,76 @@
+# =============================================================================
+# Multi-stage Dockerfile for Next.js Science Portal with Nginx
+# =============================================================================
+
+# Stage 1: Dependencies
+FROM node:22-alpine AS deps
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+
+COPY package.json package-lock.json* ./
+# Install ALL dependencies (including devDependencies for build)
+RUN npm ci
+
+# Stage 2: Builder
+FROM node:22-alpine AS builder
+WORKDIR /app
+
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+# Accept build arguments for required environment variables
+ARG NEXT_PUBLIC_LOGIN_API=https://ws-cadc.canfar.net/ac
+ARG NEXT_PUBLIC_SKAHA_API=https://ws-uv.canfar.net/skaha
+ARG NEXT_PUBLIC_SRC_SKAHA_API=https://src.canfar.net/skaha
+ARG NEXT_PUBLIC_SRC_CAVERN_API=https://src.canfar.net/cavern
+ARG NEXT_PUBLIC_API_TIMEOUT=30000
+ARG NEXT_PUBLIC_USE_CANFAR=false
+ARG NEXT_PUBLIC_ENABLE_QUERY_DEVTOOLS=false
+
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_ENV=production
+ENV NEXT_PUBLIC_LOGIN_API=$NEXT_PUBLIC_LOGIN_API
+ENV NEXT_PUBLIC_SKAHA_API=$NEXT_PUBLIC_SKAHA_API
+ENV NEXT_PUBLIC_SRC_SKAHA_API=$NEXT_PUBLIC_SRC_SKAHA_API
+ENV NEXT_PUBLIC_SRC_CAVERN_API=$NEXT_PUBLIC_SRC_CAVERN_API
+ENV NEXT_PUBLIC_API_TIMEOUT=$NEXT_PUBLIC_API_TIMEOUT
+ENV NEXT_PUBLIC_USE_CANFAR=$NEXT_PUBLIC_USE_CANFAR
+ENV NEXT_PUBLIC_ENABLE_QUERY_DEVTOOLS=$NEXT_PUBLIC_ENABLE_QUERY_DEVTOOLS
+
+RUN npm run build
+
+# Stage 3: Next.js Runner
+FROM node:22-alpine AS nextjs-runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+COPY --from=builder /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+USER nextjs
+
+EXPOSE 3000
+
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
+CMD ["node", "server.js"]
+
+# Stage 4: Nginx
+FROM nginx:alpine AS nginx
+
+# Remove default nginx config
+RUN rm /etc/nginx/conf.d/default.conf
+
+# Copy custom nginx config
+COPY nginx.conf /etc/nginx/conf.d/
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]

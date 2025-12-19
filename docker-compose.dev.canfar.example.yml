@@ -1,0 +1,57 @@
+version: '3.8'
+
+# =============================================================================
+# DEVELOPMENT - CANFAR MODE (EXAMPLE)
+# =============================================================================
+# This configuration uses CANFAR authentication (username/password)
+# and CANFAR backend APIs (ws-uv.canfar.net)
+# No Nginx - direct access to Next.js on port 3000
+#
+# Copy this file to docker-compose.dev.canfar.yml and configure as needed.
+#
+# Usage:
+#   docker-compose -f docker-compose.dev.canfar.yml up -d
+# =============================================================================
+
+services:
+  nextjs:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_LOGIN_API: https://ws-cadc.canfar.net/ac
+        NEXT_PUBLIC_SKAHA_API: https://ws-uv.canfar.net/skaha
+        NEXT_PUBLIC_SRC_SKAHA_API: https://src.canfar.net/skaha
+        NEXT_PUBLIC_SRC_CAVERN_API: https://src.canfar.net/cavern
+        NEXT_PUBLIC_API_TIMEOUT: "30000"
+        NEXT_PUBLIC_USE_CANFAR: "true"
+        NEXT_PUBLIC_ENABLE_QUERY_DEVTOOLS: "true"
+    container_name: science-portal-nextjs-dev-canfar
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      # Server-side API configuration - CANFAR APIs
+      - SERVICE_STORAGE_API=https://ws-uv.canfar.net/arc/nodes/home/
+      - LOGIN_API=https://ws-cadc.canfar.net/ac
+      - SKAHA_API=https://ws-uv.canfar.net/skaha
+      - SRC_SKAHA_API=https://src.canfar.net/skaha
+      - SRC_CAVERN_API=https://src.canfar.net/cavern
+      - API_TIMEOUT=30000
+
+      # Client-side configuration
+      - NEXT_PUBLIC_LOGIN_API=https://ws-cadc.canfar.net/ac
+      - NEXT_PUBLIC_SKAHA_API=https://ws-uv.canfar.net/skaha
+      - NEXT_PUBLIC_SRC_SKAHA_API=https://src.canfar.net/skaha
+      - NEXT_PUBLIC_SRC_CAVERN_API=https://src.canfar.net/cavern
+      - NEXT_PUBLIC_API_TIMEOUT=30000
+      - NEXT_PUBLIC_ENABLE_QUERY_DEVTOOLS=true
+
+      # Authentication mode - CANFAR
+      - NEXT_USE_CANFAR=true
+      - NEXT_PUBLIC_USE_CANFAR=true
+
+      # NextAuth configuration
+      - AUTH_SECRET=${AUTH_SECRET:-REPLACE_WITH_SECURE_RANDOM_STRING}
+      - AUTH_TRUST_HOST=true
+      - NEXTAUTH_URL=http://localhost:3000

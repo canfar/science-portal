@@ -1,0 +1,191 @@
+# DigitalOcean-specific values for science-portal
+# This file overrides default values.yaml for DigitalOcean Kubernetes deployment
+
+# Replica count - start with 2 for high availability
+replicaCount: 2
+
+# Image configuration
+# Replace with your DigitalOcean Container Registry or Docker Hub repository
+image:
+  repository: registry.digitalocean.com/ice-image/science-portal-nextjs
+  pullPolicy: IfNotPresent
+  # "1.0.0" CANFAR mode (experimental: false)
+  # "1.1.0" OIDC mode (experimental: false)
+  # "1.2.0" CANFAR mode + experimental features
+  tag: "1.2.0"
+
+# If using DigitalOcean Container Registry, create and reference the pull secret:
+# doctl registry kubernetes-manifest | kubectl apply -f -
+imagePullSecrets:
+  - name: registry-ice-image
+
+# Service configuration
+# Use ClusterIP with Ingress for cost-effective setup
+# Alternative: Use LoadBalancer type for direct DO Load Balancer (incurs additional cost)
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 3000
+  annotations: {}
+    # For LoadBalancer type, you can add:
+    # service.beta.kubernetes.io/do-loadbalancer-name: "science-portal-lb"
+    # service.beta.kubernetes.io/do-loadbalancer-protocol: "http"
+    # service.beta.kubernetes.io/do-loadbalancer-healthcheck-path: "/api/health"
+    # service.beta.kubernetes.io/do-loadbalancer-healthcheck-protocol: "http"
+
+# Ingress configuration for DigitalOcean
+ingress:
+  enabled: true
+  className: "nginx" # DigitalOcean Kubernetes 1-Click Apps includes nginx-ingress
+  annotations:
+    # cert-manager annotations for automatic SSL/TLS
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    # Nginx-specific annotations
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    # Client body size for file uploads
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    # Connection timeouts
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+  hosts:
+    - host: science-portal-next.testapp.ca
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: science-portal-tls
+      hosts:
+        - science-portal-next.testapp.ca
+
+# Resource limits optimized for DigitalOcean node sizes
+# Adjust based on your node pool configuration
+# This configuration works well with:
+# - Basic nodes: 2 vCPU, 4 GB RAM
+# - Professional nodes: 4 vCPU, 8 GB RAM
+resources:
+  limits:
+    cpu: 1000m      # 1 CPU core max
+    memory: 1Gi     # 1 GB RAM max
+  requests:
+    cpu: 250m       # 0.25 CPU cores requested
+    memory: 512Mi   # 512 MB RAM requested
+
+# Horizontal Pod Autoscaler
+# Automatically scale based on CPU/Memory usage
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 6  # Adjusted for DO cost optimization
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+# Node selector for specific node pools (optional)
+# Uncomment and configure if using multiple node pools
+# nodeSelector:
+#   doks.digitalocean.com/node-pool: your-node-pool-name
+#   node.kubernetes.io/instance-type: s-2vcpu-4gb
+
+# Tolerations for node taints (optional)
+tolerations: []
+
+# Affinity - spread pods across different nodes for HA
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - science-portal
+          topologyKey: kubernetes.io/hostname
+
+# Environment variables - customize for your deployment
+env:
+  # Server-side API configuration
+  - name: SERVICE_STORAGE_API
+    value: "https://ws-uv.canfar.net/arc/nodes/home/"
+  - name: LOGIN_API
+    value: "https://ws-cadc.canfar.net/ac"
+  - name: SKAHA_API
+    value: "https://ws-uv.canfar.net/skaha"
+  - name: SRC_SKAHA_API
+    value: "https://src.canfar.net/skaha"
+  - name: SRC_CAVERN_API
+    value: "https://src.canfar.net/cavern"
+  - name: API_TIMEOUT
+    value: "30000"
+
+  # Client-side configuration (NEXT_PUBLIC_)
+  - name: NEXT_PUBLIC_LOGIN_API
+    value: "https://ws-cadc.canfar.net/ac"
+  - name: NEXT_PUBLIC_SKAHA_API
+    value: "https://ws-uv.canfar.net/skaha"
+  - name: NEXT_PUBLIC_SRC_SKAHA_API
+    value: "https://src.canfar.net/skaha"
+  - name: NEXT_PUBLIC_SRC_CAVERN_API
+    value: "https://src.canfar.net/cavern"
+  - name: NEXT_PUBLIC_API_TIMEOUT
+    value: "30000"
+  - name: NEXT_PUBLIC_ENABLE_QUERY_DEVTOOLS
+    value: "false"
+  - name: NEXT_PUBLIC_EXPERIMENTAL
+    value: "true"
+
+  # Authentication mode
+  - name: NEXT_USE_CANFAR
+    value: "true"
+  - name: NEXT_PUBLIC_USE_CANFAR
+    value: "true"
+
+  # NextAuth configuration
+  - name: AUTH_TRUST_HOST
+    value: "true"
+  - name: NEXTAUTH_URL
+    value: "https://science-portal-next.testapp.ca"
+
+# Secrets configuration
+# Create the secret before deploying:
+# kubectl create secret generic science-portal-secrets \
+#   --from-literal=auth-secret=$(openssl rand -base64 32) \
+#   --from-literal=oidc-client-secret=your-oidc-secret
+secrets:
+  existingSecret: "science-portal-secrets"
+  keys:
+    authSecret: "auth-secret"
+    oidcClientSecret: "oidc-client-secret"
+
+# OIDC Configuration - customize for your identity provider
+oidc:
+  uri: "https://ska-iam.stfc.ac.uk/"
+  clientId: "your-oidc-client-id"
+  callbackUri: "https://science-portal-next.testapp.ca/science-portal"
+  redirectUri: "https://science-portal-next.testapp.ca/api/auth/callback/oidc"
+  scope: "openid profile offline_access"
+
+# Network Policy - adjust based on your security requirements
+networkPolicy:
+  enabled: true
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 3000
+  egress:
+    # Allow all egress for external API calls
+    - {}
+
+# Pod Disruption Budget - ensure availability during node maintenance
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
