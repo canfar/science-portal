@@ -15,8 +15,10 @@ on:
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: read
+  attestations: write
   pages: write
   id-token: write
+  packages: write
 
 jobs:
   # Build application and Docker image
