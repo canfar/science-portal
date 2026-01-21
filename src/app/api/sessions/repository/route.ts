@@ -25,7 +25,9 @@ import type { ImageRepository } from '@/lib/api/skaha';
  * List the Image Repository hosts configured as a JSON Array
  */
 export const GET = withErrorHandling(async (request: NextRequest) => {
-  const logger = createLogger('/api/sessions/repository', 'GET');
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+  const sessionsAPIEndpoint = `${basePath}/api/sessions`;
+  const logger = createLogger(`${sessionsAPIEndpoint}/repository`, 'GET');
   logger.logRequest(request);
 
   if (!validateMethod(request, ['GET'])) {

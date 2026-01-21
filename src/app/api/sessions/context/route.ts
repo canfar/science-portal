@@ -29,7 +29,9 @@ import { createLogger } from '@/app/api/lib/logger';
  * - Default values for cores and RAM
  */
 export const GET = withErrorHandling(async (request: NextRequest) => {
-  const logger = createLogger('/api/sessions/context', 'GET');
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+  const sessionsAPIEndpoint = `${basePath}/api/sessions`;
+  const logger = createLogger(`${sessionsAPIEndpoint}/context`, 'GET');
   logger.logRequest(request);
 
   if (!validateMethod(request, ['GET'])) {

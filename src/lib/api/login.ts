@@ -7,6 +7,9 @@
 
 import { saveToken, getAuthHeader } from '@/lib/auth/token-storage';
 
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+const authAPIEndpoint = `${basePath}/api/auth`;
+
 export interface User {
   username: string;
   email?: string;
@@ -47,7 +50,7 @@ export interface AuthStatus {
  * Stores the authentication token in sessionStorage for subsequent requests.
  */
 export async function login(credentials: LoginCredentials): Promise<User> {
-  const response = await fetch('/api/auth/login', {
+  const response = await fetch(`${authAPIEndpoint}/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
@@ -74,7 +77,7 @@ export async function login(credentials: LoginCredentials): Promise<User> {
 export async function logout(): Promise<void> {
   const { removeToken } = await import('@/lib/auth/token-storage');
 
-  const response = await fetch('/api/auth/logout', {
+  const response = await fetch(`${authAPIEndpoint}/logout`, {
     method: 'POST',
     credentials: 'include',
   });
@@ -96,7 +99,7 @@ export async function getAuthStatus(): Promise<AuthStatus> {
   try {
     const authHeaders = getAuthHeader();
 
-    const response = await fetch('/api/auth/status', {
+    const response = await fetch(`${authAPIEndpoint}/status`, {
       credentials: 'include',
       headers: authHeaders,
     });
@@ -122,7 +125,7 @@ export async function getAuthStatus(): Promise<AuthStatus> {
 export async function getUserDetails(username: string): Promise<User> {
   const authHeaders = getAuthHeader();
 
-  const response = await fetch(`/api/auth/user/${username}`, {
+  const response = await fetch(`${authAPIEndpoint}/user/${username}`, {
     credentials: 'include',
     headers: authHeaders,
   });
@@ -150,7 +153,7 @@ export async function checkPermission(
       permission,
     });
 
-    const response = await fetch(`/api/auth/permissions?${params}`, {
+    const response = await fetch(`${authAPIEndpoint}/permissions?${params}`, {
       credentials: 'include',
       headers: authHeaders,
     });

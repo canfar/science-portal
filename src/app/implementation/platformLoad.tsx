@@ -106,12 +106,6 @@ export const PlatformLoadImpl: React.FC<PlatformLoadProps> = ({
               max={data.maxValues.ram}
               isLoading={isLoading}
             />
-            <MetricBlock
-              label="Running Instances"
-              series={data.instances}
-              max={data.maxValues.instances}
-              isLoading={isLoading}
-            />
           </Stack>
         ) : (
           <Stack spacing={1}>
@@ -125,12 +119,6 @@ export const PlatformLoadImpl: React.FC<PlatformLoadProps> = ({
               label="RAM"
               series={data.ram}
               max={data.maxValues.ram}
-              isLoading={isLoading}
-            />
-            <MetricBlock
-              label="Running Instances"
-              series={data.instances}
-              max={data.maxValues.instances}
               isLoading={isLoading}
             />
           </Stack>

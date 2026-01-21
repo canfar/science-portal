@@ -34,6 +34,7 @@ export const apiConfig = {
 
 // Useful for constructing API route URLs when running in a shared environment.
 // This is also set in the next.config.ts file to tell NextJS where to listen.
+// @see https://nextjs.org/docs/app/api-reference/config/next-config-js/basePath
 // jenkinsd 2026.01.21
 //
 const currentBasePath = process.env.NEXT_PUBLIC_BASE_PATH || '';

@@ -315,8 +315,7 @@ export default function SciencePortalPage() {
     return {
       cpu: { name: 'CPU', used: 0, free: 0 },
       ram: { name: 'RAM', used: 0, free: 0 },
-      instances: { name: 'Instances', used: 0, free: 0 },
-      maxValues: { cpu: 1, ram: 1, instances: 1 },
+      maxValues: { cpu: 1, ram: 1 },
       lastUpdate: new Date().toISOString(),
     };
   }, [platformLoadData]);

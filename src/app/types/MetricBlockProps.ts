@@ -26,7 +26,7 @@ export interface MetricSeries {
  */
 export interface MetricBlockProps {
   /**
-   * The label for the metric (e.g., 'CPU', 'RAM', 'Instances')
+   * The label for the metric (e.g., 'CPU', 'RAM')
    */
   label: string;
   /**

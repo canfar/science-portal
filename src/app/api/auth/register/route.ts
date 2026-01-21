@@ -27,7 +27,9 @@ export interface RegistrationRequestPayload {
 }
 
 export const POST = withErrorHandling(async (request: NextRequest) => {
-  const logger = createLogger('/api/auth/register', 'POST');
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+  const authAPIEndpoint = `${basePath}/api/auth`;
+  const logger = createLogger(`${authAPIEndpoint}/register`, 'POST');
 
   if (!validateMethod(request, ['POST'])) {
     logger.logError(HTTP_STATUS.METHOD_NOT_ALLOWED, 'Method not allowed');

@@ -191,7 +191,9 @@ export const RegistrationModalImpl = React.forwardRef<
         setInternalSuccess(null);
 
         try {
-          const response = await fetch('/api/auth/register', {
+          const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+          const authAPIEndpoint = `${basePath}/api/auth`;
+          const response = await fetch(`${authAPIEndpoint}/register`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

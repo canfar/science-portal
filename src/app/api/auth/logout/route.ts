@@ -19,7 +19,9 @@ import { createLogger } from '@/app/api/lib/logger';
 import { HTTP_STATUS } from '@/app/api/lib/http-constants';
 
 export const POST = withErrorHandling(async (request: NextRequest) => {
-  const logger = createLogger('/api/auth/logout', 'POST');
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+  const authAPIEndpoint = `${basePath}/api/auth`;
+  const logger = createLogger(`${authAPIEndpoint}/logout`, 'POST');
   logger.logRequest(request);
 
   if (!validateMethod(request, ['POST'])) {

@@ -48,7 +48,9 @@ export interface AuthStatus {
 }
 
 export const GET = withErrorHandling(async (request: NextRequest) => {
-  const logger = createLogger('/api/auth/status', 'GET');
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+  const authAPIEndpoint = `${basePath}/api/auth`;
+  const logger = createLogger(`${authAPIEndpoint}/status`, 'GET');
 
   if (!validateMethod(request, ['GET'])) {
     logger.logError(HTTP_STATUS.METHOD_NOT_ALLOWED, 'Method not allowed');

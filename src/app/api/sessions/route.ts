@@ -27,7 +27,9 @@ import { HTTP_STATUS } from '@/app/api/lib/http-constants';
  * List all active sessions for the current user
  */
 export const GET = withErrorHandling(async (request: NextRequest) => {
-  const logger = createLogger('/api/sessions', 'GET');
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+  const sessionsAPIEndpoint = `${basePath}/api/sessions`;
+  const logger = createLogger(sessionsAPIEndpoint, 'GET');
   logger.logRequest(request);
 
   if (!validateMethod(request, ['GET'])) {
@@ -71,7 +73,9 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
  * Launch a new session
  */
 export const POST = withErrorHandling(async (request: NextRequest) => {
-  const logger = createLogger('/api/sessions', 'POST');
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+  const sessionsAPIEndpoint = `${basePath}/api/sessions`;
+  const logger = createLogger(sessionsAPIEndpoint, 'POST');
 
   if (!validateMethod(request, ['POST'])) {
     return methodNotAllowed(['POST']);

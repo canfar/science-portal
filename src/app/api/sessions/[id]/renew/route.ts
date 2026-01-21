@@ -35,7 +35,9 @@ export const POST = withErrorHandling(async (
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) => {
-  const logger = createLogger('/api/sessions/[id]/renew', 'POST');
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+  const sessionsAPIEndpoint = `${basePath}/api/sessions`;
+  const logger = createLogger(`${sessionsAPIEndpoint}/[id]/renew`, 'POST');
 
   if (!validateMethod(request, ['POST'])) {
     return methodNotAllowed(['POST']);

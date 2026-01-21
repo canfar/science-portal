@@ -109,7 +109,9 @@ export const ResetPasswordModalImpl = React.forwardRef<
         setInternalSuccess(null);
 
         try {
-          const response = await fetch('/api/auth/reset-password', {
+          const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+          const authAPIEndpoint = `${basePath}/api/auth`;
+          const response = await fetch(`${authAPIEndpoint}/reset-password`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

@@ -20,12 +20,9 @@ export const MetricBlockImpl: React.FC<MetricBlockProps> = React.memo(
       // Format based on label type
       if (label === 'CPU') {
         return `Available CPUs: ${series.free} / ${max}`;
-      } else if (label === 'RAM') {
-        // Values are already in GB from the API
-        return `Available RAM: ${series.free}GB / ${max}GB`;
       } else {
-        // Instances - show total
-        return `Running Instances: ${Math.round(max)}`;
+        // RAM - Values are already in GB from the API
+        return `Available RAM: ${series.free}GB / ${max}GB`;
       }
     }, [series.used, series.free, max, label]);
 
@@ -55,33 +52,15 @@ export const MetricBlockImpl: React.FC<MetricBlockProps> = React.memo(
 
     // Define legend items based on metric type
     const legendItems = useMemo(() => {
-      if (label === 'Running Instances') {
-        // For instances, we need to handle multiple segments
-        return [
-          { key: 'used', label: 'session', color: '#1E3A8A' },
-          { key: 'free', label: 'desktopApp', color: '#3B82F6' },
-          { key: 'headless', label: 'headless', color: '#60A5FA' },
-        ];
-      } else {
-        // For CPU and RAM
         return [
           { key: 'used', label: 'used', color: chartColors.used },
           { key: 'free', label: 'free', color: chartColors.free },
         ];
-      }
     }, [label, chartColors]);
 
     // Define stack keys based on metric type
     const stackKeys = useMemo(() => {
-      if (
-        label === 'Running Instances' &&
-        'headless' in series &&
-        series.headless
-      ) {
-        return ['used', 'free', 'headless'];
-      } else {
         return ['used', 'free'];
-      }
     }, [label, series]);
 
     return (

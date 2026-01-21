@@ -24,7 +24,9 @@ import type { PlatformLoad, SkahaStatsResponse } from '@/lib/api/skaha';
  * Get platform load statistics
  */
 export const GET = withErrorHandling(async (request: NextRequest) => {
-  const logger = createLogger('/api/sessions/platform-load', 'GET');
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+  const sessionsAPIEndpoint = `${basePath}/api/sessions`;
+  const logger = createLogger(`${sessionsAPIEndpoint}/platform-load`, 'GET');
   logger.logRequest(request);
 
   if (!validateMethod(request, ['GET'])) {
@@ -74,21 +76,14 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
       used: requestedRAM,
       free: +(ramAvailable - requestedRAM).toFixed(2),
     },
-    instances: {
-      name: 'Instances',
-      used: data.instances.session,     // Navy blue - session instances
-      free: data.instances.desktopApp,  // Blue - desktop app instances
-      headless: data.instances.headless, // Light blue - headless instances
-    },
     maxValues: {
       cpu: data.cores.cpuCoresAvailable,
-      ram: ramAvailable,
-      instances: data.instances.total, // Use total as max since we don't have a better value
+      ram: ramAvailable
     },
     lastUpdate: lastUpdate,
   };
 
-  logger.info(`Platform stats - Instances: ${data.instances.total}, CPU: ${data.cores.requestedCPUCores}/${data.cores.cpuCoresAvailable}, RAM: ${data.ram.requestedRAM}/${data.ram.ramAvailable}`);
+  logger.info(`Platform stats - CPU: ${data.cores.requestedCPUCores}/${data.cores.cpuCoresAvailable}, RAM: ${data.ram.requestedRAM}/${data.ram.ramAvailable}`);
   logger.logSuccess(200, platformLoad);
   return successResponse(platformLoad);
 });

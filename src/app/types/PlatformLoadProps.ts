@@ -13,16 +13,11 @@ export interface PlatformLoadData {
    */
   ram: MetricSeries;
   /**
-   * Instance metrics
-   */
-  instances: MetricSeries;
-  /**
    * Maximum values for each metric
    */
   maxValues: {
     cpu: number;
     ram: number;
-    instances: number;
   };
   /**
    * Last update timestamp (string for API responses, Date for client-side)
