@@ -9,17 +9,16 @@ import { getOIDCConfig, isOIDCAuth } from '@/lib/config/auth-config';
  * When NEXT_USE_CANFAR=true, the custom CANFAR auth flow is used instead
  */
 
-const portalEndpoint = process.env.NEXT_PUBLIC_BASE_PATH || '/science-portal';
-
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
 export const authConfig: NextAuthConfig = {
   providers: [],
   pages: {
-    signIn: portalEndpoint,
+    signIn: `/science-portal`,
   },
+  basePath: `${basePath}/api/auth`,
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
-      const isLoggedIn = !!auth?.user;
-      const isOnDashboard = nextUrl.pathname.startsWith(portalEndpoint);
+      const isOnDashboard = nextUrl.pathname.startsWith('/science-portal');
 
       // Allow access if using CANFAR auth (handled separately)
       if (!isOIDCAuth()) {

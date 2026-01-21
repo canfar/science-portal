@@ -3,5 +3,6 @@
 import { SessionProvider } from 'next-auth/react';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  return <SessionProvider>{children}</SessionProvider>;
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+  return <SessionProvider basePath={`${basePath}/api/auth`}>{children}</SessionProvider>;
 }
