@@ -154,10 +154,12 @@ export const CanfarLogo = ({ height = 40 }: { height?: number }) => (
   <img src="/logo.png" alt="CANFAR Logo" style={{ height }} />
 );
 
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+
 // SRCNet logo component (for OIDC mode)
 export const SRCNetLogo = ({ height = 40 }: { height?: number }) => (
   /* eslint-disable-next-line @next/next/no-img-element */
-  <img src="/SRCNetLogo.png" alt="SRCNet Logo" style={{ height }} />
+  <img src={`${basePath}/SRCNetLogo.png`} alt="SRCNet Logo" style={{ height }} />
 );
 
 // Convert navigation items to AppBar format
