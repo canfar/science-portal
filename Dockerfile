@@ -34,7 +34,7 @@ ARG NEXT_PUBLIC_API_TIMEOUT=30000
 ARG NEXT_PUBLIC_USE_CANFAR=true
 ARG NEXT_PUBLIC_ENABLE_QUERY_DEVTOOLS=false
 ARG NEXT_PUBLIC_EXPERIMENTAL=true
-ARG NEXT_PUBLIC_BASE_PATH=/science-portal
+ARG NEXT_PUBLIC_BASE_PATH=""
 
 # Set environment variables for build
 ENV NEXT_TELEMETRY_DISABLED=1
@@ -47,7 +47,7 @@ ENV NEXT_PUBLIC_API_TIMEOUT=$NEXT_PUBLIC_API_TIMEOUT
 ENV NEXT_PUBLIC_USE_CANFAR=$NEXT_PUBLIC_USE_CANFAR
 ENV NEXT_PUBLIC_ENABLE_QUERY_DEVTOOLS=$NEXT_PUBLIC_ENABLE_QUERY_DEVTOOLS
 ENV NEXT_PUBLIC_EXPERIMENTAL=$NEXT_PUBLIC_EXPERIMENTAL
-ARG NEXT_PUBLIC_BASE_PATH=${NEXT_PUBLIC_BASE_PATH}
+ENV NEXT_PUBLIC_BASE_PATH=$NEXT_PUBLIC_BASE_PATH
 
 # Build Next.js application
 # The standalone output will be in .next/standalone
@@ -86,7 +86,7 @@ ENV HOSTNAME="0.0.0.0"
 
 # Health check for container orchestration
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3000/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+  CMD node -e "require('http').get('http://localhost:3000${NEXT_PUBLIC_BASE_PATH}/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
 
 # Use dumb-init to handle signals properly (graceful shutdown)
 ENTRYPOINT ["dumb-init", "--"]
