@@ -27,6 +27,7 @@ const nextConfig: NextConfig = {
     SKAHA_API: process.env.NEXT_PUBLIC_SKAHA_API,
     API_TIMEOUT: process.env.NEXT_PUBLIC_API_TIMEOUT || '30000',
     ENABLE_QUERY_DEVTOOLS: process.env.NEXT_PUBLIC_ENABLE_QUERY_DEVTOOLS || 'false',
+    NEXTAUTH_URL: process.env.NEXTAUTH_URL,
   },
 };
 

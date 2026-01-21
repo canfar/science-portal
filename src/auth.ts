@@ -15,7 +15,6 @@ export const authConfig: NextAuthConfig = {
   pages: {
     signIn: `/science-portal`,
   },
-  basePath: `${basePath}/api/auth`,
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
       const isOnDashboard = nextUrl.pathname.startsWith('/science-portal');
