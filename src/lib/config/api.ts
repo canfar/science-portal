@@ -32,33 +32,39 @@ export const apiConfig = {
   },
 } as const;
 
+// Useful for constructing API route URLs when running in a shared environment.
+// This is also set in the next.config.ts file to tell NextJS where to listen.
+// jenkinsd 2026.01.21
+//
+const currentBasePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+
 /**
  * Next.js API Routes (client calls these)
  * These routes proxy requests to external services server-side
  */
 export const apiRoutes = {
   auth: {
-    login: '/api/auth/login',
-    logout: '/api/auth/logout',
-    status: '/api/auth/status',
-    user: (username: string) => `/api/auth/user/${username}`,
-    permissions: '/api/auth/permissions',
+    login: `${currentBasePath}/api/auth/login`,
+    logout: `${currentBasePath}/api/auth/logout`,
+    status: `${currentBasePath}/api/auth/status`,
+    user: (username: string) => `${currentBasePath}/api/auth/user/${username}`,
+    permissions: `${currentBasePath}/api/auth/permissions`,
   },
   sessions: {
-    list: '/api/sessions',
-    detail: (id: string) => `/api/sessions/${id}`,
-    launch: '/api/sessions',
-    delete: (id: string) => `/api/sessions/${id}`,
-    renew: (id: string) => `/api/sessions/${id}/renew`,
-    logs: (id: string) => `/api/sessions/${id}/logs`,
-    events: (id: string) => `/api/sessions/${id}/events`,
-    platformLoad: '/api/sessions/platform-load',
-    images: '/api/sessions/images',
+    list: `${currentBasePath}/api/sessions`,
+    detail: (id: string) => `${currentBasePath}/api/sessions/${id}`,
+    launch: `${currentBasePath}/api/sessions`,
+    delete: (id: string) => `${currentBasePath}/api/sessions/${id}`,
+    renew: (id: string) => `${currentBasePath}/api/sessions/${id}/renew`,
+    logs: (id: string) => `${currentBasePath}/api/sessions/${id}/logs`,
+    events: (id: string) => `${currentBasePath}/api/sessions/${id}/events`,
+    platformLoad: `${currentBasePath}/api/sessions/platform-load`,
+    images: `${currentBasePath}/api/sessions/images`,
   },
   storage: {
-    quota: (username: string) => `/api/storage/quota/${username}`,
-    files: (username: string) => `/api/storage/files/${username}`,
-    raw: (username: string) => `/api/storage/raw/${username}`,
+    quota: (username: string) => `${currentBasePath}/api/storage/quota/${username}`,
+    files: (username: string) => `${currentBasePath}/api/storage/files/${username}`,
+    raw: (username: string) => `${currentBasePath}/api/storage/raw/${username}`,
   },
 } as const;
 
