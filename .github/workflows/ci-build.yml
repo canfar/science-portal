@@ -43,8 +43,6 @@ jobs:
           build-args: |
             NEXT_PUBLIC_LOGIN_API=https://ws-cadc.canfar.net/ac
             NEXT_PUBLIC_SKAHA_API=https://ws-uv.canfar.net/skaha
-            NEXT_PUBLIC_SRC_SKAHA_API=https://src.canfar.net/skaha
-            NEXT_PUBLIC_SRC_CAVERN_API=https://src.canfar.net/cavern
             NEXT_PUBLIC_API_TIMEOUT=30000
             NEXT_PUBLIC_USE_CANFAR=true
             NEXT_PUBLIC_ENABLE_QUERY_DEVTOOLS=false
@@ -54,7 +52,38 @@ jobs:
             ghcr.io/${{ github.repository }}-canfar:latest
             ghcr.io/${{ github.repository }}-canfar:${{ github.sha }}
 
-  build-src:
+  # Build application and Docker image
+  build-rc-canfar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push CANFAR Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile
+          build-args: |
+            NEXT_PUBLIC_LOGIN_API=https://rc-ws-cadc.canfar.net/ac
+            NEXT_PUBLIC_SKAHA_API=https://rc-uv.canfar.net/skaha
+            NEXT_PUBLIC_API_TIMEOUT=30000
+            NEXT_PUBLIC_USE_CANFAR=true
+            NEXT_PUBLIC_ENABLE_QUERY_DEVTOOLS=false
+            NEXT_PUBLIC_EXPERIMENTAL=true
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}-rc-canfar:latest
+            ghcr.io/${{ github.repository }}-rc-canfar:${{ github.sha }}
+
+  build-rc-cansrc:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -73,15 +102,45 @@ jobs:
           context: .
           file: Dockerfile
           build-args: |
-            NEXT_PUBLIC_LOGIN_API=https://ska-iam.stfc.ac.uk/
-            NEXT_PUBLIC_SKAHA_API=https://src.kawfee.ca/skaha
-            NEXT_PUBLIC_SRC_SKAHA_API=https://src.kawfee.ca/skaha
-            NEXT_PUBLIC_SRC_CAVERN_API=https://src.kawfee.ca/cavern
+            NEXT_PUBLIC_SRC_SKAHA_API=https://rc-src.canfar.net/skaha
+            NEXT_PUBLIC_SRC_CAVERN_API=https://rc-src.canfar.net/cavern
             NEXT_PUBLIC_API_TIMEOUT=30000
             NEXT_PUBLIC_USE_CANFAR=false
             NEXT_PUBLIC_ENABLE_QUERY_DEVTOOLS=false
             NEXT_PUBLIC_EXPERIMENTAL=true
+            NEXT_PUBLIC_BASE_PATH=/next-science-portal
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}-src:latest
-            ghcr.io/${{ github.repository }}-src:${{ github.sha }}
+            ghcr.io/${{ github.repository }}-rc-cansrc:latest
+            ghcr.io/${{ github.repository }}-rc-cansrc:${{ github.sha }}
+
+  build-cansrc:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push SRC Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile
+          build-args: |
+            NEXT_PUBLIC_SRC_SKAHA_API=https://src.canfar.net/skaha
+            NEXT_PUBLIC_SRC_CAVERN_API=https://src.canfar.net/cavern
+            NEXT_PUBLIC_API_TIMEOUT=30000
+            NEXT_PUBLIC_USE_CANFAR=false
+            NEXT_PUBLIC_ENABLE_QUERY_DEVTOOLS=false
+            NEXT_PUBLIC_EXPERIMENTAL=true
+            NEXT_PUBLIC_BASE_PATH=/next-science-portal
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}-cansrc:latest
+            ghcr.io/${{ github.repository }}-cansrc:${{ github.sha }}
