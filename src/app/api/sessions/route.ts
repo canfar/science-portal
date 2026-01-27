@@ -41,7 +41,7 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
 
   const finalHeaders = {
     ...authHeaders,
-    'Accept': 'application/json',
+    Accept: 'application/json',
   };
   console.log('📨 Session GET route - final headers:', finalHeaders);
 
@@ -51,15 +51,12 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
       method: 'GET',
       headers: finalHeaders,
     },
-    serverApiConfig.skaha.timeout
+    serverApiConfig.skaha.timeout,
   );
 
   if (!response.ok) {
     logger.logError(response.status, `Failed to fetch sessions: ${response.statusText}`);
-    return errorResponse(
-      'Failed to fetch sessions',
-      response.status
-    );
+    return errorResponse('Failed to fetch sessions', response.status);
   }
 
   const sessions: SkahaSessionResponse[] = await response.json();
@@ -86,10 +83,13 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
 
   // Validate required fields
   if (!body.sessionType || !body.sessionName || !body.containerImage) {
-    logger.logError(HTTP_STATUS.BAD_REQUEST, 'Missing required fields: sessionType, sessionName, containerImage');
+    logger.logError(
+      HTTP_STATUS.BAD_REQUEST,
+      'Missing required fields: sessionType, sessionName, containerImage',
+    );
     return errorResponse(
       'Missing required fields: sessionType, sessionName, containerImage',
-      HTTP_STATUS.BAD_REQUEST
+      HTTP_STATUS.BAD_REQUEST,
     );
   }
 
@@ -136,12 +136,14 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
   const headers: HeadersInit = {
     ...authHeaders,
     'Content-Type': 'application/x-www-form-urlencoded',
-    'Accept': 'application/json',
+    Accept: 'application/json',
   };
 
   // Add registry authentication header if credentials are provided (for Advanced tab)
   if (body.registryUsername && body.registrySecret) {
-    const registryAuth = Buffer.from(`${body.registryUsername}:${body.registrySecret}`).toString('base64');
+    const registryAuth = Buffer.from(`${body.registryUsername}:${body.registrySecret}`).toString(
+      'base64',
+    );
     (headers as Record<string, string>)['x-skaha-registry-auth'] = registryAuth;
     logger.info(`Including registry auth for user: ${body.registryUsername}`);
   }
@@ -155,7 +157,7 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
       headers,
       body: formData.toString(),
     },
-    serverApiConfig.skaha.timeout
+    serverApiConfig.skaha.timeout,
   );
 
   if (!response.ok) {
@@ -170,20 +172,20 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
 
       // Check for specific error patterns
       if (cleanedError.includes('No authentication provided for unknown or private image')) {
-        userMessage = 'This image requires authentication. Please provide registry username and password in the Advanced tab.';
+        userMessage =
+          'This image requires authentication. Please provide registry username and password in the Advanced tab.';
       } else if (cleanedError.includes('authentication') || cleanedError.includes('unauthorized')) {
         userMessage = 'Authentication failed. Please check your registry credentials.';
       } else {
         // Use the error text if it's not too long
-        userMessage = cleanedError.length > 200 ? 'Failed to launch session. Please check your configuration.' : cleanedError;
+        userMessage =
+          cleanedError.length > 200
+            ? 'Failed to launch session. Please check your configuration.'
+            : cleanedError;
       }
     }
 
-    return errorResponse(
-      userMessage,
-      response.status,
-      errorText
-    );
+    return errorResponse(userMessage, response.status, errorText);
   }
 
   // SKAHA returns the session ID in the response body as text
@@ -192,10 +194,13 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
   logger.logSuccess(HTTP_STATUS.CREATED, { sessionId, sessionName: body.sessionName });
 
   // Return the session ID and basic info
-  return successResponse({
-    id: sessionId,
-    name: body.sessionName,
-    type: body.sessionType,
-    image: body.containerImage
-  }, HTTP_STATUS.CREATED);
+  return successResponse(
+    {
+      id: sessionId,
+      name: body.sessionName,
+      type: body.sessionType,
+      image: body.containerImage,
+    },
+    HTTP_STATUS.CREATED,
+  );
 });

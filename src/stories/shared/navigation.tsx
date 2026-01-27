@@ -124,7 +124,7 @@ export const userMenuItems: NavigationItem[] = [
     label: 'Reset Password',
     icon: <SettingsIcon />,
     href: RESET_PASSWORD_URL,
-    type: 'link'
+    type: 'link',
   },
   {
     label: 'Obtain Certificate',

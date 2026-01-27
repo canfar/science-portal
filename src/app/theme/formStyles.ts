@@ -55,9 +55,7 @@ export const formStyles = {
 };
 
 // Helper function to merge multiple sx props
-export const mergeSx = (
-  ...sxProps: (SxProps<Theme> | undefined)[]
-): SxProps<Theme> => {
+export const mergeSx = (...sxProps: (SxProps<Theme> | undefined)[]): SxProps<Theme> => {
   const filtered = sxProps.filter(Boolean) as SxProps<Theme>[];
   if (filtered.length === 0) return {};
 

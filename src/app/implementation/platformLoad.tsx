@@ -31,9 +31,8 @@ export const PlatformLoadImpl: React.FC<PlatformLoadProps> = ({
   // Memoized to prevent recalculation on every render
   // Only recalculates when the date actually changes
   const formattedLastUpdate = useMemo(() => {
-    const dateStr = typeof data.lastUpdate === 'string'
-      ? data.lastUpdate
-      : data.lastUpdate.toISOString();
+    const dateStr =
+      typeof data.lastUpdate === 'string' ? data.lastUpdate : data.lastUpdate.toISOString();
     return dateStr.replace('T', ' ').slice(0, -5) + ' UTC';
   }, [data.lastUpdate]);
 
@@ -64,12 +63,7 @@ export const PlatformLoadImpl: React.FC<PlatformLoadProps> = ({
         <Typography variant="h6" component="h2">
           {title}
         </Typography>
-        <IconButton
-          aria-label="refresh"
-          onClick={onRefresh}
-          disabled={isLoading}
-          size="small"
-        >
+        <IconButton aria-label="refresh" onClick={onRefresh} disabled={isLoading} size="small">
           <RefreshIcon />
         </IconButton>
       </Box>

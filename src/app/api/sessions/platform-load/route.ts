@@ -13,7 +13,7 @@ import {
   errorResponse,
   successResponse,
   fetchExternalApi,
-  forwardAuthHeader
+  forwardAuthHeader,
 } from '@/app/api/lib/api-utils';
 import { serverApiConfig } from '@/app/api/lib/server-config';
 import { createLogger } from '@/app/api/lib/logger';
@@ -41,18 +41,15 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
       method: 'GET',
       headers: {
         ...authHeaders,
-        'Accept': 'application/json',
+        Accept: 'application/json',
       },
     },
-    serverApiConfig.skaha.timeout
+    serverApiConfig.skaha.timeout,
   );
 
   if (!response.ok) {
     logger.logError(response.status, `Failed to fetch platform load: ${response.statusText}`);
-    return errorResponse(
-      'Failed to fetch platform load',
-      response.status
-    );
+    return errorResponse('Failed to fetch platform load', response.status);
   }
 
   const data: SkahaStatsResponse = await response.json();
@@ -78,12 +75,14 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
     },
     maxValues: {
       cpu: data.cores.cpuCoresAvailable,
-      ram: ramAvailable
+      ram: ramAvailable,
     },
     lastUpdate: lastUpdate,
   };
 
-  logger.info(`Platform stats - CPU: ${data.cores.requestedCPUCores}/${data.cores.cpuCoresAvailable}, RAM: ${data.ram.requestedRAM}/${data.ram.ramAvailable}`);
+  logger.info(
+    `Platform stats - CPU: ${data.cores.requestedCPUCores}/${data.cores.cpuCoresAvailable}, RAM: ${data.ram.requestedRAM}/${data.ram.ramAvailable}`,
+  );
   logger.logSuccess(200, platformLoad);
   return successResponse(platformLoad);
 });

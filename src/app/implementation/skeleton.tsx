@@ -17,9 +17,7 @@ export const SkeletonImpl: React.FC<SkeletonProps> = ({
   const isDarkMode = theme.palette.mode === 'dark';
 
   const skeletonColors = {
-    base: isDarkMode
-      ? alpha(theme.palette.grey[800], 0.5)
-      : alpha(theme.palette.grey[300], 0.5),
+    base: isDarkMode ? alpha(theme.palette.grey[800], 0.5) : alpha(theme.palette.grey[300], 0.5),
     highlight: isDarkMode
       ? alpha(theme.palette.grey[700], 0.5)
       : alpha(theme.palette.grey[100], 0.5),

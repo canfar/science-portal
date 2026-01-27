@@ -26,8 +26,7 @@ const useVariantStyles = (variant: 'default' | 'compact') => {
       },
       '& .MuiMenuItem-root': {
         minHeight: 36,
-        fontSize:
-          theme.customTypography?.fontSize?.sm || theme.typography.fontSize,
+        fontSize: theme.customTypography?.fontSize?.sm || theme.typography.fontSize,
       },
     },
   };
@@ -35,10 +34,7 @@ const useVariantStyles = (variant: 'default' | 'compact') => {
   return variantStyles[variant];
 };
 
-export const MenuImpl: React.FC<MenuProps> = ({
-  variant = 'default',
-  ...props
-}) => {
+export const MenuImpl: React.FC<MenuProps> = ({ variant = 'default', ...props }) => {
   const theme = useTheme();
   const styles = useVariantStyles(variant);
 

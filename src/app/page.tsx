@@ -1,40 +1,32 @@
-"use client";
+'use client';
 
-import { useState, useCallback, useMemo, useEffect } from "react";
-import { useSession } from "next-auth/react";
-import { AppBarWithAuth } from "@/app/components/AppBarWithAuth/AppBarWithAuth";
-import { ActiveSessionsWidget } from "@/app/components/ActiveSessionsWidget/ActiveSessionsWidget";
-import { UserStorageWidget } from "@/app/components/UserStorageWidget/UserStorageWidget";
-import { LaunchFormWidget } from "@/app/components/LaunchFormWidget/LaunchFormWidget";
-import { PlatformLoad } from "@/app/components/PlatformLoad/PlatformLoad";
-import { Footer } from "@/app/components/Footer/Footer";
-import { Box } from "@/app/components/Box/Box";
-import { Container } from "@mui/material";
-import { ThemeToggle } from "@/app/components/ThemeToggle/ThemeToggle";
-import {
-  appBarWithUserMenu,
-  CanfarLogo,
-  SRCNetLogo,
-} from "@/stories/shared/navigation";
-import type { SessionCardProps } from "@/app/types/SessionCardProps";
-import type { PlatformLoadData } from "@/app/types/PlatformLoadProps";
-import { useAuthStatus } from "@/lib/hooks/useAuth";
+import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
+import { AppBarWithAuth } from '@/app/components/AppBarWithAuth/AppBarWithAuth';
+import { ActiveSessionsWidget } from '@/app/components/ActiveSessionsWidget/ActiveSessionsWidget';
+import { UserStorageWidget } from '@/app/components/UserStorageWidget/UserStorageWidget';
+import { LaunchFormWidget } from '@/app/components/LaunchFormWidget/LaunchFormWidget';
+import { PlatformLoad } from '@/app/components/PlatformLoad/PlatformLoad';
+import { Footer } from '@/app/components/Footer/Footer';
+import { Box } from '@/app/components/Box/Box';
+import { Container } from '@mui/material';
+import { ThemeToggle } from '@/app/components/ThemeToggle/ThemeToggle';
+import { appBarWithUserMenu, CanfarLogo, SRCNetLogo } from '@/stories/shared/navigation';
+import type { SessionCardProps } from '@/app/types/SessionCardProps';
+import type { PlatformLoadData } from '@/app/types/PlatformLoadProps';
+import { useAuthStatus } from '@/lib/hooks/useAuth';
 import {
   useSessions,
   useDeleteSession,
   useRenewSession,
   useLaunchSession,
   useSessionPolling,
-} from "@/lib/hooks/useSessions";
-import { usePlatformLoad } from "@/lib/hooks/usePlatformLoad";
-import {
-  useContainerImages,
-  useImageRepositories,
-  useContext,
-} from "@/lib/hooks/useImages";
-import { useQueryClient } from "@tanstack/react-query";
-import type { Session, SessionLaunchParams } from "@/lib/api/skaha";
-import { saveToken, hasToken } from "@/lib/auth/token-storage";
+} from '@/lib/hooks/useSessions';
+import { usePlatformLoad } from '@/lib/hooks/usePlatformLoad';
+import { useContainerImages, useImageRepositories, useContext } from '@/lib/hooks/useImages';
+import { useQueryClient } from '@tanstack/react-query';
+import type { Session, SessionLaunchParams } from '@/lib/api/skaha';
+import { saveToken, hasToken } from '@/lib/auth/token-storage';
 import {
   DOCS_URL,
   ABOUT_URL,
@@ -47,19 +39,19 @@ import {
   SCIENCE_PORTAL_URL,
   CADC_SEARCH_URL,
   OPENSTACK_CLOUD_URL,
-} from "@/lib/config/site-config";
+} from '@/lib/config/site-config';
 
 export default function SciencePortalPage() {
   // Check if in OIDC mode (CANFAR mode when NEXT_PUBLIC_USE_CANFAR=true)
   // Environment variables are available at build time, so no need to check window
-  const isOIDCMode = process.env.NEXT_PUBLIC_USE_CANFAR !== "true";
+  const isOIDCMode = process.env.NEXT_PUBLIC_USE_CANFAR !== 'true';
 
   // Get NextAuth session to extract and save token
   const { data: session, status: sessionStatus } = useSession();
 
   // Save token to localStorage when NextAuth session is available
   useEffect(() => {
-    if (sessionStatus === "authenticated" && session?.accessToken) {
+    if (sessionStatus === 'authenticated' && session?.accessToken) {
       // Only save if not already in localStorage
       if (!hasToken()) {
         saveToken(session.accessToken);
@@ -76,9 +68,7 @@ export default function SciencePortalPage() {
   const [prevAuthState, setPrevAuthState] = useState(isAuthenticated);
 
   // Track which sessions are currently being operated on (delete/renew)
-  const [operatingSessionIds, setOperatingSessionIds] = useState<Set<string>>(
-    new Set(),
-  );
+  const [operatingSessionIds, setOperatingSessionIds] = useState<Set<string>>(new Set());
 
   // Track which sessions are being polled after launch
   const [pollingSessionId, setPollingSessionId] = useState<string | null>(null);
@@ -92,21 +82,21 @@ export default function SciencePortalPage() {
       // Clear all queries except auth status
       queryClient.invalidateQueries({
         predicate: (query) => {
-          return !query.queryKey.includes("auth");
+          return !query.queryKey.includes('auth');
         },
       });
 
       // Remove all non-auth queries from cache
       queryClient.removeQueries({
         predicate: (query) => {
-          return !query.queryKey.includes("auth");
+          return !query.queryKey.includes('auth');
         },
       });
 
       // Clear nuqs state from URL (remove all query parameters)
       // and reload the page to reset all state
       const currentUrl = new URL(window.location.href);
-      currentUrl.search = ""; // Clear all query parameters
+      currentUrl.search = ''; // Clear all query parameters
       window.location.href = currentUrl.toString(); // Full page reload
     } else if (isAuthenticated && prevAuthState === false) {
       setPrevAuthState(isAuthenticated);
@@ -154,7 +144,7 @@ export default function SciencePortalPage() {
 
   // Debug: Log context state
   useEffect(() => {
-    console.log("🔍 Context Hook State:", {
+    console.log('🔍 Context Hook State:', {
       isAuthenticated,
       isLoadingContext,
       isFetchingContext,
@@ -166,7 +156,7 @@ export default function SciencePortalPage() {
   // Mutation hooks for session actions
   const { mutate: deleteSession } = useDeleteSession({
     onSuccess: (_, sessionId) => {
-      console.log("Session deleted successfully");
+      console.log('Session deleted successfully');
       // Keep operating state for 3 seconds while verification happens
       setTimeout(() => {
         setOperatingSessionIds((prev) => {
@@ -177,7 +167,7 @@ export default function SciencePortalPage() {
       }, 3500); // Slightly longer than the 3s verification delay
     },
     onError: (error, sessionId) => {
-      console.error("Failed to delete session:", error);
+      console.error('Failed to delete session:', error);
       // Remove operating state on error
       setOperatingSessionIds((prev) => {
         const next = new Set(prev);
@@ -189,7 +179,7 @@ export default function SciencePortalPage() {
 
   const { mutate: renewSession } = useRenewSession({
     onSuccess: (_, { sessionId }) => {
-      console.log("Session renewed successfully");
+      console.log('Session renewed successfully');
       // Remove operating state immediately since we trust the API response
       setOperatingSessionIds((prev) => {
         const next = new Set(prev);
@@ -198,7 +188,7 @@ export default function SciencePortalPage() {
       });
     },
     onError: (error, { sessionId }) => {
-      console.error("Failed to renew session:", error);
+      console.error('Failed to renew session:', error);
       // Remove operating state on error
       setOperatingSessionIds((prev) => {
         const next = new Set(prev);
@@ -210,12 +200,12 @@ export default function SciencePortalPage() {
 
   const { mutateAsync: launchSessionAsync } = useLaunchSession({
     onSuccess: (newSession) => {
-      console.log("Session launched successfully:", newSession.id);
+      console.log('Session launched successfully:', newSession.id);
       // Start polling this session
       setPollingSessionId(newSession.id);
     },
     onError: (error) => {
-      console.error("Failed to launch session:", error);
+      console.error('Failed to launch session:', error);
     },
   });
 
@@ -231,14 +221,14 @@ export default function SciencePortalPage() {
   const { startPolling, stopPolling } = useSessionPolling(pollingSessionId, {
     interval: 30000, // Poll every 30 seconds
     onStatusChange: (session) => {
-      console.log("Session status changed:", session.status);
+      console.log('Session status changed:', session.status);
     },
     onComplete: () => {
-      console.log("Session polling complete");
+      console.log('Session polling complete');
       setPollingSessionId(null);
     },
     onError: (error) => {
-      console.error("Error polling session:", error);
+      console.error('Error polling session:', error);
       setPollingSessionId(null);
     },
   });
@@ -257,8 +247,7 @@ export default function SciencePortalPage() {
   // NOT authenticated → ALWAYS show loading
   // IS authenticated → show loading while initial loading OR refetching (after 30s delay from mutations)
   const isLoadingSessions = !isAuthenticated || isLoading || isFetching;
-  const isLoadingPlatform =
-    !isAuthenticated || isPlatformLoading || isPlatformFetching;
+  const isLoadingPlatform = !isAuthenticated || isPlatformLoading || isPlatformFetching;
   const isLoadingLaunchForm =
     !isAuthenticated ||
     isLoadingImages ||
@@ -343,8 +332,8 @@ export default function SciencePortalPage() {
     }
     // Return placeholder data to show widget while loading
     return {
-      cpu: { name: "CPU", used: 0, free: 0 },
-      ram: { name: "RAM", used: 0, free: 0 },
+      cpu: { name: 'CPU', used: 0, free: 0 },
+      ram: { name: 'RAM', used: 0, free: 0 },
       maxValues: { cpu: 1, ram: 1 },
       lastUpdate: new Date().toISOString(),
     };
@@ -352,41 +341,41 @@ export default function SciencePortalPage() {
 
   const footerSections = [
     {
-      title: "Resources",
+      title: 'Resources',
       links: [
-        { label: "Documentation", href: DOCS_URL, external: true },
-        { label: "About", href: ABOUT_URL, external: true },
-        { label: "Open Source", href: OPEN_SOURCE_URL, external: true },
+        { label: 'Documentation', href: DOCS_URL, external: true },
+        { label: 'About', href: ABOUT_URL, external: true },
+        { label: 'Open Source', href: OPEN_SOURCE_URL, external: true },
       ],
     },
     {
-      title: "Services",
+      title: 'Services',
       links: [
         {
-          label: "Storage Management",
+          label: 'Storage Management',
           href: STORAGE_MANAGEMENT_URL,
           external: true,
         },
         {
-          label: "Group Management",
+          label: 'Group Management',
           href: GROUP_MANAGEMENT_URL,
           external: true,
         },
         {
-          label: "Data Publication",
+          label: 'Data Publication',
           href: DATA_PUBLICATION_URL,
           external: true,
         },
-        { label: "Science Portal", href: SCIENCE_PORTAL_URL, external: true },
-        { label: "CADC Search", href: CADC_SEARCH_URL, external: true },
-        { label: "OpenStack Cloud", href: OPENSTACK_CLOUD_URL, external: true },
+        { label: 'Science Portal', href: SCIENCE_PORTAL_URL, external: true },
+        { label: 'CADC Search', href: CADC_SEARCH_URL, external: true },
+        { label: 'OpenStack Cloud', href: OPENSTACK_CLOUD_URL, external: true },
       ],
     },
     {
-      title: "Support",
+      title: 'Support',
       links: [
-        { label: "Help", href: SUPPORT_EMAIL, external: false },
-        { label: "Join us on Discord", href: DISCORD_URL, external: true },
+        { label: 'Help', href: SUPPORT_EMAIL, external: false },
+        { label: 'Join us on Discord', href: DISCORD_URL, external: true },
       ],
     },
   ];
@@ -394,10 +383,10 @@ export default function SciencePortalPage() {
   return (
     <Box
       sx={{
-        display: "flex",
-        flexDirection: "column",
-        minHeight: "100vh",
-        backgroundColor: "background.default",
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: '100vh',
+        backgroundColor: 'background.default',
       }}
     >
       {/* AppBar with Science Portal wordmark */}
@@ -419,15 +408,15 @@ export default function SciencePortalPage() {
         <Container maxWidth="xl" sx={{ mb: 4, px: { xs: 2, sm: 3 } }}>
           <Box
             sx={{
-              display: "flex",
-              flexDirection: { xs: "column", lg: "row" },
+              display: 'flex',
+              flexDirection: { xs: 'column', lg: 'row' },
               gap: 3,
             }}
           >
             {/* ActiveSessionsWidget - 80% width on large screens */}
             <Box
               sx={{
-                flex: { xs: 1, lg: "0 0 80%" },
+                flex: { xs: 1, lg: '0 0 80%' },
                 minWidth: 0, // Prevent flex item from overflowing
               }}
             >
@@ -444,14 +433,14 @@ export default function SciencePortalPage() {
             {/* UserStorageWidget - 20% width on large screens */}
             <Box
               sx={{
-                flex: { xs: 1, lg: "0 0 20%" },
+                flex: { xs: 1, lg: '0 0 20%' },
                 minWidth: 0, // Prevent flex item from overflowing
                 px: { xs: 1, sm: 2 }, // Add horizontal padding
               }}
             >
               <UserStorageWidget
                 isAuthenticated={isAuthenticated}
-                name={authStatus?.user?.username || ""}
+                name={authStatus?.user?.username || ''}
                 isLoading={isLoadingUserStorage}
               />
             </Box>
@@ -462,15 +451,15 @@ export default function SciencePortalPage() {
         <Container maxWidth="xl" sx={{ mb: 4, px: { xs: 2, sm: 3 } }}>
           <Box
             sx={{
-              display: "flex",
-              flexDirection: { xs: "column", lg: "row" },
+              display: 'flex',
+              flexDirection: { xs: 'column', lg: 'row' },
               gap: 3,
             }}
           >
             {/* LaunchFormWidget - 60% width on large screens */}
             <Box
               sx={{
-                flex: { xs: 1, lg: "0 0 60%" },
+                flex: { xs: 1, lg: '0 0 60%' },
                 minWidth: 0, // Prevent flex item from overflowing
               }}
             >
@@ -493,7 +482,7 @@ export default function SciencePortalPage() {
             {/* PlatformLoad - 40% width on large screens */}
             <Box
               sx={{
-                flex: { xs: 1, lg: "0 0 40%" },
+                flex: { xs: 1, lg: '0 0 40%' },
                 minWidth: 0, // Prevent flex item from overflowing
                 px: { xs: 1, sm: 2 }, // Add horizontal padding
               }}
@@ -509,9 +498,7 @@ export default function SciencePortalPage() {
       </Box>
 
       {/* Footer - full width - CANFAR mode only */}
-      {!isOIDCMode && (
-        <Footer sections={footerSections} copyright="© 2022-2025" />
-      )}
+      {!isOIDCMode && <Footer sections={footerSections} copyright="© 2022-2025" />}
     </Box>
   );
 }

@@ -143,7 +143,7 @@ export async function getUserDetails(username: string): Promise<User> {
 export async function checkPermission(
   username: string,
   resource: string,
-  permission: 'read' | 'write' | 'execute'
+  permission: 'read' | 'write' | 'execute',
 ): Promise<boolean> {
   try {
     const authHeaders = getAuthHeader();

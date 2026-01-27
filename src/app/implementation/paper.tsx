@@ -6,17 +6,7 @@ import { useTheme } from '@mui/material/styles';
 import { PaperProps } from '@/app/types/PaperProps';
 
 export const PaperImplementation = React.forwardRef<HTMLDivElement, PaperProps>(
-  (
-    {
-      children,
-      elevation = 1,
-      variant = 'elevation',
-      square = false,
-      sx,
-      ...props
-    },
-    ref
-  ) => {
+  ({ children, elevation = 1, variant = 'elevation', square = false, sx, ...props }, ref) => {
     const theme = useTheme();
 
     // Validate elevation range (0-24)
@@ -43,7 +33,7 @@ export const PaperImplementation = React.forwardRef<HTMLDivElement, PaperProps>(
         {children}
       </MuiPaper>
     );
-  }
+  },
 );
 
 PaperImplementation.displayName = 'Paper';

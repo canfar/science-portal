@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 /**
  * Unified Authentication Hooks
@@ -8,19 +8,15 @@
  * - OIDC via NextAuth (when NEXT_USE_CANFAR=false)
  */
 
-import { useEffect } from "react";
-import {
-  useSession,
-  signIn as nextAuthSignIn,
-  signOut as nextAuthSignOut,
-} from "next-auth/react";
+import { useEffect } from 'react';
+import { useSession, signIn as nextAuthSignIn, signOut as nextAuthSignOut } from 'next-auth/react';
 import {
   useQuery,
   useMutation,
   useQueryClient,
   type UseQueryOptions,
   type UseMutationOptions,
-} from "@tanstack/react-query";
+} from '@tanstack/react-query';
 import {
   login as canfarLogin,
   logout as canfarLogout,
@@ -30,21 +26,21 @@ import {
   type User,
   type LoginCredentials,
   type AuthStatus,
-} from "@/lib/api/login";
+} from '@/lib/api/login';
 
 // Client-side auth mode detection
 function isCanfarMode(): boolean {
-  if (typeof window === "undefined") {
+  if (typeof window === 'undefined') {
     return false;
   }
 
   // IMPORTANT: Always use environment variable as source of truth
-  const envMode = process.env.NEXT_PUBLIC_USE_CANFAR === "true";
-  const storageMode = localStorage.getItem("AUTH_MODE");
+  const envMode = process.env.NEXT_PUBLIC_USE_CANFAR === 'true';
+  const storageMode = localStorage.getItem('AUTH_MODE');
   // Sync localStorage to match environment
-  const correctMode = envMode ? "CANFAR" : "OIDC";
+  const correctMode = envMode ? 'CANFAR' : 'OIDC';
   if (storageMode !== correctMode) {
-    localStorage.setItem("AUTH_MODE", correctMode);
+    localStorage.setItem('AUTH_MODE', correctMode);
   }
 
   return envMode;
@@ -54,32 +50,28 @@ function isCanfarMode(): boolean {
  * Query keys for auth
  */
 export const authKeys = {
-  all: ["auth"] as const,
-  status: () => [...authKeys.all, "status"] as const,
-  user: (username: string) => [...authKeys.all, "user", username] as const,
+  all: ['auth'] as const,
+  status: () => [...authKeys.all, 'status'] as const,
+  user: (username: string) => [...authKeys.all, 'user', username] as const,
   permission: (username: string, resource: string, permission: string) =>
-    [...authKeys.all, "permission", username, resource, permission] as const,
+    [...authKeys.all, 'permission', username, resource, permission] as const,
 };
 
 /**
  * Get current authentication status
  * Works with both CANFAR and OIDC auth
  */
-export function useAuthStatus(
-  options?: Omit<UseQueryOptions<AuthStatus>, "queryKey" | "queryFn">,
-) {
+export function useAuthStatus(options?: Omit<UseQueryOptions<AuthStatus>, 'queryKey' | 'queryFn'>) {
   const { data: session, status } = useSession();
   const isCanfar = isCanfarMode();
 
-  console.log("🔍 useAuthStatus called:", { isCanfar, sessionStatus: status });
+  console.log('🔍 useAuthStatus called:', { isCanfar, sessionStatus: status });
 
   // For CANFAR mode, use existing auth status check
   const canfarAuthStatus = useQuery({
     queryKey: authKeys.status(),
     queryFn: () => {
-      console.log(
-        "📋 CANFAR mode - calling /api/auth/status (makes API call to /ac/whoami)",
-      );
+      console.log('📋 CANFAR mode - calling /api/auth/status (makes API call to /ac/whoami)');
       return canfarGetAuthStatus();
     },
     enabled: isCanfar,
@@ -93,10 +85,10 @@ export function useAuthStatus(
   // For OIDC mode, use NextAuth session directly (no React Query wrapper)
   // This ensures immediate updates when session state changes
   useEffect(() => {
-    if (!isCanfar && status === "authenticated" && session?.accessToken) {
+    if (!isCanfar && status === 'authenticated' && session?.accessToken) {
       // Store the access token in localStorage for API calls
       // Using dynamic import to avoid circular dependency issues
-      import("@/lib/auth/token-storage").then(({ saveToken }) => {
+      import('@/lib/auth/token-storage').then(({ saveToken }) => {
         saveToken(session.accessToken as string);
       });
     }
@@ -105,14 +97,11 @@ export function useAuthStatus(
   // In OIDC mode, directly return NextAuth session state (no React Query)
   if (!isCanfar) {
     const oidcAuthStatus: AuthStatus =
-      status === "authenticated" && session?.user
+      status === 'authenticated' && session?.user
         ? {
             authenticated: true,
             user: {
-              username:
-                session.user.username ||
-                session.user.email?.split("@")[0] ||
-                "user",
+              username: session.user.username || session.user.email?.split('@')[0] || 'user',
               email: session.user.email || undefined,
               displayName: session.user.name || undefined,
               firstName: session.user.firstName || undefined,
@@ -121,8 +110,8 @@ export function useAuthStatus(
           }
         : { authenticated: false };
 
-    console.log("🔍 useAuthStatus returning (OIDC):", {
-      isLoading: status === "loading",
+    console.log('🔍 useAuthStatus returning (OIDC):', {
+      isLoading: status === 'loading',
       isAuthenticated: oidcAuthStatus.authenticated,
       username: oidcAuthStatus.user?.username,
     });
@@ -130,7 +119,7 @@ export function useAuthStatus(
     // Return in React Query format for compatibility
     return {
       data: oidcAuthStatus,
-      isLoading: status === "loading",
+      isLoading: status === 'loading',
       isError: false,
       error: null,
       refetch: () => Promise.resolve({ data: oidcAuthStatus }),
@@ -138,7 +127,7 @@ export function useAuthStatus(
   }
 
   // CANFAR mode uses React Query
-  console.log("🔍 useAuthStatus returning (CANFAR):", {
+  console.log('🔍 useAuthStatus returning (CANFAR):', {
     isLoading: canfarAuthStatus.isLoading,
     isAuthenticated: canfarAuthStatus.data?.authenticated,
   });
@@ -151,7 +140,7 @@ export function useAuthStatus(
  */
 export function useUserDetails(
   username: string,
-  options?: Omit<UseQueryOptions<User>, "queryKey" | "queryFn">,
+  options?: Omit<UseQueryOptions<User>, 'queryKey' | 'queryFn'>,
 ) {
   return useQuery({
     queryKey: authKeys.user(username),
@@ -167,8 +156,8 @@ export function useUserDetails(
 export function usePermission(
   username: string,
   resource: string,
-  permission: "read" | "write" | "execute",
-  options?: Omit<UseQueryOptions<boolean>, "queryKey" | "queryFn">,
+  permission: 'read' | 'write' | 'execute',
+  options?: Omit<UseQueryOptions<boolean>, 'queryKey' | 'queryFn'>,
 ) {
   return useQuery({
     queryKey: authKeys.permission(username, resource, permission),
@@ -182,9 +171,7 @@ export function usePermission(
  * Login mutation
  * Automatically uses the correct auth method based on environment
  */
-export function useLogin(
-  options?: UseMutationOptions<User, Error, LoginCredentials>,
-) {
+export function useLogin(options?: UseMutationOptions<User, Error, LoginCredentials>) {
   const queryClient = useQueryClient();
   const isCanfar = isCanfarMode();
 
@@ -196,7 +183,7 @@ export function useLogin(
       } else {
         // OIDC auth - redirect to NextAuth signin
         // Note: OIDC doesn't use username/password, but we'll trigger the flow
-        await nextAuthSignIn("oidc", { callbackUrl: "/science-portal" });
+        await nextAuthSignIn('oidc', { callbackUrl: '/science-portal' });
         // Return a placeholder user as the actual auth happens via redirect
         return {
           username: credentials.username,
@@ -225,7 +212,7 @@ export function useLogout(options?: UseMutationOptions<void, Error, void>) {
         await canfarLogout();
       } else {
         // OIDC logout - use NextAuth signOut
-        await nextAuthSignOut({ callbackUrl: "/science-portal" });
+        await nextAuthSignOut({ callbackUrl: '/science-portal' });
       }
     },
     onSuccess: () => {
@@ -246,9 +233,9 @@ export function useOIDCLogin() {
     login: async () => {
       if (!isCanfar) {
         try {
-          await nextAuthSignIn("oidc", { callbackUrl: "/science-portal" });
+          await nextAuthSignIn('oidc', { callbackUrl: '/science-portal' });
         } catch (error) {
-          console.error("Failed to initiate OIDC login:", error);
+          console.error('Failed to initiate OIDC login:', error);
           throw error;
         }
       }
@@ -262,10 +249,9 @@ export function useOIDCLogin() {
  */
 export function useAuthModeSync() {
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const envMode =
-        process.env.NEXT_PUBLIC_USE_CANFAR === "true" ? "CANFAR" : "OIDC";
-      localStorage.setItem("AUTH_MODE", envMode);
+    if (typeof window !== 'undefined') {
+      const envMode = process.env.NEXT_PUBLIC_USE_CANFAR === 'true' ? 'CANFAR' : 'OIDC';
+      localStorage.setItem('AUTH_MODE', envMode);
     }
   }, []);
 }

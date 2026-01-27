@@ -34,14 +34,14 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
   // Create response with success message
   const response = successResponse({
     success: true,
-    message: 'Logged out successfully'
+    message: 'Logged out successfully',
   });
 
   // Clear the CADC_SSO cookie by setting it with expired date
   // This works for any cookie that might have been set during login
   const cookiesToClear = ['CADC_SSO', 'JSESSIONID'];
 
-  cookiesToClear.forEach(cookieName => {
+  cookiesToClear.forEach((cookieName) => {
     response.cookies.set(cookieName, '', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',

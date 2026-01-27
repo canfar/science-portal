@@ -13,7 +13,7 @@ import {
   errorResponse,
   successResponse,
   fetchExternalApi,
-  forwardAuthHeader
+  forwardAuthHeader,
 } from '@/app/api/lib/api-utils';
 import { serverApiConfig } from '@/app/api/lib/server-config';
 import { createLogger } from '@/app/api/lib/logger';
@@ -44,19 +44,20 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
       method: 'GET',
       headers: {
         ...authHeaders,
-        'Accept': 'application/json',
+        Accept: 'application/json',
       },
     },
-    serverApiConfig.skaha.timeout
+    serverApiConfig.skaha.timeout,
   );
 
   if (!response.ok) {
     const errorText = await response.text();
-    logger.logError(response.status, `Failed to fetch image repositories: ${response.statusText}`, errorText);
-    return errorResponse(
-      'Failed to fetch image repositories',
-      response.status
+    logger.logError(
+      response.status,
+      `Failed to fetch image repositories: ${response.statusText}`,
+      errorText,
     );
+    return errorResponse('Failed to fetch image repositories', response.status);
   }
 
   const rawResponse = await response.json();

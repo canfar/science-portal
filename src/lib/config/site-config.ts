@@ -22,9 +22,12 @@ export const CADC_SEARCH_URL = 'https://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/en/
 export const OPENSTACK_CLOUD_URL = 'https://arbutus-canfar.cloud.computecanada.ca/';
 
 // User Account Management
-export const UPDATE_PROFILE_URL = 'https://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/en/auth/update.html';
-export const RESET_PASSWORD_URL = 'https://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/en/auth/resetPassword.html';
-export const CERTIFICATE_BASE_URL = 'https://ws.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/cred/generate?daysValid=30';
+export const UPDATE_PROFILE_URL =
+  'https://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/en/auth/update.html';
+export const RESET_PASSWORD_URL =
+  'https://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/en/auth/resetPassword.html';
+export const CERTIFICATE_BASE_URL =
+  'https://ws.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/cred/generate?daysValid=30';
 
 /**
  * Generate a certificate URL with HTTP Basic Auth credentials

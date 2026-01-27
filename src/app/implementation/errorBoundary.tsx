@@ -94,8 +94,8 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
             marginBottom: 4,
           }}
         >
-          We&apos;re sorry, but something unexpected happened. Our team has been
-          notified and is working on fixing the issue.
+          We&apos;re sorry, but something unexpected happened. Our team has been notified and is
+          working on fixing the issue.
         </Typography>
 
         {showReset && (
@@ -129,9 +129,7 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
                 },
               }}
             >
-              <AlertTitle sx={{ fontWeight: 600 }}>
-                Error Details (Development Only)
-              </AlertTitle>
+              <AlertTitle sx={{ fontWeight: 600 }}>Error Details (Development Only)</AlertTitle>
               <Typography
                 variant="body2"
                 component="pre"
@@ -159,9 +157,7 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
                   },
                 }}
               >
-                <AlertTitle sx={{ fontWeight: 600 }}>
-                  Component Stack
-                </AlertTitle>
+                <AlertTitle sx={{ fontWeight: 600 }}>Component Stack</AlertTitle>
                 <Typography
                   variant="body2"
                   component="pre"
@@ -186,10 +182,7 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({
   );
 };
 
-export class ErrorBoundaryImplementation extends Component<
-  ErrorBoundaryProps,
-  ErrorBoundaryState
-> {
+export class ErrorBoundaryImplementation extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = {
@@ -242,13 +235,7 @@ export class ErrorBoundaryImplementation extends Component<
 
   render() {
     const { hasError, error, errorInfo } = this.state;
-    const {
-      children,
-      fallback,
-      showReset = true,
-      resetButtonText,
-      className,
-    } = this.props;
+    const { children, fallback, showReset = true, resetButtonText, className } = this.props;
 
     if (hasError && error && errorInfo) {
       // Use custom fallback if provided, otherwise use default

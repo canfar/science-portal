@@ -14,22 +14,10 @@ import {
   useAuthModeSync,
 } from '@/lib/hooks/useAuth';
 import type { LoginCredentials } from '@/lib/api/login';
-import {
-  PersonOutline,
-  VpnKey,
-  Verified,
-  Logout as LogoutIcon,
-} from '@mui/icons-material';
+import { PersonOutline, VpnKey, Verified, Logout as LogoutIcon } from '@mui/icons-material';
 import { CircularProgress } from '@mui/material';
-import {
-  UPDATE_PROFILE_URL,
-  getCertificateUrl,
-} from '@/lib/config/site-config';
-import {
-  saveCredentials,
-  getCredentials,
-  removeCredentials,
-} from '@/lib/auth/token-storage';
+import { UPDATE_PROFILE_URL, getCertificateUrl } from '@/lib/config/site-config';
+import { saveCredentials, getCredentials, removeCredentials } from '@/lib/auth/token-storage';
 
 interface AppBarWithAuthProps extends Omit<AppBarProps, 'menuLabel' | 'menuItems'> {
   /**
@@ -96,10 +84,10 @@ export function AppBarWithAuth({
             saveCredentials(credentials.username, credentials.password);
             handleCloseLogin();
           },
-        }
+        },
       );
     },
-    [login, handleCloseLogin]
+    [login, handleCloseLogin],
   );
 
   const handleLogout = useCallback(() => {
@@ -161,9 +149,8 @@ export function AppBarWithAuth({
   const username = authStatus?.user?.username ?? '';
 
   // Build display name: "FirstName LastName" or username as fallback
-  const displayName = firstName && lastName
-    ? `${firstName} ${lastName}`.trim()
-    : username || 'User';
+  const displayName =
+    firstName && lastName ? `${firstName} ${lastName}`.trim() : username || 'User';
 
   // Don't show menu items while checking auth status to prevent flickering
   // Only show menu when we have auth status data
@@ -234,8 +221,8 @@ export function AppBarWithAuth({
   const menuItemsToPass = isCheckingAuth
     ? loadingMenuItem
     : showAuthenticatedMenu
-    ? authenticatedMenuItems
-    : unauthenticatedMenuItems;
+      ? authenticatedMenuItems
+      : unauthenticatedMenuItems;
 
   // Determine menu label
   const menuLabelToShow = isCheckingAuth ? (

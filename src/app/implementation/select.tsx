@@ -1,11 +1,6 @@
 'use client';
 
-import {
-  Select as MuiSelect,
-  FormControl,
-  InputLabel,
-  FormHelperText,
-} from '@mui/material';
+import { Select as MuiSelect, FormControl, InputLabel, FormHelperText } from '@mui/material';
 import { SelectProps } from '@/app/types/SelectProps';
 import React from 'react';
 
@@ -27,13 +22,11 @@ export const SelectImpl = React.forwardRef<HTMLDivElement, SelectProps>(
       required,
       ...props
     },
-    ref
+    ref,
   ) => {
     const muiSize = sizeMapping[size];
     const labelId = label ? `${props.id || 'select'}-label` : undefined;
-    const helperTextId = helperText
-      ? `${props.id || 'select'}-helper-text`
-      : undefined;
+    const helperTextId = helperText ? `${props.id || 'select'}-helper-text` : undefined;
 
     return (
       <FormControl
@@ -46,9 +39,7 @@ export const SelectImpl = React.forwardRef<HTMLDivElement, SelectProps>(
           '& .MuiFormLabel-root': {
             fontFamily: theme.typography.fontFamily,
             fontSize:
-              size === 'sm'
-                ? theme.typography.body2.fontSize
-                : theme.typography.body1.fontSize,
+              size === 'sm' ? theme.typography.body2.fontSize : theme.typography.body1.fontSize,
             fontWeight: theme.typography.fontWeightMedium,
             color: theme.palette.text.secondary,
             '&.Mui-focused': {
@@ -75,9 +66,7 @@ export const SelectImpl = React.forwardRef<HTMLDivElement, SelectProps>(
             sx={(theme) => ({
               fontFamily: theme.typography.fontFamily,
               fontSize:
-                size === 'sm'
-                  ? theme.typography.body2.fontSize
-                  : theme.typography.body1.fontSize,
+                size === 'sm' ? theme.typography.body2.fontSize : theme.typography.body1.fontSize,
               fontWeight: theme.typography.fontWeightMedium,
             })}
           >
@@ -92,9 +81,7 @@ export const SelectImpl = React.forwardRef<HTMLDivElement, SelectProps>(
           sx={(theme) => ({
             fontFamily: theme.typography.fontFamily,
             fontSize:
-              size === 'sm'
-                ? theme.typography.body2.fontSize
-                : theme.typography.body1.fontSize,
+              size === 'sm' ? theme.typography.body2.fontSize : theme.typography.body1.fontSize,
             borderRadius: `${theme.shape.borderRadius}px`,
             backgroundColor: theme.palette.background.default,
             transition: 'none', // Remove transition for cleaner interaction
@@ -123,8 +110,7 @@ export const SelectImpl = React.forwardRef<HTMLDivElement, SelectProps>(
               },
             },
             '& .MuiSelect-select': {
-              padding:
-                size === 'sm' ? theme.spacing(1, 1.5) : theme.spacing(1.5, 2),
+              padding: size === 'sm' ? theme.spacing(1, 1.5) : theme.spacing(1.5, 2),
               paddingRight: `${theme.spacing(4)} !important`,
               fontFamily: theme.typography.fontFamily,
               fontSize: 'inherit',
@@ -209,7 +195,7 @@ export const SelectImpl = React.forwardRef<HTMLDivElement, SelectProps>(
         )}
       </FormControl>
     );
-  }
+  },
 );
 
 SelectImpl.displayName = 'SelectImpl';

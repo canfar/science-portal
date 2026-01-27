@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -24,8 +24,8 @@ import {
   Paper,
   useTheme,
   useMediaQuery,
-} from "@mui/material";
-import { apiRoutes } from "@/lib/config/api";
+} from '@mui/material';
+import { apiRoutes } from '@/lib/config/api';
 import {
   Close as CloseIcon,
   Refresh as RefreshIcon,
@@ -35,23 +35,21 @@ import {
   CloudDone as CloudDoneIcon,
   PlayCircle as PlayCircleIcon,
   Flag as FlagIcon,
-} from "@mui/icons-material";
+} from '@mui/icons-material';
 import type {
   EventsModalProps,
   SessionEvent,
   EventType,
   EventReason,
   UseSessionEventsReturn,
-} from "@/app/types/EventsModalProps";
-import { getAuthHeader } from "@/lib/auth/token-storage";
+} from '@/app/types/EventsModalProps';
+import { getAuthHeader } from '@/lib/auth/token-storage';
 
 /**
  * Parse raw log data into structured events
  */
-const parseEventLog = (
-  logData: string,
-): { events: SessionEvent[]; hasParseErrors: boolean } => {
-  const lines = logData.trim().split("\n");
+const parseEventLog = (logData: string): { events: SessionEvent[]; hasParseErrors: boolean } => {
+  const lines = logData.trim().split('\n');
   if (lines.length < 2) return { events: [], hasParseErrors: false };
 
   const events: SessionEvent[] = [];
@@ -64,9 +62,7 @@ const parseEventLog = (
 
     // Parse the log line - format: TYPE REASON MESSAGE FIRST-TIME LAST-TIME
     // Using regex to handle spaces in message
-    const match = line.match(
-      /^(\S+)\s+(\S+)\s+(.*?)\s+(\S+|<nil>)\s+(\S+|<nil>)$/,
-    );
+    const match = line.match(/^(\S+)\s+(\S+)\s+(.*?)\s+(\S+|<nil>)\s+(\S+|<nil>)$/);
 
     if (match) {
       const [, type, reason, message, firstTime, lastTime] = match;
@@ -76,8 +72,8 @@ const parseEventLog = (
         type: type as EventType,
         reason: reason as EventReason,
         message: message.trim(),
-        firstTime: firstTime === "<nil>" ? null : firstTime,
-        lastTime: lastTime === "<nil>" ? null : lastTime,
+        firstTime: firstTime === '<nil>' ? null : firstTime,
+        lastTime: lastTime === '<nil>' ? null : lastTime,
       });
     } else {
       // Mark that we had parsing errors but continue trying to parse other lines
@@ -93,14 +89,14 @@ const parseEventLog = (
  * Format timestamp for display
  */
 const formatTimestamp = (timestamp: string | null): string => {
-  if (!timestamp) return "-";
+  if (!timestamp) return '-';
 
   try {
     const date = new Date(timestamp);
-    return date.toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
+    return date.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
     });
   } catch {
     return timestamp;
@@ -112,18 +108,18 @@ const formatTimestamp = (timestamp: string | null): string => {
  */
 const getEventIcon = (reason: EventReason) => {
   switch (reason) {
-    case "Scheduled":
+    case 'Scheduled':
       return <ScheduleIcon fontSize="small" />;
-    case "Pulling":
+    case 'Pulling':
       return <CloudDownloadIcon fontSize="small" />;
-    case "Pulled":
+    case 'Pulled':
       return <CloudDoneIcon fontSize="small" />;
-    case "Created":
-    case "Started":
+    case 'Created':
+    case 'Started':
       return <PlayCircleIcon fontSize="small" />;
-    case "Failed":
-    case "BackOff":
-    case "Unhealthy":
+    case 'Failed':
+    case 'BackOff':
+    case 'Unhealthy':
       return <ErrorIcon fontSize="small" />;
     default:
       return <FlagIcon fontSize="small" />;
@@ -133,18 +129,16 @@ const getEventIcon = (reason: EventReason) => {
 /**
  * Get chip color for event type
  */
-const getEventTypeColor = (
-  type: EventType,
-): "success" | "warning" | "error" | "default" => {
+const getEventTypeColor = (type: EventType): 'success' | 'warning' | 'error' | 'default' => {
   switch (type) {
-    case "Normal":
-      return "success";
-    case "Warning":
-      return "warning";
-    case "Error":
-      return "error";
+    case 'Normal':
+      return 'success';
+    case 'Warning':
+      return 'warning';
+    case 'Error':
+      return 'error';
     default:
-      return "default";
+      return 'default';
   }
 };
 
@@ -176,12 +170,12 @@ const useSessionEvents = (
       const authHeaders = getAuthHeader();
 
       const response = await fetch(endpoint, {
-        method: "GET",
+        method: 'GET',
         headers: {
-          Accept: "text/plain",
+          Accept: 'text/plain',
           ...authHeaders,
         },
-        credentials: "include",
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -195,8 +189,8 @@ const useSessionEvents = (
       setEvents(parsedEvents);
       setParseError(hasParseErrors);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to fetch events");
-      console.error("Error fetching events:", err);
+      setError(err instanceof Error ? err.message : 'Failed to fetch events');
+      console.error('Error fetching events:', err);
     } finally {
       setLoading(false);
     }
@@ -213,12 +207,12 @@ const useSessionEvents = (
     if (initialEvents && !rawData) {
       // Generate mock raw data from initial events
       const header =
-        "TYPE     REASON      MESSAGE                                                                                                                        FIRST-TIME             LAST-TIME";
+        'TYPE     REASON      MESSAGE                                                                                                                        FIRST-TIME             LAST-TIME';
       const lines = initialEvents.map(
         (e) =>
-          `${e.type}   ${e.reason}   ${e.message}   ${e.firstTime || "<nil>"}   ${e.lastTime || "<nil>"}`,
+          `${e.type}   ${e.reason}   ${e.message}   ${e.firstTime || '<nil>'}   ${e.lastTime || '<nil>'}`,
       );
-      setRawData([header, ...lines].join("\n"));
+      setRawData([header, ...lines].join('\n'));
     }
   }, [initialEvents, rawData]);
 
@@ -238,7 +232,7 @@ const useSessionEvents = (
 export const EventsModalImpl: React.FC<EventsModalProps> = ({
   open,
   sessionId,
-  sessionName = "Session",
+  sessionName = 'Session',
   onClose,
   onRefresh,
   eventsEndpoint,
@@ -247,24 +241,26 @@ export const EventsModalImpl: React.FC<EventsModalProps> = ({
   showRefreshButton = true,
   autoScroll = false,
   forceRawView = false,
-  defaultView = "table",
+  defaultView = 'table',
 }) => {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const isTablet = useMediaQuery(theme.breakpoints.down("md"));
-  const [showRawView, setShowRawView] = useState(
-    forceRawView || defaultView === "raw",
-  );
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isTablet = useMediaQuery(theme.breakpoints.down('md'));
+  const [showRawView, setShowRawView] = useState(forceRawView || defaultView === 'raw');
 
-  const { events, rawData, loading, error, parseError, refresh } =
-    useSessionEvents(sessionId, open, eventsEndpoint, initialEvents);
+  const { events, rawData, loading, error, parseError, refresh } = useSessionEvents(
+    sessionId,
+    open,
+    eventsEndpoint,
+    initialEvents,
+  );
 
   // Sort events by timestamp (most recent first)
   const sortedEvents = useMemo(() => {
     return [...events]
       .sort((a, b) => {
-        const timeA = a.lastTime || a.firstTime || "";
-        const timeB = b.lastTime || b.firstTime || "";
+        const timeA = a.lastTime || a.firstTime || '';
+        const timeB = b.lastTime || b.firstTime || '';
         return timeB.localeCompare(timeA);
       })
       .slice(0, maxEvents);
@@ -278,7 +274,7 @@ export const EventsModalImpl: React.FC<EventsModalProps> = ({
   // Auto-scroll to bottom when new events arrive
   useEffect(() => {
     if (autoScroll && open) {
-      const content = document.getElementById("events-modal-content");
+      const content = document.getElementById('events-modal-content');
       if (content) {
         content.scrollTop = content.scrollHeight;
       }
@@ -305,18 +301,12 @@ export const EventsModalImpl: React.FC<EventsModalProps> = ({
         <Box display="flex" alignItems="center" justifyContent="space-between">
           <Box display="flex" alignItems="center" gap={1}>
             <FlagIcon />
-            <Typography variant="h6">
-              Container Events - {sessionName}
-            </Typography>
+            <Typography variant="h6">Container Events - {sessionName}</Typography>
           </Box>
           <Box display="flex" alignItems="center" gap={1}>
             {showRefreshButton && !loading && (
               <Tooltip title="Refresh events">
-                <IconButton
-                  onClick={handleRefresh}
-                  size="small"
-                  aria-label="refresh events"
-                >
+                <IconButton onClick={handleRefresh} size="small" aria-label="refresh events">
                   <RefreshIcon />
                 </IconButton>
               </Tooltip>
@@ -330,12 +320,7 @@ export const EventsModalImpl: React.FC<EventsModalProps> = ({
 
       <DialogContent id="events-modal-content" dividers>
         {/* View toggle and parse error warning */}
-        <Box
-          display="flex"
-          alignItems="center"
-          justifyContent="space-between"
-          mb={2}
-        >
+        <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
           <FormControlLabel
             control={
               <Checkbox
@@ -345,7 +330,7 @@ export const EventsModalImpl: React.FC<EventsModalProps> = ({
                 disabled={forceRawView}
               />
             }
-            label={forceRawView ? "Raw view (parsing disabled)" : "Raw view"}
+            label={forceRawView ? 'Raw view (parsing disabled)' : 'Raw view'}
           />
           {parseError && !showRawView && !forceRawView && (
             <Alert severity="warning" sx={{ flex: 1, ml: 2 }}>
@@ -355,12 +340,7 @@ export const EventsModalImpl: React.FC<EventsModalProps> = ({
         </Box>
 
         {loading && (
-          <Box
-            display="flex"
-            justifyContent="center"
-            alignItems="center"
-            py={4}
-          >
+          <Box display="flex" justifyContent="center" alignItems="center" py={4}>
             <CircularProgress />
           </Box>
         )}
@@ -381,7 +361,7 @@ export const EventsModalImpl: React.FC<EventsModalProps> = ({
             sx={{
               p: 2,
               backgroundColor: theme.palette.grey[50],
-              ...(theme.palette.mode === "dark" && {
+              ...(theme.palette.mode === 'dark' && {
                 backgroundColor: theme.palette.grey[900],
               }),
             }}
@@ -390,11 +370,11 @@ export const EventsModalImpl: React.FC<EventsModalProps> = ({
               component="pre"
               variant="body2"
               sx={{
-                fontFamily: "monospace",
-                fontSize: "0.875rem",
-                overflowX: "auto",
-                whiteSpace: "pre-wrap",
-                wordBreak: "break-word",
+                fontFamily: 'monospace',
+                fontSize: '0.875rem',
+                overflowX: 'auto',
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-word',
                 m: 0,
               }}
             >
@@ -416,7 +396,7 @@ export const EventsModalImpl: React.FC<EventsModalProps> = ({
         )}
 
         {!loading && !error && !showRawView && sortedEvents.length > 0 && (
-          <Box sx={{ overflowX: "auto" }}>
+          <Box sx={{ overflowX: 'auto' }}>
             <Table size="small" stickyHeader>
               <TableHead>
                 <TableRow>
@@ -451,9 +431,9 @@ export const EventsModalImpl: React.FC<EventsModalProps> = ({
                             variant="body2"
                             sx={{
                               maxWidth: 400,
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              whiteSpace: "nowrap",
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
                             }}
                           >
                             {event.message}

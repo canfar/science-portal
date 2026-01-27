@@ -185,9 +185,7 @@ export function sortImages(images: ParsedImage[]): ParsedImage[] {
  * //   }
  * // }
  */
-export function groupImagesByTypeAndProject(
-  rawImages: RawImage[]
-): ImagesByTypeAndProject {
+export function groupImagesByTypeAndProject(rawImages: RawImage[]): ImagesByTypeAndProject {
   if (!Array.isArray(rawImages)) {
     return {};
   }
@@ -253,7 +251,7 @@ export function groupImagesByTypeAndProject(
  */
 export function getImagesForType(
   imagesByType: ImagesByTypeAndProject,
-  sessionType: string
+  sessionType: string,
 ): ParsedImage[] {
   const projectImages = imagesByType[sessionType];
 
@@ -275,7 +273,7 @@ export function getImagesForType(
 export function getImagesForTypeAndProject(
   imagesByType: ImagesByTypeAndProject,
   sessionType: string,
-  projectName: string
+  projectName: string,
 ): ParsedImage[] {
   return imagesByType[sessionType]?.[projectName] || [];
 }
@@ -292,6 +290,6 @@ export function getProjectNames(imagesByProject: ImagesByProject): string[] {
   }
 
   return Object.keys(imagesByProject).sort((a, b) =>
-    a.localeCompare(b, undefined, { sensitivity: 'base' })
+    a.localeCompare(b, undefined, { sensitivity: 'base' }),
   );
 }

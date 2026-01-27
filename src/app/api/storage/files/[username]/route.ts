@@ -7,21 +7,21 @@
  * PUT /api/storage/files/[username]?path= - Create a directory
  */
 
-import { NextRequest } from "next/server";
+import { NextRequest } from 'next/server';
 import {
   withErrorHandling,
   errorResponse,
   successResponse,
   fetchExternalApi,
   forwardAuthHeader,
-} from "@/app/api/lib/api-utils";
-import { serverApiConfig } from "@/app/api/lib/server-config";
-import { HTTP_STATUS } from "@/app/api/lib/http-constants";
+} from '@/app/api/lib/api-utils';
+import { serverApiConfig } from '@/app/api/lib/server-config';
+import { HTTP_STATUS } from '@/app/api/lib/http-constants';
 
 export interface StorageNode {
   name: string;
   path: string;
-  type: "file" | "directory";
+  type: 'file' | 'directory';
   size: number;
   lastModified: string;
 }
@@ -30,16 +30,13 @@ export interface StorageNode {
  * GET - List files and directories in a path
  */
 export const GET = withErrorHandling(
-  async (
-    request: NextRequest,
-    { params }: { params: Promise<{ username: string }> },
-  ) => {
+  async (request: NextRequest, { params }: { params: Promise<{ username: string }> }) => {
     const { username } = await params;
     const searchParams = request.nextUrl.searchParams;
-    const path = searchParams.get("path") || "";
+    const path = searchParams.get('path') || '';
 
     if (!username) {
-      return errorResponse("Username is required", HTTP_STATUS.BAD_REQUEST);
+      return errorResponse('Username is required', HTTP_STATUS.BAD_REQUEST);
     }
 
     const authHeaders = await forwardAuthHeader(request);
@@ -51,17 +48,17 @@ export const GET = withErrorHandling(
     const response = await fetchExternalApi(
       endpoint,
       {
-        method: "GET",
+        method: 'GET',
         headers: {
           ...authHeaders,
-          Accept: "application/json",
+          Accept: 'application/json',
         },
       },
       serverApiConfig.storage.timeout,
     );
 
     if (!response.ok) {
-      return errorResponse("Failed to list storage nodes", response.status);
+      return errorResponse('Failed to list storage nodes', response.status);
     }
 
     const data: StorageNode[] = await response.json();
@@ -73,23 +70,17 @@ export const GET = withErrorHandling(
  * POST - Upload a file
  */
 export const POST = withErrorHandling(
-  async (
-    request: NextRequest,
-    { params }: { params: Promise<{ username: string }> },
-  ) => {
+  async (request: NextRequest, { params }: { params: Promise<{ username: string }> }) => {
     const { username } = await params;
     const searchParams = request.nextUrl.searchParams;
-    const path = searchParams.get("path") || "";
+    const path = searchParams.get('path') || '';
 
     if (!username) {
-      return errorResponse("Username is required", HTTP_STATUS.BAD_REQUEST);
+      return errorResponse('Username is required', HTTP_STATUS.BAD_REQUEST);
     }
 
     if (!path) {
-      return errorResponse(
-        "Path is required for file upload",
-        HTTP_STATUS.BAD_REQUEST,
-      );
+      return errorResponse('Path is required for file upload', HTTP_STATUS.BAD_REQUEST);
     }
 
     const formData = await request.formData();
@@ -99,7 +90,7 @@ export const POST = withErrorHandling(
     const response = await fetchExternalApi(
       `${storageUrl}/users/${username}/files/${path}`,
       {
-        method: "POST",
+        method: 'POST',
         headers: authHeaders,
         body: formData,
       },
@@ -107,7 +98,7 @@ export const POST = withErrorHandling(
     );
 
     if (!response.ok) {
-      return errorResponse("Upload failed", response.status);
+      return errorResponse('Upload failed', response.status);
     }
 
     return successResponse({ success: true });
@@ -118,23 +109,17 @@ export const POST = withErrorHandling(
  * DELETE - Delete a file or directory
  */
 export const DELETE = withErrorHandling(
-  async (
-    request: NextRequest,
-    { params }: { params: Promise<{ username: string }> },
-  ) => {
+  async (request: NextRequest, { params }: { params: Promise<{ username: string }> }) => {
     const { username } = await params;
     const searchParams = request.nextUrl.searchParams;
-    const path = searchParams.get("path") || "";
+    const path = searchParams.get('path') || '';
 
     if (!username) {
-      return errorResponse("Username is required", HTTP_STATUS.BAD_REQUEST);
+      return errorResponse('Username is required', HTTP_STATUS.BAD_REQUEST);
     }
 
     if (!path) {
-      return errorResponse(
-        "Path is required for deletion",
-        HTTP_STATUS.BAD_REQUEST,
-      );
+      return errorResponse('Path is required for deletion', HTTP_STATUS.BAD_REQUEST);
     }
 
     const authHeaders = await forwardAuthHeader(request);
@@ -143,14 +128,14 @@ export const DELETE = withErrorHandling(
     const response = await fetchExternalApi(
       `${storageUrl}/users/${username}/files/${path}`,
       {
-        method: "DELETE",
+        method: 'DELETE',
         headers: authHeaders,
       },
       serverApiConfig.storage.timeout,
     );
 
     if (!response.ok) {
-      return errorResponse("Deletion failed", response.status);
+      return errorResponse('Deletion failed', response.status);
     }
 
     return successResponse({ success: true });
@@ -161,23 +146,17 @@ export const DELETE = withErrorHandling(
  * PUT - Create a directory
  */
 export const PUT = withErrorHandling(
-  async (
-    request: NextRequest,
-    { params }: { params: Promise<{ username: string }> },
-  ) => {
+  async (request: NextRequest, { params }: { params: Promise<{ username: string }> }) => {
     const { username } = await params;
     const searchParams = request.nextUrl.searchParams;
-    const path = searchParams.get("path") || "";
+    const path = searchParams.get('path') || '';
 
     if (!username) {
-      return errorResponse("Username is required", HTTP_STATUS.BAD_REQUEST);
+      return errorResponse('Username is required', HTTP_STATUS.BAD_REQUEST);
     }
 
     if (!path) {
-      return errorResponse(
-        "Path is required for directory creation",
-        HTTP_STATUS.BAD_REQUEST,
-      );
+      return errorResponse('Path is required for directory creation', HTTP_STATUS.BAD_REQUEST);
     }
 
     const authHeaders = await forwardAuthHeader(request);
@@ -186,18 +165,18 @@ export const PUT = withErrorHandling(
     const response = await fetchExternalApi(
       `${storageUrl}/users/${username}/files/${path}`,
       {
-        method: "PUT",
+        method: 'PUT',
         headers: {
           ...authHeaders,
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ type: "directory" }),
+        body: JSON.stringify({ type: 'directory' }),
       },
       serverApiConfig.storage.timeout,
     );
 
     if (!response.ok) {
-      return errorResponse("Directory creation failed", response.status);
+      return errorResponse('Directory creation failed', response.status);
     }
 
     return successResponse({ success: true });

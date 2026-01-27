@@ -13,7 +13,7 @@ import {
   errorResponse,
   successResponse,
   fetchExternalApi,
-  forwardAuthHeader
+  forwardAuthHeader,
 } from '@/app/api/lib/api-utils';
 import { serverApiConfig } from '@/app/api/lib/server-config';
 import { groupImagesByTypeAndProject, type RawImage } from '@/lib/utils/image-parser';
@@ -52,17 +52,14 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
       method: 'GET',
       headers: {
         ...authHeaders,
-        'Accept': 'application/json',
+        Accept: 'application/json',
       },
     },
-    serverApiConfig.skaha.timeout
+    serverApiConfig.skaha.timeout,
   );
 
   if (!response.ok) {
-    return errorResponse(
-      'Failed to fetch container images',
-      response.status
-    );
+    return errorResponse('Failed to fetch container images', response.status);
   }
 
   const rawImages: RawImage[] = await response.json();

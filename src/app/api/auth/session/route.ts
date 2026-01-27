@@ -50,10 +50,10 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
         method: 'GET',
         headers: {
           ...cookies,
-          'Accept': 'application/json',
+          Accept: 'application/json',
         },
       },
-      serverApiConfig.login.timeout
+      serverApiConfig.login.timeout,
     );
 
     if (!response.ok) {

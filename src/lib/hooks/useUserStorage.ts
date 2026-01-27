@@ -29,8 +29,7 @@ export const storageKeys = {
   quotas: () => [...storageKeys.all, 'quota'] as const,
   quota: (username: string) => [...storageKeys.quotas(), username] as const,
   nodes: () => [...storageKeys.all, 'nodes'] as const,
-  nodeList: (username: string, path: string) =>
-    [...storageKeys.nodes(), username, path] as const,
+  nodeList: (username: string, path: string) => [...storageKeys.nodes(), username, path] as const,
 };
 
 /**
@@ -47,7 +46,7 @@ export const storageKeys = {
 export function useUserStorageQuota(
   username: string,
   isAuthenticated?: boolean,
-  options?: Omit<UseQueryOptions<UserStorageQuota>, 'queryKey' | 'queryFn'>
+  options?: Omit<UseQueryOptions<UserStorageQuota>, 'queryKey' | 'queryFn'>,
 ) {
   return useQuery({
     queryKey: storageKeys.quota(username),
@@ -71,7 +70,7 @@ export function useUserStorageQuota(
 export function useStorageNodes(
   username: string,
   path: string = '',
-  options?: Omit<UseQueryOptions<StorageNode[]>, 'queryKey' | 'queryFn'>
+  options?: Omit<UseQueryOptions<StorageNode[]>, 'queryKey' | 'queryFn'>,
 ) {
   return useQuery({
     queryKey: storageKeys.nodeList(username, path),
@@ -96,11 +95,7 @@ export function useStorageNodes(
  * ```
  */
 export function useUploadFile(
-  options?: UseMutationOptions<
-    void,
-    Error,
-    { username: string; path: string; file: File }
-  >
+  options?: UseMutationOptions<void, Error, { username: string; path: string; file: File }>,
 ) {
   const queryClient = useQueryClient();
 
@@ -136,7 +131,7 @@ export function useUploadFile(
  * ```
  */
 export function useDeleteStorageNode(
-  options?: UseMutationOptions<void, Error, { username: string; path: string }>
+  options?: UseMutationOptions<void, Error, { username: string; path: string }>,
 ) {
   const queryClient = useQueryClient();
 
@@ -172,7 +167,7 @@ export function useDeleteStorageNode(
  * ```
  */
 export function useCreateDirectory(
-  options?: UseMutationOptions<void, Error, { username: string; path: string }>
+  options?: UseMutationOptions<void, Error, { username: string; path: string }>,
 ) {
   const queryClient = useQueryClient();
 

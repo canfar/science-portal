@@ -9,13 +9,7 @@ export type SessionType =
   | 'firefly'
   | 'contributednotebook'
   | 'contributeddesktop';
-export type SessionStatus =
-  | 'Running'
-  | 'Pending'
-  | 'Failed'
-  | 'Terminating'
-  | 'Error'
-  | 'Unknown';
+export type SessionStatus = 'Running' | 'Pending' | 'Failed' | 'Terminating' | 'Error' | 'Unknown';
 
 export interface SessionCardProps extends Omit<CardProps, 'onClick'> {
   id?: string;

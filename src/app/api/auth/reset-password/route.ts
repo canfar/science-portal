@@ -69,13 +69,13 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
 
   const externalUrl = serverApiConfig.passwordReset.url;
   logger.logExternalCall(externalUrl, 'POST', {
-    'Content-Type': 'application/x-www-form-urlencoded'
+    'Content-Type': 'application/x-www-form-urlencoded',
   });
   logger.info('Sending password reset request', {
     emailAddress: body.emailAddress,
     loginURI: formData.get('loginURI'),
     role: formData.get('role'),
-    pageLanguage: formData.get('pageLanguage')
+    pageLanguage: formData.get('pageLanguage'),
   });
 
   try {
@@ -88,7 +88,7 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
         },
         body: formData.toString(),
       },
-      serverApiConfig.passwordReset.timeout
+      serverApiConfig.passwordReset.timeout,
     );
 
     if (!response.ok) {
@@ -130,17 +130,17 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
         success: true,
         message: 'Password reset instructions have been sent to your email address.',
       },
-      { status: HTTP_STATUS.OK }
+      { status: HTTP_STATUS.OK },
     );
   } catch (error) {
     logger.logError(
       HTTP_STATUS.INTERNAL_SERVER_ERROR,
       'Failed to send password reset email',
-      error
+      error,
     );
     return errorResponse(
       'Failed to send password reset email. Please try again later.',
-      HTTP_STATUS.INTERNAL_SERVER_ERROR
+      HTTP_STATUS.INTERNAL_SERVER_ERROR,
     );
   }
 });

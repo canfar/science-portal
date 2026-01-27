@@ -8,7 +8,8 @@ export const CanfarRangeImpl = React.forwardRef<HTMLDivElement, CanfarRangeProps
   ({ value, range, onChange, disabled = false, label }, ref) => {
     const theme = useTheme();
 
-    const initialValue = range.findIndex((el) => parseInt(String(el)) === parseInt(String(value))) || 0;
+    const initialValue =
+      range.findIndex((el) => parseInt(String(el)) === parseInt(String(value))) || 0;
     const [rangePos, setRangePos] = useState(initialValue);
 
     const handleChange = (_event: Event, newValue: number | number[]) => {
@@ -19,7 +20,9 @@ export const CanfarRangeImpl = React.forwardRef<HTMLDivElement, CanfarRangeProps
 
     useEffect(() => {
       if (value !== undefined && value !== null) {
-        const newRangePos = range.findIndex((el) => parseInt(String(el)) === parseInt(String(value)));
+        const newRangePos = range.findIndex(
+          (el) => parseInt(String(el)) === parseInt(String(value)),
+        );
         if (newRangePos !== -1) {
           setRangePos(newRangePos);
         }
@@ -64,7 +67,7 @@ export const CanfarRangeImpl = React.forwardRef<HTMLDivElement, CanfarRangeProps
         />
       </Box>
     );
-  }
+  },
 );
 
 CanfarRangeImpl.displayName = 'CanfarRangeImpl';

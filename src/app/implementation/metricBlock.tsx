@@ -52,15 +52,15 @@ export const MetricBlockImpl: React.FC<MetricBlockProps> = React.memo(
 
     // Define legend items based on metric type
     const legendItems = useMemo(() => {
-        return [
-          { key: 'used', label: 'used', color: chartColors.used },
-          { key: 'free', label: 'free', color: chartColors.free },
-        ];
+      return [
+        { key: 'used', label: 'used', color: chartColors.used },
+        { key: 'free', label: 'free', color: chartColors.free },
+      ];
     }, [chartColors]);
 
     // Define stack keys based on metric type
     const stackKeys = useMemo(() => {
-        return ['used', 'free'];
+      return ['used', 'free'];
     }, []);
 
     return (
@@ -93,7 +93,7 @@ export const MetricBlockImpl: React.FC<MetricBlockProps> = React.memo(
         )}
       </Box>
     );
-  }
+  },
 );
 
 MetricBlockImpl.displayName = 'MetricBlockImpl';

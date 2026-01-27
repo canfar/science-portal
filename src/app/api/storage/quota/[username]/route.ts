@@ -4,34 +4,31 @@
  * GET /api/storage/quota/[username] - Get user storage quota information
  */
 
-import { NextRequest } from "next/server";
+import { NextRequest } from 'next/server';
 import {
   withErrorHandling,
   errorResponse,
   successResponse,
   fetchExternalApi,
   forwardAuthHeader,
-} from "@/app/api/lib/api-utils";
-import { serverApiConfig } from "@/app/api/lib/server-config";
-import { HTTP_STATUS } from "@/app/api/lib/http-constants";
+} from '@/app/api/lib/api-utils';
+import { serverApiConfig } from '@/app/api/lib/server-config';
+import { HTTP_STATUS } from '@/app/api/lib/http-constants';
 
 export interface UserStorageQuota {
   name: string;
   quota: number;
   used: number;
   available: number;
-  unit: "bytes" | "GB";
+  unit: 'bytes' | 'GB';
 }
 
 export const GET = withErrorHandling(
-  async (
-    request: NextRequest,
-    { params }: { params: Promise<{ username: string }> },
-  ) => {
+  async (request: NextRequest, { params }: { params: Promise<{ username: string }> }) => {
     const { username } = await params;
 
     if (!username) {
-      return errorResponse("Username is required", HTTP_STATUS.BAD_REQUEST);
+      return errorResponse('Username is required', HTTP_STATUS.BAD_REQUEST);
     }
 
     const authHeaders = await forwardAuthHeader(request);
@@ -40,17 +37,17 @@ export const GET = withErrorHandling(
     const response = await fetchExternalApi(
       `${storageUrl}/users/${username}/quota`,
       {
-        method: "GET",
+        method: 'GET',
         headers: {
           ...authHeaders,
-          Accept: "application/json",
+          Accept: 'application/json',
         },
       },
       serverApiConfig.storage.timeout,
     );
 
     if (!response.ok) {
-      return errorResponse("Failed to fetch storage quota", response.status);
+      return errorResponse('Failed to fetch storage quota', response.status);
     }
 
     const data: UserStorageQuota = await response.json();

@@ -1,7 +1,6 @@
 import { DialogProps } from '@mui/material/Dialog';
 
-export interface LoginModalProps
-  extends Omit<DialogProps, 'children' | 'title' | 'onSubmit'> {
+export interface LoginModalProps extends Omit<DialogProps, 'children' | 'title' | 'onSubmit'> {
   /**
    * Dialog title (optional, defaults to "Login")
    */
@@ -15,7 +14,7 @@ export interface LoginModalProps
    */
   onClose?: (
     event: React.SyntheticEvent | Event,
-    reason: 'backdropClick' | 'escapeKeyDown'
+    reason: 'backdropClick' | 'escapeKeyDown',
   ) => void;
   /**
    * Callback fired when login is successful

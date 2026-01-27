@@ -10,43 +10,42 @@ const sizeMapping = {
   lg: 'large',
 } as const;
 
-export const IconButtonImpl = React.forwardRef<
-  HTMLButtonElement,
-  IconButtonProps
->(({ size = 'md', variant = 'primary', ...props }, ref) => {
-  const muiSize = sizeMapping[size];
+export const IconButtonImpl = React.forwardRef<HTMLButtonElement, IconButtonProps>(
+  ({ size = 'md', variant = 'primary', ...props }, ref) => {
+    const muiSize = sizeMapping[size];
 
-  return (
-    <MuiIconButton
-      ref={ref}
-      size={muiSize}
-      sx={(theme) => {
-        const variantStyles = {
-          primary: {
-            color: theme.palette.primary.main,
-            '&:hover': {
-              backgroundColor: theme.palette.action.hover,
+    return (
+      <MuiIconButton
+        ref={ref}
+        size={muiSize}
+        sx={(theme) => {
+          const variantStyles = {
+            primary: {
+              color: theme.palette.primary.main,
+              '&:hover': {
+                backgroundColor: theme.palette.action.hover,
+              },
             },
-          },
-          secondary: {
-            color: theme.palette.info.main,
-            '&:hover': {
-              backgroundColor: theme.palette.action.hover,
+            secondary: {
+              color: theme.palette.info.main,
+              '&:hover': {
+                backgroundColor: theme.palette.action.hover,
+              },
             },
-          },
-          ghost: {
-            color: 'inherit',
-            '&:hover': {
-              backgroundColor: theme.palette.action.hover,
+            ghost: {
+              color: 'inherit',
+              '&:hover': {
+                backgroundColor: theme.palette.action.hover,
+              },
             },
-          },
-        };
+          };
 
-        return variantStyles[variant];
-      }}
-      {...props}
-    />
-  );
-});
+          return variantStyles[variant];
+        }}
+        {...props}
+      />
+    );
+  },
+);
 
 IconButtonImpl.displayName = 'IconButtonImpl';

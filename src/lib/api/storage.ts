@@ -5,21 +5,21 @@
  * Uses Bearer token authentication from token storage.
  */
 
-import { getAuthHeader } from "@/lib/auth/token-storage";
-import { apiRoutes } from "@/lib/config/api";
+import { getAuthHeader } from '@/lib/auth/token-storage';
+import { apiRoutes } from '@/lib/config/api';
 
 export interface UserStorageQuota {
   name: string;
   quota: number;
   used: number;
   available: number;
-  unit: "bytes" | "GB";
+  unit: 'bytes' | 'GB';
 }
 
 export interface StorageNode {
   name: string;
   path: string;
-  type: "file" | "directory";
+  type: 'file' | 'directory';
   size: number;
   lastModified: string;
 }
@@ -27,14 +27,12 @@ export interface StorageNode {
 /**
  * Get user storage quota information
  */
-export async function getUserStorageQuota(
-  username: string,
-): Promise<UserStorageQuota> {
+export async function getUserStorageQuota(username: string): Promise<UserStorageQuota> {
   const authHeaders = getAuthHeader();
   const response = await fetch(apiRoutes.storage.quota(username), {
-    method: "GET",
-    headers: { Accept: "application/json", ...authHeaders },
-    credentials: "include",
+    method: 'GET',
+    headers: { Accept: 'application/json', ...authHeaders },
+    credentials: 'include',
   });
 
   if (!response.ok) {
@@ -49,14 +47,14 @@ export async function getUserStorageQuota(
  */
 export async function listStorageNodes(
   username: string,
-  path: string = "",
+  path: string = '',
 ): Promise<StorageNode[]> {
   const authHeaders = getAuthHeader();
-  const url = `${apiRoutes.storage.files(username)}${path ? `?path=${encodeURIComponent(path)}` : ""}`;
+  const url = `${apiRoutes.storage.files(username)}${path ? `?path=${encodeURIComponent(path)}` : ''}`;
   const response = await fetch(url, {
-    method: "GET",
-    headers: { Accept: "application/json", ...authHeaders },
-    credentials: "include",
+    method: 'GET',
+    headers: { Accept: 'application/json', ...authHeaders },
+    credentials: 'include',
   });
 
   if (!response.ok) {
@@ -69,21 +67,17 @@ export async function listStorageNodes(
 /**
  * Upload a file to storage
  */
-export async function uploadFile(
-  username: string,
-  path: string,
-  file: File,
-): Promise<void> {
+export async function uploadFile(username: string, path: string, file: File): Promise<void> {
   const authHeaders = getAuthHeader();
-  const url = `${apiRoutes.storage.files(username)}${path ? `?path=${encodeURIComponent(path)}` : ""}`;
+  const url = `${apiRoutes.storage.files(username)}${path ? `?path=${encodeURIComponent(path)}` : ''}`;
   const formData = new FormData();
-  formData.append("file", file);
+  formData.append('file', file);
 
   const response = await fetch(url, {
-    method: "POST",
+    method: 'POST',
     headers: authHeaders, // Don't include Content-Type for FormData, browser will set it
     body: formData,
-    credentials: "include",
+    credentials: 'include',
   });
 
   if (!response.ok) {
@@ -94,16 +88,13 @@ export async function uploadFile(
 /**
  * Delete a file or directory
  */
-export async function deleteStorageNode(
-  username: string,
-  path: string,
-): Promise<void> {
+export async function deleteStorageNode(username: string, path: string): Promise<void> {
   const authHeaders = getAuthHeader();
   const url = `${apiRoutes.storage.files(username)}?path=${encodeURIComponent(path)}`;
   const response = await fetch(url, {
-    method: "DELETE",
-    headers: { Accept: "application/json", ...authHeaders },
-    credentials: "include",
+    method: 'DELETE',
+    headers: { Accept: 'application/json', ...authHeaders },
+    credentials: 'include',
   });
 
   if (!response.ok) {
@@ -114,21 +105,18 @@ export async function deleteStorageNode(
 /**
  * Create a directory
  */
-export async function createDirectory(
-  username: string,
-  path: string,
-): Promise<void> {
+export async function createDirectory(username: string, path: string): Promise<void> {
   const authHeaders = getAuthHeader();
   const url = `${apiRoutes.storage.files(username)}?path=${encodeURIComponent(path)}`;
   const response = await fetch(url, {
-    method: "PUT",
+    method: 'PUT',
     headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
       ...authHeaders,
     },
-    credentials: "include",
-    body: JSON.stringify({ type: "directory" }),
+    credentials: 'include',
+    body: JSON.stringify({ type: 'directory' }),
   });
 
   if (!response.ok) {

@@ -17,21 +17,8 @@ import { Close as CloseIcon } from '@mui/icons-material';
 import { TextField } from '@/app/components/TextField/TextField';
 import { ResetPasswordModalProps } from '@/app/types/ResetPasswordModalProps';
 
-export const ResetPasswordModalImpl = React.forwardRef<
-  HTMLDivElement,
-  ResetPasswordModalProps
->(
-  (
-    {
-      open,
-      onClose,
-      isLoading = false,
-      errorMessage,
-      successMessage,
-      ...dialogProps
-    },
-    ref
-  ) => {
+export const ResetPasswordModalImpl = React.forwardRef<HTMLDivElement, ResetPasswordModalProps>(
+  ({ open, onClose, isLoading = false, errorMessage, successMessage, ...dialogProps }, ref) => {
     const [email, setEmail] = useState('');
     const [emailError, setEmailError] = useState<string | undefined>();
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -93,7 +80,7 @@ export const ResetPasswordModalImpl = React.forwardRef<
         setInternalError(null);
         setInternalSuccess(null);
       },
-      [emailError]
+      [emailError],
     );
 
     const handleSubmit = useCallback(
@@ -130,35 +117,29 @@ export const ResetPasswordModalImpl = React.forwardRef<
           }
 
           setInternalSuccess(
-            data.message ||
-              'Password reset instructions have been sent to your email address.'
+            data.message || 'Password reset instructions have been sent to your email address.',
           );
 
           // Clear the email field after successful submission
           setEmail('');
         } catch (error) {
           const errorMsg =
-            error instanceof Error
-              ? error.message
-              : 'Failed to send password reset email';
+            error instanceof Error ? error.message : 'Failed to send password reset email';
           setInternalError(errorMsg);
         } finally {
           setIsSubmitting(false);
         }
       },
-      [email, validateEmail]
+      [email, validateEmail],
     );
 
     const handleClose = useCallback(
-      (
-        _event: React.SyntheticEvent | Event,
-        _reason: 'backdropClick' | 'escapeKeyDown'
-      ) => {
+      (_event: React.SyntheticEvent | Event, _reason: 'backdropClick' | 'escapeKeyDown') => {
         if (!isSubmitting && !isLoading) {
           onClose();
         }
       },
-      [isSubmitting, isLoading, onClose]
+      [isSubmitting, isLoading, onClose],
     );
 
     const handleCancelClick = useCallback(() => {
@@ -183,11 +164,7 @@ export const ResetPasswordModalImpl = React.forwardRef<
         {...dialogProps}
       >
         <DialogTitle id="reset-password-dialog-title">
-          <Box
-            display="flex"
-            alignItems="center"
-            justifyContent="space-between"
-          >
+          <Box display="flex" alignItems="center" justifyContent="space-between">
             Reset Password
             <IconButton
               aria-label="Close reset password dialog"
@@ -215,19 +192,14 @@ export const ResetPasswordModalImpl = React.forwardRef<
             )}
 
             {displaySuccess && (
-              <Alert
-                severity="success"
-                sx={{ mb: 2 }}
-                onClose={() => setInternalSuccess(null)}
-              >
+              <Alert severity="success" sx={{ mb: 2 }} onClose={() => setInternalSuccess(null)}>
                 {displaySuccess}
               </Alert>
             )}
 
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               <Typography variant="body2" color="text.secondary">
-                Enter your email address and we will send you instructions to
-                reset your password.
+                Enter your email address and we will send you instructions to reset your password.
               </Typography>
 
               <TextField
@@ -245,9 +217,7 @@ export const ResetPasswordModalImpl = React.forwardRef<
                 aria-label="Email address"
                 aria-required="true"
                 aria-invalid={!!emailError}
-                aria-describedby={
-                  emailError ? 'reset-password-email-error' : undefined
-                }
+                aria-describedby={emailError ? 'reset-password-email-error' : undefined}
                 FormHelperTextProps={{
                   id: emailError ? 'reset-password-email-error' : undefined,
                 }}
@@ -278,7 +248,7 @@ export const ResetPasswordModalImpl = React.forwardRef<
         </form>
       </Dialog>
     );
-  }
+  },
 );
 
 ResetPasswordModalImpl.displayName = 'ResetPasswordModalImpl';

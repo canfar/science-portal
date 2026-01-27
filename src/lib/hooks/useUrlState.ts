@@ -19,23 +19,23 @@ import {
   parseAsBoolean,
   parseAsArrayOf,
   parseAsStringEnum,
-} from "nuqs";
-import type { SessionType } from "@/lib/api/skaha";
+} from 'nuqs';
+import type { SessionType } from '@/lib/api/skaha';
 
 /**
  * Session type parser for URL state
  */
 const parseAsSessionType = parseAsStringEnum<SessionType>([
-  "notebook",
-  "desktop",
-  "headless",
-  "carta",
+  'notebook',
+  'desktop',
+  'headless',
+  'carta',
 ]);
 
 /**
  * Sort order parser
  */
-const parseAsSortOrder = parseAsStringEnum(["asc", "desc"]);
+const parseAsSortOrder = parseAsStringEnum(['asc', 'desc']);
 
 /**
  * Use search query in URL
@@ -51,7 +51,7 @@ const parseAsSortOrder = parseAsStringEnum(["asc", "desc"]);
  * ```
  */
 export function useSearchQuery() {
-  return useQueryState("search", parseAsString.withDefault(""));
+  return useQueryState('search', parseAsString.withDefault(''));
 }
 
 /**
@@ -66,11 +66,11 @@ export function useSearchQuery() {
  * ```
  */
 export function usePage() {
-  return useQueryState("page", parseAsInteger.withDefault(1));
+  return useQueryState('page', parseAsInteger.withDefault(1));
 }
 
 export function usePageSize() {
-  return useQueryState("pageSize", parseAsInteger.withDefault(10));
+  return useQueryState('pageSize', parseAsInteger.withDefault(10));
 }
 
 /**
@@ -107,8 +107,8 @@ export function usePagination() {
  */
 export function useSorting() {
   const [sorting, setSorting] = useQueryStates({
-    sortBy: parseAsString.withDefault("createdAt"),
-    sortOrder: parseAsSortOrder.withDefault("desc"),
+    sortBy: parseAsString.withDefault('createdAt'),
+    sortOrder: parseAsSortOrder.withDefault('desc'),
   });
 
   return {
@@ -163,7 +163,7 @@ export function useSessionFilters() {
  * ```
  */
 export function useSelectedSession() {
-  return useQueryState("session", parseAsString);
+  return useQueryState('session', parseAsString);
 }
 
 /**
@@ -178,15 +178,15 @@ export function useSelectedSession() {
  * ```
  */
 export function useLaunchModal() {
-  return useQueryState("launch", parseAsBoolean.withDefault(false));
+  return useQueryState('launch', parseAsBoolean.withDefault(false));
 }
 
 export function useDeleteModal() {
-  return useQueryState("delete", parseAsString); // Contains session ID to delete
+  return useQueryState('delete', parseAsString); // Contains session ID to delete
 }
 
 export function useEventsModal() {
-  return useQueryState("events", parseAsString); // Contains session ID for events
+  return useQueryState('events', parseAsString); // Contains session ID for events
 }
 
 /**
@@ -202,8 +202,8 @@ export function useEventsModal() {
  * </Tabs>
  * ```
  */
-export function useTabState(defaultTab: string = "overview") {
-  return useQueryState("tab", parseAsString.withDefault(defaultTab));
+export function useTabState(defaultTab: string = 'overview') {
+  return useQueryState('tab', parseAsString.withDefault(defaultTab));
 }
 
 /**
@@ -219,8 +219,8 @@ export function useTabState(defaultTab: string = "overview") {
  * ```
  */
 export function useViewMode() {
-  const viewModeParser = parseAsStringEnum(["grid", "list"]);
-  return useQueryState("view", viewModeParser.withDefault("grid"));
+  const viewModeParser = parseAsStringEnum(['grid', 'list']);
+  return useQueryState('view', viewModeParser.withDefault('grid'));
 }
 
 /**
@@ -238,7 +238,7 @@ export function useViewMode() {
  */
 export function useExpandedState() {
   const [expandedIds, setExpandedIds] = useQueryState(
-    "expanded",
+    'expanded',
     parseAsArrayOf(parseAsString).withDefault([]),
   );
 

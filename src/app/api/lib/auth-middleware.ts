@@ -18,9 +18,7 @@ export interface AuthSession {
 /**
  * Checks if the user is authenticated by calling the auth status endpoint
  */
-export async function checkAuthentication(
-  request: NextRequest
-): Promise<AuthSession> {
+export async function checkAuthentication(request: NextRequest): Promise<AuthSession> {
   try {
     const authUrl = `${serverApiConfig.login.baseUrl}/whoami`;
     const cookies = forwardCookies(request);
@@ -31,10 +29,10 @@ export async function checkAuthentication(
         method: 'GET',
         headers: {
           ...cookies,
-          'Accept': 'application/json',
+          Accept: 'application/json',
         },
       },
-      serverApiConfig.login.timeout
+      serverApiConfig.login.timeout,
     );
 
     if (!response.ok) {
@@ -58,9 +56,7 @@ export async function checkAuthentication(
  * Requires authentication for an API route
  * Returns the auth session if authenticated, or null if not
  */
-export async function requireAuth(
-  request: NextRequest
-): Promise<AuthSession | null> {
+export async function requireAuth(request: NextRequest): Promise<AuthSession | null> {
   const session = await checkAuthentication(request);
 
   if (!session.authenticated) {
