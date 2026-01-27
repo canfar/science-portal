@@ -26,9 +26,6 @@ export const CanfarRangeImpl = React.forwardRef<HTMLDivElement, CanfarRangeProps
       }
     }, [value, range]);
 
-    // Calculate percentage for gradient visualization
-    const percentage = ((rangePos) / (range.length - 1)) * 100;
-
     return (
       <Box ref={ref} sx={{ width: '100%', px: 1 }}>
         <Slider

@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback } from "react";
 import {
   Paper,
   Typography,
@@ -8,22 +8,23 @@ import {
   Box,
   LinearProgress,
   Link,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Refresh as RefreshIcon,
   HelpOutline as HelpOutlineIcon,
-} from '@mui/icons-material';
-import { useTheme } from '@mui/material/styles';
-import { LaunchFormWidgetProps } from '@/app/types/LaunchFormWidgetProps';
-import { SessionLaunchForm } from '@/app/components/SessionLaunchForm/SessionLaunchForm';
-import { SessionRequestModal } from '@/app/components/SessionRequestModal/SessionRequestModal';
-import { SessionFormData } from '@/app/types/SessionLaunchFormProps';
-import { SessionRequestStatus } from '@/app/types/SessionRequestModalProps';
+} from "@mui/icons-material";
+import { useTheme } from "@mui/material/styles";
+import { LaunchFormWidgetProps } from "@/app/types/LaunchFormWidgetProps";
+import { SessionLaunchForm } from "@/app/components/SessionLaunchForm/SessionLaunchForm";
+import { SessionRequestModal } from "@/app/components/SessionRequestModal/SessionRequestModal";
+import { SessionFormData } from "@/app/types/SessionLaunchFormProps";
+import { SessionRequestStatus } from "@/app/types/SessionRequestModalProps";
+import type { Session } from "@/lib/api/skaha";
 
 export function LaunchFormWidgetImpl({
   isLoading = false,
   onRefresh,
-  title = 'Launch New Session',
+  title = "Launch New Session",
   showProgressIndicator = false,
   progressPercentage = 0,
   helpUrl,
@@ -31,23 +32,23 @@ export function LaunchFormWidgetImpl({
   repositoryHosts = [],
   activeSessions = [],
   launchSessionFn,
+  onLaunch,
   ...sessionLaunchFormProps
 }: LaunchFormWidgetProps) {
   const theme = useTheme();
 
   const [modalOpen, setModalOpen] = useState(false);
   const [requestStatus, setRequestStatus] =
-    useState<SessionRequestStatus>('requesting');
+    useState<SessionRequestStatus>("requesting");
   const [requestError, setRequestError] = useState<string | undefined>();
   const [sessionData, setSessionData] = useState<SessionFormData | null>(null);
-  const [selectedSessionType, setSelectedSessionType] = useState<string>('notebook');
-  const [launchedSession, setLaunchedSession] = useState<any>(null);
+  const [launchedSession, setLaunchedSession] = useState<Session | null>(null);
 
   const handleLaunch = useCallback(
     async (formData: SessionFormData) => {
       setSessionData(formData);
       setModalOpen(true);
-      setRequestStatus('requesting');
+      setRequestStatus("requesting");
       setRequestError(undefined);
       setLaunchedSession(null);
 
@@ -64,17 +65,18 @@ export function LaunchFormWidgetImpl({
           sessionName: formData.sessionName,
           containerImage: imageToUse,
           // Only include cores and ram for fixed resources
-          ...(formData.resourceType === 'fixed' && {
+          ...(formData.resourceType === "fixed" && {
             cores: formData.cores,
             ram: formData.memory,
             // Only include gpus if > 0 (API doesn't accept 0)
             ...(formData.gpus && formData.gpus > 0 && { gpus: formData.gpus }),
           }),
           // Include registry auth if provided (for Advanced tab with custom images)
-          ...(formData.repositoryAuthUsername && formData.repositoryAuthSecret && {
-            registryUsername: formData.repositoryAuthUsername,
-            registrySecret: formData.repositoryAuthSecret,
-          }),
+          ...(formData.repositoryAuthUsername &&
+            formData.repositoryAuthSecret && {
+              registryUsername: formData.repositoryAuthUsername,
+              registrySecret: formData.repositoryAuthSecret,
+            }),
         };
 
         // Launch the session using custom function if provided, otherwise use default API
@@ -83,27 +85,27 @@ export function LaunchFormWidgetImpl({
           initialSession = await launchSessionFn(launchParams);
         } else {
           // Fallback to default API call
-          const { launchSession } = await import('@/lib/api/skaha');
+          const { launchSession } = await import("@/lib/api/skaha");
           initialSession = await launchSession(launchParams);
         }
 
         // Call the original onLaunch if provided
-        if (sessionLaunchFormProps.onLaunch) {
-          await sessionLaunchFormProps.onLaunch(formData);
+        if (onLaunch) {
+          await onLaunch(formData);
         }
 
         // Session created successfully - modal will show success
         // The 30-second delay in useLaunchSession hook will refetch all sessions
         setLaunchedSession(initialSession);
-        setRequestStatus('success');
+        setRequestStatus("success");
       } catch (error) {
-        setRequestStatus('error');
+        setRequestStatus("error");
         setRequestError(
-          error instanceof Error ? error.message : 'An unknown error occurred'
+          error instanceof Error ? error.message : "An unknown error occurred",
         );
       }
     },
-    [sessionLaunchFormProps]
+    [launchSessionFn, onLaunch],
   );
 
   const handleModalClose = useCallback(() => {
@@ -119,9 +121,9 @@ export function LaunchFormWidgetImpl({
   const handleConnect = useCallback(() => {
     // Open the session in a new tab using the connectURL from the API response
     if (launchedSession?.connectUrl) {
-      window.open(launchedSession.connectUrl, '_blank', 'noopener,noreferrer');
+      window.open(launchedSession.connectUrl, "_blank", "noopener,noreferrer");
     } else {
-      console.error('No connectURL available for session');
+      console.error("No connectURL available for session");
     }
     setModalOpen(false);
   }, [launchedSession]);
@@ -131,14 +133,14 @@ export function LaunchFormWidgetImpl({
       elevation={0}
       variant="outlined"
       sx={{
-        position: 'relative',
+        position: "relative",
         padding: theme.spacing(2),
-        overflow: 'hidden',
+        overflow: "hidden",
         borderRadius: theme.shape.borderRadius,
         border: `1px solid ${theme.palette.divider}`,
-        boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+        boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
         // Better mobile padding
-        [theme.breakpoints.down('sm')]: {
+        [theme.breakpoints.down("sm")]: {
           padding: theme.spacing(1.5),
           borderRadius: 2,
         },
@@ -148,25 +150,25 @@ export function LaunchFormWidgetImpl({
       {/* Header */}
       <Box
         sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
           marginBottom: theme.spacing(1),
           // Better mobile layout for header
-          [theme.breakpoints.down('sm')]: {
-            flexDirection: 'column',
-            alignItems: 'flex-start',
+          [theme.breakpoints.down("sm")]: {
+            flexDirection: "column",
+            alignItems: "flex-start",
             gap: 1,
           },
         }}
       >
         <Box
           sx={{
-            display: 'flex',
-            alignItems: 'center',
+            display: "flex",
+            alignItems: "center",
             gap: 1,
             // Ensure title wraps nicely on very small screens
-            flexWrap: 'wrap',
+            flexWrap: "wrap",
           }}
         >
           <Typography
@@ -174,7 +176,7 @@ export function LaunchFormWidgetImpl({
             component="h2"
             sx={{
               // Smaller text on mobile if needed
-              [theme.breakpoints.down('sm')]: {
+              [theme.breakpoints.down("sm")]: {
                 fontSize: theme.typography.body1.fontSize,
                 fontWeight: theme.typography.fontWeightBold,
               },
@@ -188,11 +190,11 @@ export function LaunchFormWidgetImpl({
               target="_blank"
               rel="noopener noreferrer"
               sx={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                textDecoration: 'none',
-                '&:hover': {
-                  textDecoration: 'underline',
+                display: "inline-flex",
+                alignItems: "center",
+                textDecoration: "none",
+                "&:hover": {
+                  textDecoration: "underline",
                 },
               }}
             >
@@ -208,8 +210,8 @@ export function LaunchFormWidgetImpl({
             size="small"
             sx={{
               // Position refresh button better on mobile
-              [theme.breakpoints.down('sm')]: {
-                alignSelf: 'flex-end',
+              [theme.breakpoints.down("sm")]: {
+                alignSelf: "flex-end",
                 mt: -1,
               },
             }}
@@ -221,8 +223,8 @@ export function LaunchFormWidgetImpl({
 
       {/* Loading Bar */}
       <LinearProgress
-        color={isLoading ? 'primary' : 'success'}
-        variant={isLoading ? 'indeterminate' : 'determinate'}
+        color={isLoading ? "primary" : "success"}
+        variant={isLoading ? "indeterminate" : "determinate"}
         value={
           isLoading
             ? undefined
@@ -231,11 +233,11 @@ export function LaunchFormWidgetImpl({
               : 100
         }
         sx={{
-          width: '100%',
+          width: "100%",
           height: 4,
           marginBottom: theme.spacing(2),
           borderRadius: 2,
-          '& .MuiLinearProgress-bar': {
+          "& .MuiLinearProgress-bar": {
             borderRadius: 2,
           },
         }}
@@ -248,7 +250,6 @@ export function LaunchFormWidgetImpl({
           imagesByType={imagesByType}
           onLaunch={handleLaunch}
           isLoading={isLoading}
-          onSessionTypeChange={setSelectedSessionType}
           repositoryHosts={repositoryHosts}
           activeSessions={activeSessions}
         />
@@ -257,14 +258,14 @@ export function LaunchFormWidgetImpl({
       {/* Session Request Modal */}
       <SessionRequestModal
         open={modalOpen}
-        sessionName={sessionData?.sessionName || ''}
-        sessionType={sessionData?.type || ''}
+        sessionName={sessionData?.sessionName || ""}
+        sessionType={sessionData?.type || ""}
         status={requestStatus}
         errorMessage={requestError}
         sessionUrl={launchedSession?.connectUrl}
         onClose={handleModalClose}
         onConnect={
-          launchedSession?.status === 'Running' && launchedSession?.connectUrl
+          launchedSession?.status === "Running" && launchedSession?.connectUrl
             ? handleConnect
             : undefined
         }

@@ -8,7 +8,7 @@
  * No external API call is made - we simply expire the auth cookies.
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import {
   withErrorHandling,
   successResponse,

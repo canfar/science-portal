@@ -23,7 +23,6 @@ import {
 import { CircularProgress } from '@mui/material';
 import {
   UPDATE_PROFILE_URL,
-  RESET_PASSWORD_URL,
   getCertificateUrl,
 } from '@/lib/config/site-config';
 import {
@@ -51,7 +50,6 @@ export function AppBarWithAuth({
   elevation,
   variant,
   sx,
-  ...otherProps
 }: AppBarWithAuthProps) {
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [resetPasswordModalOpen, setResetPasswordModalOpen] = useState(false);
@@ -170,7 +168,6 @@ export function AppBarWithAuth({
   // Don't show menu items while checking auth status to prevent flickering
   // Only show menu when we have auth status data
   const showAuthenticatedMenu = !isCheckingAuth && authStatus !== undefined && isAuthenticated;
-  const showUnauthenticatedMenu = !isCheckingAuth && authStatus !== undefined && !isAuthenticated;
 
   // Menu items shown when authenticated
   // CANFAR-specific items only show in CANFAR mode

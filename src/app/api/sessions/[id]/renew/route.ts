@@ -14,15 +14,10 @@ import {
   successResponse,
   fetchExternalApi,
   forwardAuthHeader,
-  getRequestBody,
 } from '@/app/api/lib/api-utils';
 import { serverApiConfig } from '@/app/api/lib/server-config';
 import { createLogger } from '@/app/api/lib/logger';
 import type { SkahaSessionResponse } from '@/lib/api/skaha';
-
-interface RenewSessionParams {
-  hours?: number; // Optional - SKAHA uses configured expiry time if not specified
-}
 
 /**
  * POST /api/sessions/[id]/renew

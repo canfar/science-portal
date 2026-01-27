@@ -5,12 +5,17 @@
  * Uses localStorage for persistence.
  */
 
-import { create } from 'zustand';
-import { devtools, persist } from 'zustand/middleware';
+import { create } from "zustand";
+import { devtools, persist } from "zustand/middleware";
 
-export type ThemeMode = 'light' | 'dark' | 'system';
-export type SessionSortField = 'name' | 'type' | 'status' | 'startedTime' | 'expiresTime';
-export type SortOrder = 'asc' | 'desc';
+export type ThemeMode = "light" | "dark" | "system";
+export type SessionSortField =
+  | "name"
+  | "type"
+  | "status"
+  | "startedTime"
+  | "expiresTime";
+export type SortOrder = "asc" | "desc";
 
 interface UserPreferences {
   // Theme
@@ -69,7 +74,7 @@ interface UserPreferences {
 }
 
 const defaultPreferences = {
-  themeMode: 'system' as ThemeMode,
+  themeMode: "system" as ThemeMode,
   defaultSessionType: null,
   defaultCores: 2,
   defaultRam: 8,
@@ -77,8 +82,8 @@ const defaultPreferences = {
   sessionsPerPage: 10,
   showTerminatedSessions: false,
   defaultSessionSort: {
-    field: 'startedTime' as SessionSortField,
-    order: 'desc' as SortOrder,
+    field: "startedTime" as SessionSortField,
+    order: "desc" as SortOrder,
   },
   enableNotifications: true,
   notifyOnSessionStart: true,
@@ -91,7 +96,7 @@ const defaultPreferences = {
 export const useUserPreferencesStore = create<UserPreferences>()(
   devtools(
     persist(
-      (set, get) => ({
+      (set) => ({
         ...defaultPreferences,
 
         // Theme
@@ -116,30 +121,35 @@ export const useUserPreferencesStore = create<UserPreferences>()(
 
         // Display preferences
         setSessionsPerPage: (count) => set({ sessionsPerPage: count }),
-        setShowTerminatedSessions: (show) => set({ showTerminatedSessions: show }),
+        setShowTerminatedSessions: (show) =>
+          set({ showTerminatedSessions: show }),
         setDefaultSessionSort: (field, order) =>
           set({ defaultSessionSort: { field, order } }),
 
         // Notifications
-        setEnableNotifications: (enabled) => set({ enableNotifications: enabled }),
-        setNotifyOnSessionStart: (enabled) => set({ notifyOnSessionStart: enabled }),
+        setEnableNotifications: (enabled) =>
+          set({ enableNotifications: enabled }),
+        setNotifyOnSessionStart: (enabled) =>
+          set({ notifyOnSessionStart: enabled }),
         setNotifyOnSessionExpiring: (enabled) =>
           set({ notifyOnSessionExpiring: enabled }),
-        setExpiryWarningMinutes: (minutes) => set({ expiryWarningMinutes: minutes }),
+        setExpiryWarningMinutes: (minutes) =>
+          set({ expiryWarningMinutes: minutes }),
 
         // Advanced
-        setAutoRefreshInterval: (seconds) => set({ autoRefreshInterval: seconds }),
+        setAutoRefreshInterval: (seconds) =>
+          set({ autoRefreshInterval: seconds }),
         setDebugMode: (enabled) => set({ debugMode: enabled }),
 
         // Reset to defaults
         resetToDefaults: () => set(defaultPreferences),
       }),
       {
-        name: 'user-preferences',
-      }
+        name: "user-preferences",
+      },
     ),
     {
-      name: 'UserPreferencesStore',
-    }
-  )
+      name: "UserPreferencesStore",
+    },
+  ),
 );

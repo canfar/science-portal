@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   Card as MuiCard,
@@ -13,61 +13,61 @@ import {
   Tooltip,
   CircularProgress,
   Backdrop,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Delete as DeleteIcon,
   Flag as FlagIcon,
   Description as LogsIcon,
   Schedule as ExtendIcon,
-  Science as JupyterIcon,
   Code as CodeIcon,
-} from '@mui/icons-material';
+} from "@mui/icons-material";
 import {
   SessionCardProps,
   SessionType,
   SessionStatus,
-} from '@/app/types/SessionCardProps';
-import React, { useState, useMemo, useCallback } from 'react';
-import { EventsModal } from '@/app/components/EventsModal/EventsModal';
-import { DeleteSessionModal } from '@/app/components/DeleteSessionModal/DeleteSessionModal';
-import { SessionRenewModal } from '@/app/components/SessionRenewModal/SessionRenewModal';
+} from "@/app/types/SessionCardProps";
+import { apiRoutes } from "@/lib/config/api";
+import React, { useState, useCallback } from "react";
+import Image from "next/image";
+import { EventsModal } from "@/app/components/EventsModal/EventsModal";
+import { DeleteSessionModal } from "@/app/components/DeleteSessionModal/DeleteSessionModal";
+import { SessionRenewModal } from "@/app/components/SessionRenewModal/SessionRenewModal";
 
 const getSessionIcon = (type: SessionType): React.ReactNode => {
   const iconSize = 24; // Standard icon size
-  const iconStyle = { width: iconSize, height: iconSize, objectFit: 'contain' as const };
 
   switch (type) {
-    case 'notebook':
-    case 'contributednotebook':
-        return <img src="/notebook_icon.jpg" alt="Desktop" style={iconStyle} />;
-    case 'desktop':
-    case 'contributeddesktop':
-      return <img src="/desktop_icon.png" alt="Desktop" style={iconStyle} />;
-    case 'carta':
-      return <img src="/carta_icon.png" alt="CARTA" style={iconStyle} />;
-    case 'contributed':
-      return <img src="/contributed_icon.png" alt="Contributed" style={iconStyle} />;
-    case 'firefly':
-      return <img src="/firefly_icon.png" alt="Firefly" style={iconStyle} />;
+    case "notebook":
+    case "contributednotebook":
+      return <Image src="/notebook_icon.jpg" alt="Notebook" width={iconSize} height={iconSize} style={{ objectFit: "contain" }} />;
+    case "desktop":
+    case "contributeddesktop":
+      return <Image src="/desktop_icon.png" alt="Desktop" width={iconSize} height={iconSize} style={{ objectFit: "contain" }} />;
+    case "carta":
+      return <Image src="/carta_icon.png" alt="CARTA" width={iconSize} height={iconSize} style={{ objectFit: "contain" }} />;
+    case "contributed":
+      return <Image src="/contributed_icon.png" alt="Contributed" width={iconSize} height={iconSize} style={{ objectFit: "contain" }} />;
+    case "firefly":
+      return <Image src="/firefly_icon.png" alt="Firefly" width={iconSize} height={iconSize} style={{ objectFit: "contain" }} />;
     default:
       return <CodeIcon />;
   }
 };
 
 const getStatusColor = (
-  status: SessionStatus
-): 'success' | 'warning' | 'error' | 'default' => {
+  status: SessionStatus,
+): "success" | "warning" | "error" | "default" => {
   switch (status) {
-    case 'Running':
-      return 'success';
-    case 'Pending':
-      return 'warning';
-    case 'Failed':
-      return 'error';
-    case 'Terminating':
-      return 'warning';
+    case "Running":
+      return "success";
+    case "Pending":
+      return "warning";
+    case "Failed":
+      return "error";
+    case "Terminating":
+      return "warning";
     default:
-      return 'default';
+      return "default";
   }
 };
 
@@ -78,14 +78,14 @@ const getStatusColor = (
 const getShortImageName = (fullImagePath: string): string => {
   // Handle undefined, null, or empty values
   if (!fullImagePath) {
-    return 'N/A';
+    return "N/A";
   }
 
   // Split by "/" and take everything after the first part (registry host)
-  const parts = fullImagePath.split('/');
+  const parts = fullImagePath.split("/");
   if (parts.length > 1) {
     // Remove the first part (registry host) and join the rest
-    return parts.slice(1).join('/');
+    return parts.slice(1).join("/");
   }
   // If no "/" found, return as-is
   return fullImagePath;
@@ -98,12 +98,15 @@ const getShortImageName = (fullImagePath: string): string => {
 const formatTimestamp = (timestamp: string): string => {
   // Handle undefined, null, or empty values
   if (!timestamp) {
-    return 'Pending...';
+    return "Pending...";
   }
 
   // Remove seconds and 'Z' from ISO timestamp, replace 'T' with space
   // Format: YYYY-MM-DDTHH:MM:SSZ -> YYYY-MM-DD HH:MM
-  return timestamp.replace(/:\d{2}Z?\s*$/, '').replace('Z', '').replace('T', ' ');
+  return timestamp
+    .replace(/:\d{2}Z?\s*$/, "")
+    .replace("Z", "")
+    .replace("T", " ");
 };
 
 export const SessionCardImpl = React.forwardRef<
@@ -136,7 +139,7 @@ export const SessionCardImpl = React.forwardRef<
       // disableHover = true, // Hover effects removed globally
       ...cardProps
     },
-    ref
+    ref,
   ) => {
     const theme = useTheme();
     const [showEventsModal, setShowEventsModal] = useState(false);
@@ -148,11 +151,11 @@ export const SessionCardImpl = React.forwardRef<
 
     const handleCardClick = () => {
       // Only allow clicking on Running sessions
-      if (status === 'Running') {
+      if (status === "Running") {
         if (onClick) {
           onClick();
         } else if (connectUrl) {
-          window.open(connectUrl, '_blank');
+          window.open(connectUrl, "_blank");
         }
       }
     };
@@ -184,7 +187,7 @@ export const SessionCardImpl = React.forwardRef<
         // Wait a bit to show the deleting state before closing modal
         await new Promise((resolve) => setTimeout(resolve, 500));
       } catch (error) {
-        console.error('Error deleting session:', error);
+        console.error("Error deleting session:", error);
       } finally {
         setIsDeleting(false);
         setShowDeleteModal(false);
@@ -196,24 +199,27 @@ export const SessionCardImpl = React.forwardRef<
       setShowRenewModal(true);
     };
 
-    const handleRenewConfirm = useCallback(async (hours: number) => {
-      setIsRenewing(true);
-      try {
-        // Call the actual renew function
-        if (onExtendTime) {
-          await onExtendTime();
+    const handleRenewConfirm = useCallback(
+      async (_hours: number) => {
+        setIsRenewing(true);
+        try {
+          // Call the actual renew function
+          if (onExtendTime) {
+            await onExtendTime();
+          }
+          // Wait a bit to show success state
+          await new Promise((resolve) => setTimeout(resolve, 500));
+        } catch (error) {
+          console.error("Error renewing session:", error);
+        } finally {
+          setIsRenewing(false);
+          setTimeout(() => {
+            setShowRenewModal(false);
+          }, 500);
         }
-        // Wait a bit to show success state
-        await new Promise((resolve) => setTimeout(resolve, 500));
-      } catch (error) {
-        console.error('Error renewing session:', error);
-      } finally {
-        setIsRenewing(false);
-        setTimeout(() => {
-          setShowRenewModal(false);
-        }, 500);
-      }
-    }, [onExtendTime]);
+      },
+      [onExtendTime],
+    );
 
     if (loading) {
       return (
@@ -263,9 +269,9 @@ export const SessionCardImpl = React.forwardRef<
           raised={false}
           variant="outlined"
           sx={{
-            cursor: status === 'Running' ? 'pointer' : 'default',
+            cursor: status === "Running" ? "pointer" : "default",
             border: `1px solid ${theme.palette.divider}`,
-            position: 'relative',
+            position: "relative",
           }}
         >
           {/* Operating state overlay */}
@@ -273,11 +279,12 @@ export const SessionCardImpl = React.forwardRef<
             <Backdrop
               open={isOperating}
               sx={{
-                position: 'absolute',
+                position: "absolute",
                 zIndex: theme.zIndex.drawer + 1,
-                backgroundColor: theme.palette.mode === 'dark'
-                  ? 'rgba(0, 0, 0, 0.7)'
-                  : 'rgba(255, 255, 255, 0.7)',
+                backgroundColor:
+                  theme.palette.mode === "dark"
+                    ? "rgba(0, 0, 0, 0.7)"
+                    : "rgba(255, 255, 255, 0.7)",
                 borderRadius: theme.shape.borderRadius,
               }}
             >
@@ -287,9 +294,9 @@ export const SessionCardImpl = React.forwardRef<
 
           <CardContent
             sx={{
-              [theme.breakpoints.down('sm')]: {
+              [theme.breakpoints.down("sm")]: {
                 padding: theme.spacing(2),
-                '&:last-child': {
+                "&:last-child": {
                   paddingBottom: theme.spacing(2),
                 },
               },
@@ -302,9 +309,9 @@ export const SessionCardImpl = React.forwardRef<
               justifyContent="space-between"
               mb={2}
               sx={{
-                [theme.breakpoints.down('sm')]: {
-                  flexDirection: 'column',
-                  alignItems: 'flex-start',
+                [theme.breakpoints.down("sm")]: {
+                  flexDirection: "column",
+                  alignItems: "flex-start",
                   gap: 1,
                 },
               }}
@@ -316,16 +323,16 @@ export const SessionCardImpl = React.forwardRef<
                 sx={{
                   minWidth: 0, // Allow flexbox to shrink
                   flex: 1,
-                  [theme.breakpoints.down('sm')]: {
-                    width: '100%',
+                  [theme.breakpoints.down("sm")]: {
+                    width: "100%",
                   },
                 }}
               >
                 <Box
                   sx={{
                     color: theme.palette.primary.main,
-                    display: 'flex',
-                    alignItems: 'center',
+                    display: "flex",
+                    alignItems: "center",
                     flexShrink: 0, // Icon never shrinks
                   }}
                 >
@@ -335,11 +342,11 @@ export const SessionCardImpl = React.forwardRef<
                   variant="h6"
                   component="div"
                   sx={{
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
                     minWidth: 0, // Allow text to shrink
-                    [theme.breakpoints.down('sm')]: {
+                    [theme.breakpoints.down("sm")]: {
                       fontSize: theme.typography.body1.fontSize,
                     },
                   }}
@@ -352,8 +359,8 @@ export const SessionCardImpl = React.forwardRef<
                     label="FLEX"
                     size="small"
                     sx={{
-                      height: '20px',
-                      fontSize: '0.7rem',
+                      height: "20px",
+                      fontSize: "0.7rem",
                       fontWeight: 700,
                       backgroundColor: theme.palette.success.light,
                       color: theme.palette.success.contrastText,
@@ -369,11 +376,11 @@ export const SessionCardImpl = React.forwardRef<
                 sx={{
                   fontWeight: theme.typography.fontWeightMedium,
                   flexShrink: 0, // Chip never shrinks
-                  [theme.breakpoints.down('sm')]: {
-                    alignSelf: 'flex-start',
+                  [theme.breakpoints.down("sm")]: {
+                    alignSelf: "flex-start",
                     fontSize: theme.typography.caption.fontSize,
-                    height: 'auto',
-                    minHeight: '24px',
+                    height: "auto",
+                    minHeight: "24px",
                   },
                 }}
               />
@@ -383,12 +390,12 @@ export const SessionCardImpl = React.forwardRef<
             <Stack spacing={1} mb={theme.spacing(2)}>
               <Box
                 sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
+                  display: "flex",
+                  flexDirection: "column",
                   minWidth: 0,
-                  [theme.breakpoints.up('sm')]: {
-                    flexDirection: 'row',
-                    alignItems: 'baseline',
+                  [theme.breakpoints.up("sm")]: {
+                    flexDirection: "row",
+                    alignItems: "baseline",
                   },
                 }}
               >
@@ -399,9 +406,9 @@ export const SessionCardImpl = React.forwardRef<
                   sx={{
                     flexShrink: 0,
                     mr: 1,
-                    [theme.breakpoints.down('sm')]: {
+                    [theme.breakpoints.down("sm")]: {
                       fontSize: theme.typography.caption.fontSize,
-                      marginBottom: '2px',
+                      marginBottom: "2px",
                     },
                   }}
                 >
@@ -411,13 +418,13 @@ export const SessionCardImpl = React.forwardRef<
                   variant="body2"
                   component="span"
                   sx={{
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
                     minWidth: 0,
                     flex: 1,
                     fontWeight: theme.typography.fontWeightBold,
-                    [theme.breakpoints.down('sm')]: {
+                    [theme.breakpoints.down("sm")]: {
                       fontSize: theme.typography.caption.fontSize,
                     },
                   }}
@@ -446,7 +453,7 @@ export const SessionCardImpl = React.forwardRef<
                     component="span"
                     sx={{
                       fontWeight: theme.typography.fontWeightBold,
-                      [theme.breakpoints.down('sm')]: {
+                      [theme.breakpoints.down("sm")]: {
                         fontSize: theme.typography.caption.fontSize,
                       },
                     }}
@@ -468,7 +475,7 @@ export const SessionCardImpl = React.forwardRef<
                     component="span"
                     sx={{
                       fontWeight: theme.typography.fontWeightBold,
-                      [theme.breakpoints.down('sm')]: {
+                      [theme.breakpoints.down("sm")]: {
                         fontSize: theme.typography.caption.fontSize,
                       },
                     }}
@@ -482,8 +489,8 @@ export const SessionCardImpl = React.forwardRef<
                 display="flex"
                 gap={theme.spacing(3)}
                 sx={{
-                  [theme.breakpoints.down('sm')]: {
-                    flexDirection: 'column',
+                  [theme.breakpoints.down("sm")]: {
+                    flexDirection: "column",
                     gap: theme.spacing(1),
                   },
                 }}
@@ -491,11 +498,11 @@ export const SessionCardImpl = React.forwardRef<
                 <Box
                   sx={{
                     minWidth: 0,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    [theme.breakpoints.up('sm')]: {
-                      flexDirection: 'row',
-                      alignItems: 'baseline',
+                    display: "flex",
+                    flexDirection: "column",
+                    [theme.breakpoints.up("sm")]: {
+                      flexDirection: "row",
+                      alignItems: "baseline",
                     },
                   }}
                 >
@@ -506,9 +513,9 @@ export const SessionCardImpl = React.forwardRef<
                     sx={{
                       flexShrink: 0,
                       mr: 1,
-                      [theme.breakpoints.down('sm')]: {
+                      [theme.breakpoints.down("sm")]: {
                         fontSize: theme.typography.caption.fontSize,
-                        marginBottom: '2px',
+                        marginBottom: "2px",
                       },
                     }}
                   >
@@ -519,25 +526,24 @@ export const SessionCardImpl = React.forwardRef<
                     component="span"
                     sx={{
                       fontWeight: theme.typography.fontWeightBold,
-                      [theme.breakpoints.down('sm')]: {
+                      [theme.breakpoints.down("sm")]: {
                         fontSize: theme.typography.caption.fontSize,
                       },
                     }}
                   >
                     {isFixedResources === false
-                      ? (memoryUsage || 'N/A')
-                      : `${memoryUsage || 'N/A'} / ${memoryAllocated}`
-                    }
+                      ? memoryUsage || "N/A"
+                      : `${memoryUsage || "N/A"} / ${memoryAllocated}`}
                   </Typography>
                 </Box>
                 <Box
                   sx={{
                     minWidth: 0,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    [theme.breakpoints.up('sm')]: {
-                      flexDirection: 'row',
-                      alignItems: 'baseline',
+                    display: "flex",
+                    flexDirection: "column",
+                    [theme.breakpoints.up("sm")]: {
+                      flexDirection: "row",
+                      alignItems: "baseline",
                     },
                   }}
                 >
@@ -548,9 +554,9 @@ export const SessionCardImpl = React.forwardRef<
                     sx={{
                       flexShrink: 0,
                       mr: 1,
-                      [theme.breakpoints.down('sm')]: {
+                      [theme.breakpoints.down("sm")]: {
                         fontSize: theme.typography.caption.fontSize,
-                        marginBottom: '2px',
+                        marginBottom: "2px",
                       },
                     }}
                   >
@@ -561,25 +567,24 @@ export const SessionCardImpl = React.forwardRef<
                     component="span"
                     sx={{
                       fontWeight: theme.typography.fontWeightBold,
-                      [theme.breakpoints.down('sm')]: {
+                      [theme.breakpoints.down("sm")]: {
                         fontSize: theme.typography.caption.fontSize,
                       },
                     }}
                   >
                     {isFixedResources === false
-                      ? (cpuUsage || 'N/A')
-                      : `${cpuUsage || 'N/A'} / ${cpuAllocated}`
-                    }
+                      ? cpuUsage || "N/A"
+                      : `${cpuUsage || "N/A"} / ${cpuAllocated}`}
                   </Typography>
                 </Box>
                 <Box
                   sx={{
                     minWidth: 0,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    [theme.breakpoints.up('sm')]: {
-                      flexDirection: 'row',
-                      alignItems: 'baseline',
+                    display: "flex",
+                    flexDirection: "column",
+                    [theme.breakpoints.up("sm")]: {
+                      flexDirection: "row",
+                      alignItems: "baseline",
                     },
                   }}
                 >
@@ -590,9 +595,9 @@ export const SessionCardImpl = React.forwardRef<
                     sx={{
                       flexShrink: 0,
                       mr: 1,
-                      [theme.breakpoints.down('sm')]: {
+                      [theme.breakpoints.down("sm")]: {
                         fontSize: theme.typography.caption.fontSize,
-                        marginBottom: '2px',
+                        marginBottom: "2px",
                       },
                     }}
                   >
@@ -603,12 +608,12 @@ export const SessionCardImpl = React.forwardRef<
                     component="span"
                     sx={{
                       fontWeight: theme.typography.fontWeightBold,
-                      [theme.breakpoints.down('sm')]: {
+                      [theme.breakpoints.down("sm")]: {
                         fontSize: theme.typography.caption.fontSize,
                       },
                     }}
                   >
-                    {gpuAllocated || '0'}
+                    {gpuAllocated || "0"}
                   </Typography>
                 </Box>
               </Box>
@@ -625,10 +630,10 @@ export const SessionCardImpl = React.forwardRef<
                 mt: theme.spacing(2),
                 mx: theme.spacing(-2),
                 px: theme.spacing(2),
-                justifyContent: 'flex-start',
-                flexWrap: 'wrap', // Allow wrapping on very small screens
-                [theme.breakpoints.down('sm')]: {
-                  justifyContent: 'space-evenly', // Better distribution on mobile
+                justifyContent: "flex-start",
+                flexWrap: "wrap", // Allow wrapping on very small screens
+                [theme.breakpoints.down("sm")]: {
+                  justifyContent: "space-evenly", // Better distribution on mobile
                   gap: theme.spacing(0.5), // Consistent gap
                   pt: theme.spacing(2), // More padding on mobile
                 },
@@ -640,9 +645,9 @@ export const SessionCardImpl = React.forwardRef<
                   onClick={handleDeleteClick}
                   aria-label="Delete session"
                   sx={{
-                    [theme.breakpoints.down('sm')]: {
-                      minWidth: '44px',
-                      minHeight: '44px', // Ensure touch-friendly size on mobile
+                    [theme.breakpoints.down("sm")]: {
+                      minWidth: "44px",
+                      minHeight: "44px", // Ensure touch-friendly size on mobile
                     },
                   }}
                 >
@@ -655,9 +660,9 @@ export const SessionCardImpl = React.forwardRef<
                   onClick={handleShowEvents}
                   aria-label="View events"
                   sx={{
-                    [theme.breakpoints.down('sm')]: {
-                      minWidth: '44px',
-                      minHeight: '44px',
+                    [theme.breakpoints.down("sm")]: {
+                      minWidth: "44px",
+                      minHeight: "44px",
                     },
                   }}
                 >
@@ -670,26 +675,32 @@ export const SessionCardImpl = React.forwardRef<
                   onClick={handleShowLogs}
                   aria-label="View logs"
                   sx={{
-                    [theme.breakpoints.down('sm')]: {
-                      minWidth: '44px',
-                      minHeight: '44px',
+                    [theme.breakpoints.down("sm")]: {
+                      minWidth: "44px",
+                      minHeight: "44px",
                     },
                   }}
                 >
                   <LogsIcon fontSize="small" />
                 </IconButton>
               </Tooltip>
-              <Tooltip title={status === 'Pending' ? "Cannot extend a pending session" : "Extend time"}>
+              <Tooltip
+                title={
+                  status === "Pending"
+                    ? "Cannot extend a pending session"
+                    : "Extend time"
+                }
+              >
                 <span>
                   <IconButton
                     size="small"
                     onClick={handleExtendClick}
                     aria-label="Extend time"
-                    disabled={status === 'Pending'}
+                    disabled={status === "Pending"}
                     sx={{
-                      [theme.breakpoints.down('sm')]: {
-                        minWidth: '44px',
-                        minHeight: '44px',
+                      [theme.breakpoints.down("sm")]: {
+                        minWidth: "44px",
+                        minHeight: "44px",
                       },
                     }}
                   >
@@ -708,7 +719,7 @@ export const SessionCardImpl = React.forwardRef<
           sessionName={sessionName}
           onClose={() => setShowEventsModal(false)}
           showRefreshButton={true}
-          eventsEndpoint={`/api/sessions/${sessionId || sessionName}/events`}
+          eventsEndpoint={apiRoutes.sessions.events(sessionId || sessionName)}
         />
 
         {/* Logs Modal (Raw view only, parsing disabled) */}
@@ -720,14 +731,14 @@ export const SessionCardImpl = React.forwardRef<
           showRefreshButton={true}
           forceRawView={true}
           defaultView="raw"
-          eventsEndpoint={`/api/sessions/${sessionId || sessionName}/logs`}
+          eventsEndpoint={apiRoutes.sessions.logs(sessionId || sessionName)}
         />
 
         {/* Delete Confirmation Modal */}
         <DeleteSessionModal
           open={showDeleteModal}
           sessionName={sessionName}
-          sessionId={sessionId || ''}
+          sessionId={sessionId || ""}
           onClose={() => setShowDeleteModal(false)}
           onConfirm={handleDeleteConfirm}
           isDeleting={isDeleting}
@@ -744,7 +755,7 @@ export const SessionCardImpl = React.forwardRef<
         />
       </>
     );
-  }
+  },
 );
 
-SessionCardImpl.displayName = 'SessionCardImpl';
+SessionCardImpl.displayName = "SessionCardImpl";

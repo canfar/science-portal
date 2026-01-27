@@ -151,8 +151,8 @@ export const ResetPasswordModalImpl = React.forwardRef<
 
     const handleClose = useCallback(
       (
-        event: React.SyntheticEvent | Event,
-        reason: 'backdropClick' | 'escapeKeyDown'
+        _event: React.SyntheticEvent | Event,
+        _reason: 'backdropClick' | 'escapeKeyDown'
       ) => {
         if (!isSubmitting && !isLoading) {
           onClose();

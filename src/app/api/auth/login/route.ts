@@ -12,7 +12,6 @@ import {
   successResponse,
   fetchExternalApi,
   forwardCookies,
-  copyCookies,
   validateMethod,
   methodNotAllowed,
 } from '@/app/api/lib/api-utils';

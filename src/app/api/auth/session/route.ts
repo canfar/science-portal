@@ -72,7 +72,7 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
       },
       expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
     });
-  } catch (error) {
+  } catch {
     // Return null session on error (not authenticated)
     return successResponse(null);
   }

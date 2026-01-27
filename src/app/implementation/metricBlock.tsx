@@ -24,7 +24,7 @@ export const MetricBlockImpl: React.FC<MetricBlockProps> = React.memo(
         // RAM - Values are already in GB from the API
         return `Available RAM: ${series.free}GB / ${max}GB`;
       }
-    }, [series.used, series.free, max, label]);
+    }, [series.free, max, label]);
 
     // Define colors based on metric type
     const chartColors = useMemo(() => {
@@ -56,12 +56,12 @@ export const MetricBlockImpl: React.FC<MetricBlockProps> = React.memo(
           { key: 'used', label: 'used', color: chartColors.used },
           { key: 'free', label: 'free', color: chartColors.free },
         ];
-    }, [label, chartColors]);
+    }, [chartColors]);
 
     // Define stack keys based on metric type
     const stackKeys = useMemo(() => {
         return ['used', 'free'];
-    }, [label, series]);
+    }, []);
 
     return (
       <Box className={className} sx={{ marginBottom: theme.spacing(2) }}>

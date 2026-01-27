@@ -15,7 +15,7 @@ const OBTAIN_CERTIFICATE_URL =
 
 export function UserMenuContainer() {
   const [loginModalOpen, setLoginModalOpen] = useState(false);
-  const { data: authStatus, isLoading: isCheckingAuth } = useAuthStatus();
+  const { data: authStatus } = useAuthStatus();
   const { mutate: login, isPending: isLoggingIn, error: loginError } = useLogin();
   const { mutate: logout } = useLogout();
 

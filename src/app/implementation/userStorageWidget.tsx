@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from "react";
 import {
   Paper,
   Typography,
@@ -12,33 +12,34 @@ import {
   Skeleton,
   Popover,
   Tooltip,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Refresh as RefreshIcon,
   HelpOutline as HelpOutlineIcon,
-} from '@mui/icons-material';
-import { useTheme } from '@mui/material/styles';
+} from "@mui/icons-material";
+import { useTheme } from "@mui/material/styles";
 import {
   UserStorageWidgetProps,
   StorageData,
   StorageCardData,
-} from '@/app/types/UserStorageWidgetProps';
+} from "@/app/types/UserStorageWidgetProps";
+import { apiRoutes } from "@/lib/config/api";
 
 // Test data for development
 const TEST_DATA: StorageData = {
   size: 11281596360,
   quota: 200000000000,
-  date: 'Jun 11, 2025, 11:27:58 PM PDT',
+  date: "Jun 11, 2025, 11:27:58 PM PDT",
   usage: 94,
 };
 
 // Utility functions
 const convertToFileSize = (bytes: number): string => {
-  if (!bytes || bytes === 0) return '0 B';
+  if (!bytes || bytes === 0) return "0 B";
   const thresh = 1024;
   if (Math.abs(bytes) < thresh) return `${bytes} B`;
 
-  const units = ['KB', 'MB', 'GB', 'TB', 'PB'];
+  const units = ["KB", "MB", "GB", "TB", "PB"];
   let u = -1;
   let size = bytes;
 
@@ -51,15 +52,15 @@ const convertToFileSize = (bytes: number): string => {
 };
 
 const formatDateUTC = (dateString: string): string => {
-  if (!dateString) return 'Unknown';
+  if (!dateString) return "Unknown";
   try {
     const date = new Date(dateString);
     return date
       .toISOString()
-      .replace('T', ' ')
-      .replace(/\.\d{3}Z$/, ' UTC');
+      .replace("T", " ")
+      .replace(/\.\d{3}Z$/, " UTC");
   } catch {
-    return 'Unknown';
+    return "Unknown";
   }
 };
 
@@ -82,21 +83,21 @@ const StorageCard: React.FC<StorageCardProps> = ({
   return (
     <Box
       sx={{
-        height: '100%',
+        height: "100%",
         borderRadius: 2,
-        backgroundColor: 'background.paper',
+        backgroundColor: "background.paper",
         border: `1px solid ${theme.palette.divider}`,
         p: 2,
-        cursor: 'default',
-        userSelect: 'none',
+        cursor: "default",
+        userSelect: "none",
       }}
     >
       {isLoading ? (
         <Box
           sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
             gap: 1,
           }}
         >
@@ -106,9 +107,9 @@ const StorageCard: React.FC<StorageCardProps> = ({
       ) : (
         <Box
           sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
             gap: 1,
           }}
         >
@@ -118,7 +119,7 @@ const StorageCard: React.FC<StorageCardProps> = ({
           <Typography
             variant="body2"
             fontWeight="bold"
-            color={isWarning ? 'error.main' : 'primary.main'}
+            color={isWarning ? "error.main" : "primary.main"}
           >
             {value}
           </Typography>
@@ -134,7 +135,7 @@ export const UserStorageWidgetImpl = React.forwardRef<
 >(
   (
     {
-      title = 'User Home Storage',
+      title = "User Home Storage",
       isAuthenticated = false,
       name,
       isLoading = false,
@@ -147,12 +148,12 @@ export const UserStorageWidgetImpl = React.forwardRef<
       showProgressIndicator = true,
       progressPercentage = 0,
       warningThreshold = 90,
-      emptyMessage = 'No storage data available',
+      emptyMessage = "No storage data available",
       dateFormatter = formatDateUTC,
       fileSizeFormatter = convertToFileSize,
       testMode = false,
     },
-    ref
+    ref,
   ) => {
     const theme = useTheme();
     const [internalData, setInternalData] = useState<StorageData | null>(null);
@@ -181,22 +182,22 @@ export const UserStorageWidgetImpl = React.forwardRef<
     const cardConfigs = useMemo(
       () => [
         {
-          key: 'size' as keyof StorageData,
-          label: 'Used',
+          key: "size" as keyof StorageData,
+          label: "Used",
           formatter: fileSizeFormatter,
         },
         {
-          key: 'quota' as keyof StorageData,
-          label: 'Quota',
+          key: "quota" as keyof StorageData,
+          label: "Quota",
           formatter: fileSizeFormatter,
         },
         {
-          key: 'usage' as keyof StorageData,
-          label: 'Usage',
+          key: "usage" as keyof StorageData,
+          label: "Usage",
           formatter: (val: number) => `${(val || 0).toFixed(1)}%`,
         },
       ],
-      [fileSizeFormatter]
+      [fileSizeFormatter],
     );
 
     // Memoized card data
@@ -205,7 +206,7 @@ export const UserStorageWidgetImpl = React.forwardRef<
         label: config.label,
         value: config.formatter((displayData?.[config.key] as number) ?? 0),
         isWarning:
-          config.key === 'usage' &&
+          config.key === "usage" &&
           displayData?.usage !== undefined &&
           displayData.usage > warningThreshold,
       }));
@@ -217,26 +218,26 @@ export const UserStorageWidgetImpl = React.forwardRef<
 
     // Internal fetch function
     const fetchStorageData = useCallback(async () => {
-      if (!name || name === 'Login') return;
+      if (!name || name === "Login") return;
 
       setInternalLoading(true);
       setInternalError(undefined);
 
       try {
         // Use server-side API route to avoid CORS issues
-        const url = `/api/storage/raw/${name}`;
+        const url = apiRoutes.storage.raw(name);
 
-        console.log('[UserStorageWidget] Fetching storage data:', {
+        console.log("[UserStorageWidget] Fetching storage data:", {
           username: name,
           url,
         });
 
         const response = await fetch(url, {
-          headers: { Accept: 'application/json' },
-          credentials: 'include',
+          headers: { Accept: "application/json" },
+          credentials: "include",
         });
 
-        console.log('[UserStorageWidget] Fetch response:', {
+        console.log("[UserStorageWidget] Fetch response:", {
           username: name,
           status: response.status,
           ok: response.ok,
@@ -250,19 +251,19 @@ export const UserStorageWidgetImpl = React.forwardRef<
 
         const parsedData: StorageData = await response.json();
 
-        console.log('[UserStorageWidget] Received storage data:', {
+        console.log("[UserStorageWidget] Received storage data:", {
           username: name,
           data: parsedData,
         });
 
         setInternalData(parsedData);
       } catch (err) {
-        console.error('[UserStorageWidget] Storage data fetch error:', {
+        console.error("[UserStorageWidget] Storage data fetch error:", {
           username: name,
           error: err,
           errorMessage: err instanceof Error ? err.message : String(err),
         });
-        setInternalError('Failed to fetch storage data');
+        setInternalError("Failed to fetch storage data");
       } finally {
         setInternalLoading(false);
       }
@@ -271,7 +272,7 @@ export const UserStorageWidgetImpl = React.forwardRef<
     const handleRefresh = useCallback(() => {
       if (onRefresh) {
         onRefresh();
-      } else if (isAuthenticated && name && name !== 'Login') {
+      } else if (isAuthenticated && name && name !== "Login") {
         fetchStorageData();
       }
     }, [onRefresh, isAuthenticated, name, fetchStorageData]);
@@ -279,12 +280,12 @@ export const UserStorageWidgetImpl = React.forwardRef<
     const handleHelpClick = useCallback(
       (event: React.MouseEvent<HTMLElement>) => {
         if (helpUrl) {
-          window.open(helpUrl, '_blank', 'noopener,noreferrer');
+          window.open(helpUrl, "_blank", "noopener,noreferrer");
         } else if (helpContent) {
           setHelpAnchorEl(event.currentTarget);
         }
       },
-      [helpUrl, helpContent]
+      [helpUrl, helpContent],
     );
 
     const handleHelpClose = useCallback(() => {
@@ -298,7 +299,7 @@ export const UserStorageWidgetImpl = React.forwardRef<
         !testMode &&
         isAuthenticated &&
         name &&
-        name !== 'Login'
+        name !== "Login"
       ) {
         fetchStorageData();
       }
@@ -318,15 +319,15 @@ export const UserStorageWidgetImpl = React.forwardRef<
         elevation={0}
         variant="outlined"
         sx={{
-          position: 'relative',
+          position: "relative",
           padding: theme.spacing(2),
-          overflow: 'hidden',
+          overflow: "hidden",
           borderRadius: 2,
           border: `1px solid ${theme.palette.divider}`,
-          boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+          boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
           maxWidth: 600,
           // Better mobile padding
-          [theme.breakpoints.down('sm')]: {
+          [theme.breakpoints.down("sm")]: {
             padding: theme.spacing(1.5),
             borderRadius: 2,
           },
@@ -343,31 +344,31 @@ export const UserStorageWidgetImpl = React.forwardRef<
         {/* Header */}
         <Box
           sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
             marginBottom: theme.spacing(1),
             // Better mobile layout for header
-            [theme.breakpoints.down('sm')]: {
-              flexDirection: 'column',
-              alignItems: 'flex-start',
+            [theme.breakpoints.down("sm")]: {
+              flexDirection: "column",
+              alignItems: "flex-start",
               gap: 1,
             },
           }}
         >
           <Box
             sx={{
-              display: 'flex',
-              alignItems: 'center',
+              display: "flex",
+              alignItems: "center",
               gap: 1,
-              flexWrap: 'wrap',
+              flexWrap: "wrap",
             }}
           >
             <Typography
               variant="h6"
               component="h2"
               sx={{
-                [theme.breakpoints.down('sm')]: {
+                [theme.breakpoints.down("sm")]: {
                   fontSize: theme.typography.body1.fontSize,
                   fontWeight: theme.typography.fontWeightBold,
                 },
@@ -395,8 +396,8 @@ export const UserStorageWidgetImpl = React.forwardRef<
                 disabled={currentLoading}
                 size="small"
                 sx={{
-                  [theme.breakpoints.down('sm')]: {
-                    alignSelf: 'flex-end',
+                  [theme.breakpoints.down("sm")]: {
+                    alignSelf: "flex-end",
                     mt: -1,
                   },
                 }}
@@ -410,8 +411,8 @@ export const UserStorageWidgetImpl = React.forwardRef<
         {/* Progress Bar */}
         {showProgressIndicator && (
           <LinearProgress
-            color={currentLoading ? 'primary' : 'success'}
-            variant={currentLoading ? 'indeterminate' : 'determinate'}
+            color={currentLoading ? "primary" : "success"}
+            variant={currentLoading ? "indeterminate" : "determinate"}
             value={
               currentLoading
                 ? undefined
@@ -420,11 +421,11 @@ export const UserStorageWidgetImpl = React.forwardRef<
                   : 100
             }
             sx={{
-              width: '100%',
+              width: "100%",
               height: 4,
               marginBottom: theme.spacing(2),
               borderRadius: 2,
-              '& .MuiLinearProgress-bar': {
+              "& .MuiLinearProgress-bar": {
                 borderRadius: 2,
               },
             }}
@@ -435,7 +436,7 @@ export const UserStorageWidgetImpl = React.forwardRef<
         {!displayData && !currentLoading ? (
           <Box
             sx={{
-              textAlign: 'center',
+              textAlign: "center",
               py: 4,
               color: theme.palette.text.secondary,
             }}
@@ -463,21 +464,21 @@ export const UserStorageWidgetImpl = React.forwardRef<
         {lastUpdate && !currentLoading && (
           <Box
             sx={{
-              textAlign: 'center',
+              textAlign: "center",
               mt: 2,
               color: theme.palette.text.secondary,
             }}
           >
-            <Typography variant="caption" sx={{ fontSize: '10px' }}>
-              Last update:{' '}
+            <Typography variant="caption" sx={{ fontSize: "10px" }}>
+              Last update:{" "}
               <Typography
                 component="span"
                 variant="caption"
                 sx={{
-                  fontSize: '10px',
-                  fontWeight: 'bold',
-                  fontFamily: 'monospace',
-                  color: 'primary.500',
+                  fontSize: "10px",
+                  fontWeight: "bold",
+                  fontFamily: "monospace",
+                  color: "primary.500",
                 }}
               >
                 {lastUpdate}
@@ -493,12 +494,12 @@ export const UserStorageWidgetImpl = React.forwardRef<
             anchorEl={helpAnchorEl}
             onClose={handleHelpClose}
             anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'center',
+              vertical: "bottom",
+              horizontal: "center",
             }}
             transformOrigin={{
-              vertical: 'top',
-              horizontal: 'center',
+              vertical: "top",
+              horizontal: "center",
             }}
           >
             <Box sx={{ p: 2, maxWidth: 300 }}>
@@ -511,7 +512,7 @@ export const UserStorageWidgetImpl = React.forwardRef<
         )}
       </Paper>
     );
-  }
+  },
 );
 
-UserStorageWidgetImpl.displayName = 'UserStorageWidgetImpl';
+UserStorageWidgetImpl.displayName = "UserStorageWidgetImpl";

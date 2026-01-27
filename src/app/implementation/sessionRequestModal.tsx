@@ -41,7 +41,7 @@ const parseErrorMessage = (error: string | undefined): string => {
     } else if (errorObj.error) {
       errorText = errorObj.error;
     }
-  } catch (e) {
+  } catch {
     // Not JSON, continue with string parsing
   }
 

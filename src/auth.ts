@@ -1,6 +1,6 @@
-import NextAuth from 'next-auth';
-import type { NextAuthConfig } from 'next-auth';
-import { getOIDCConfig, isOIDCAuth } from '@/lib/config/auth-config';
+import NextAuth from "next-auth";
+import type { NextAuthConfig } from "next-auth";
+import { getOIDCConfig, isOIDCAuth } from "@/lib/config/auth-config";
 
 /**
  * NextAuth Configuration for OIDC Authentication
@@ -9,15 +9,34 @@ import { getOIDCConfig, isOIDCAuth } from '@/lib/config/auth-config';
  * When NEXT_USE_CANFAR=true, the custom CANFAR auth flow is used instead
  */
 
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+// Token type for refresh token handling - extends JWT for compatibility
+interface TokenWithRefresh {
+  accessToken?: string;
+  refreshToken?: string;
+  accessTokenExpires?: number;
+  user?: Record<string, unknown>;
+  error?: string;
+  [key: string]: unknown; // Index signature for JWT compatibility
+}
+
+// OIDC profile type
+interface OIDCProfile {
+  sub: string;
+  email?: string;
+  name?: string;
+  preferred_username?: string;
+  given_name?: string;
+  family_name?: string;
+}
+
 export const authConfig: NextAuthConfig = {
   providers: [],
   pages: {
-    signIn: `/science-portal`,
+    signIn: `/`,
   },
   callbacks: {
-    authorized({ auth, request: { nextUrl } }) {
-      const isOnDashboard = nextUrl.pathname.startsWith('/science-portal');
+    authorized({ request: { nextUrl } }) {
+      const isOnDashboard = nextUrl.pathname.startsWith("/");
 
       // Allow access if using CANFAR auth (handled separately)
       if (!isOIDCAuth()) {
@@ -31,26 +50,31 @@ export const authConfig: NextAuthConfig = {
 
       return true;
     },
-    async jwt({ token, user, account, profile }) {
+    async jwt({ token, user, account }) {
       // Initial sign in
       if (account && user) {
-        console.log('\n' + '🔐'.repeat(40));
-        console.log('🔐 JWT Callback - Initial Sign In - PURE TOKEN FROM IAM:');
-        console.log('🔐'.repeat(40));
-        console.log('📋 FULL ACCESS TOKEN:');
+        console.log("\n" + "🔐".repeat(40));
+        console.log("🔐 JWT Callback - Initial Sign In - PURE TOKEN FROM IAM:");
+        console.log("🔐".repeat(40));
+        console.log("📋 FULL ACCESS TOKEN:");
         console.log(account.access_token);
-        console.log('\n📋 Token Details:');
-        console.log('  - Token length:', account.access_token?.length);
-        console.log('  - Refresh token:', account.refresh_token ? 'present' : 'missing');
-        console.log('  - Expires at:', account.expires_at);
-        console.log('  - User:', JSON.stringify(user, null, 2));
-        console.log('🔐'.repeat(40) + '\n');
+        console.log("\n📋 Token Details:");
+        console.log("  - Token length:", account.access_token?.length);
+        console.log(
+          "  - Refresh token:",
+          account.refresh_token ? "present" : "missing",
+        );
+        console.log("  - Expires at:", account.expires_at);
+        console.log("  - User:", JSON.stringify(user, null, 2));
+        console.log("🔐".repeat(40) + "\n");
 
         return {
           ...token,
           accessToken: account.access_token,
           refreshToken: account.refresh_token,
-          accessTokenExpires: account.expires_at ? account.expires_at * 1000 : 0,
+          accessTokenExpires: account.expires_at
+            ? account.expires_at * 1000
+            : 0,
           user,
         };
       }
@@ -60,20 +84,25 @@ export const authConfig: NextAuthConfig = {
         return token;
       }
 
-      console.log('⏰ JWT Callback - Token Expired, Refreshing...');
+      console.log("⏰ JWT Callback - Token Expired, Refreshing...");
       // Access token has expired, try to refresh it
       return refreshAccessToken(token);
     },
     async session({ session, token }) {
       if (token) {
-        console.log('📋 Session Callback:');
-        console.log('  - token.accessToken:', token.accessToken ? token.accessToken.substring(0, 50) + '...' : 'missing');
-        console.log('  - token.user:', JSON.stringify(token.user, null, 2));
-        console.log('  - token.error:', token.error);
+        console.log("📋 Session Callback:");
+        console.log(
+          "  - token.accessToken:",
+          token.accessToken
+            ? token.accessToken.substring(0, 50) + "..."
+            : "missing",
+        );
+        console.log("  - token.user:", JSON.stringify(token.user, null, 2));
+        console.log("  - token.error:", token.error);
 
         session.user = {
           ...session.user,
-          ...(token.user as any),
+          ...(token.user as Record<string, unknown>),
         };
         session.accessToken = token.accessToken as string;
         session.error = token.error as string | undefined;
@@ -81,26 +110,32 @@ export const authConfig: NextAuthConfig = {
       return session;
     },
   },
-  debug: process.env.NODE_ENV === 'development',
+  debug: process.env.NODE_ENV === "development",
 };
 
 /**
  * Refresh the access token using the refresh token
  */
-async function refreshAccessToken(token: any) {
+async function refreshAccessToken(
+  token: TokenWithRefresh,
+): Promise<TokenWithRefresh> {
   try {
     const oidcConfig = getOIDCConfig();
     const url = `${oidcConfig.issuer}token`;
 
+    if (!token.refreshToken) {
+      throw new Error("No refresh token available");
+    }
+
     const response = await fetch(url, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        "Content-Type": "application/x-www-form-urlencoded",
       },
       body: new URLSearchParams({
         client_id: oidcConfig.clientId,
         client_secret: oidcConfig.clientSecret,
-        grant_type: 'refresh_token',
+        grant_type: "refresh_token",
         refresh_token: token.refreshToken,
       }),
     });
@@ -118,10 +153,10 @@ async function refreshAccessToken(token: any) {
       refreshToken: refreshedTokens.refresh_token ?? token.refreshToken,
     };
   } catch (error) {
-    console.error('Error refreshing access token:', error);
+    console.error("Error refreshing access token:", error);
     return {
       ...token,
-      error: 'RefreshAccessTokenError',
+      error: "RefreshAccessTokenError",
     };
   }
 }
@@ -138,9 +173,9 @@ function initializeAuth() {
       // Configure OIDC provider
       authConfig.providers = [
         {
-          id: 'oidc',
-          name: 'SKA IAM',
-          type: 'oidc',
+          id: "oidc",
+          name: "SKA IAM",
+          type: "oidc",
           issuer: oidcConfig.issuer,
           clientId: oidcConfig.clientId,
           clientSecret: oidcConfig.clientSecret,
@@ -150,8 +185,8 @@ function initializeAuth() {
               redirect_uri: oidcConfig.redirectUrl,
             },
           },
-          checks: ['state', 'pkce'],
-          profile(profile: any) {
+          checks: ["state", "pkce"],
+          profile(profile: OIDCProfile) {
             return {
               id: profile.sub,
               email: profile.email,
@@ -161,12 +196,13 @@ function initializeAuth() {
               lastName: profile.family_name,
             };
           },
-        } as any,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } as any, // NextAuth provider type requires any cast
       ];
     } catch (error) {
-      console.error('Failed to initialize OIDC configuration:', error);
+      console.error("Failed to initialize OIDC configuration:", error);
       // Don't throw during build - allow build to continue with dummy config
-      if (process.env.NEXT_PHASE !== 'phase-production-build') {
+      if (process.env.NEXT_PHASE !== "phase-production-build") {
         throw error;
       }
     }
