@@ -33,22 +33,24 @@ import { EventsModal } from "@/app/components/EventsModal/EventsModal";
 import { DeleteSessionModal } from "@/app/components/DeleteSessionModal/DeleteSessionModal";
 import { SessionRenewModal } from "@/app/components/SessionRenewModal/SessionRenewModal";
 
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+
 const getSessionIcon = (type: SessionType): React.ReactNode => {
   const iconSize = 24; // Standard icon size
 
   switch (type) {
     case "notebook":
     case "contributednotebook":
-      return <Image src="/notebook_icon.jpg" alt="Notebook" width={iconSize} height={iconSize} style={{ objectFit: "contain" }} />;
+      return <Image src={`${basePath}/notebook_icon.jpg`} alt="Notebook" width={iconSize} height={iconSize} style={{ objectFit: "contain" }} />;
     case "desktop":
     case "contributeddesktop":
-      return <Image src="/desktop_icon.png" alt="Desktop" width={iconSize} height={iconSize} style={{ objectFit: "contain" }} />;
+      return <Image src={`${basePath}/desktop_icon.png`} alt="Desktop" width={iconSize} height={iconSize} style={{ objectFit: "contain" }} />;
     case "carta":
-      return <Image src="/carta_icon.png" alt="CARTA" width={iconSize} height={iconSize} style={{ objectFit: "contain" }} />;
+      return <Image src={`${basePath}/carta_icon.png`} alt="CARTA" width={iconSize} height={iconSize} style={{ objectFit: "contain" }} />;
     case "contributed":
-      return <Image src="/contributed_icon.png" alt="Contributed" width={iconSize} height={iconSize} style={{ objectFit: "contain" }} />;
+      return <Image src={`${basePath}/contributed_icon.png`} alt="Contributed" width={iconSize} height={iconSize} style={{ objectFit: "contain" }} />;
     case "firefly":
-      return <Image src="/firefly_icon.png" alt="Firefly" width={iconSize} height={iconSize} style={{ objectFit: "contain" }} />;
+      return <Image src={`${basePath}/firefly_icon.png`} alt="Firefly" width={iconSize} height={iconSize} style={{ objectFit: "contain" }} />;
     default:
       return <CodeIcon />;
   }
