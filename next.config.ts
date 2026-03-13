@@ -28,6 +28,8 @@ const nextConfig: NextConfig = {
     API_TIMEOUT: process.env.NEXT_PUBLIC_API_TIMEOUT || '30000',
     ENABLE_QUERY_DEVTOOLS: process.env.NEXT_PUBLIC_ENABLE_QUERY_DEVTOOLS || 'false',
     NEXTAUTH_URL: process.env.NEXTAUTH_URL,
+    AUTH_URL: process.env.NEXTAUTH_URL,
+    AUTH_TRUST_HOST: process.env.AUTH_TRUST_HOST || 'false',
   },
 };
 

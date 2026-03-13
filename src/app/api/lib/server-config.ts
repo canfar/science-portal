@@ -88,6 +88,10 @@ export const serverApiConfig = {
     baseUrl: getSkahaBaseUrl(),
     timeout: parseInt(process.env.API_TIMEOUT || process.env.NEXT_PUBLIC_API_TIMEOUT || '30000', 10),
   },
+  softwareDiscovery: {
+    baseUrl: process.env.SOFTWARE_DISCOVERY_API,
+    timeout: parseInt(process.env.API_TIMEOUT || process.env.NEXT_PUBLIC_API_TIMEOUT || '30000', 10),
+  },
 } as const;
 
 /**
@@ -98,6 +102,7 @@ export function validateServerConfig(): void {
     { name: 'SERVICE_STORAGE_API', value: serverApiConfig.storage.baseUrl },
     { name: 'LOGIN_API', value: serverApiConfig.login.baseUrl },
     { name: 'SKAHA_API', value: serverApiConfig.skaha.baseUrl },
+    { name: 'SOFTWARE_DISCOVERY_API', value: serverApiConfig.softwareDiscovery.baseUrl },
   ];
 
   const missing = required.filter(({ value }) => !value);
@@ -106,7 +111,7 @@ export function validateServerConfig(): void {
     const missingNames = missing.map(({ name }) => name).join(', ');
     console.warn(
       `Missing server environment variables: ${missingNames}. ` +
-      `Falling back to NEXT_PUBLIC_ versions.`
+      `Falling back (Maybe) to NEXT_PUBLIC_ versions.`
     );
   }
 }

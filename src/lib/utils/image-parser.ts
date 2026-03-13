@@ -58,21 +58,29 @@ export interface ImagesByTypeAndProject {
  */
 export function isValidImageId(imageId: string): boolean {
   if (!imageId || typeof imageId !== 'string') {
+    console.error(`${imageId} is not a string.`);
     return false;
   }
 
   const parts = imageId.split('/');
   if (parts.length !== 3) {
+    console.error(`${imageId} does not have exactly 3 parts.`);
     return false;
   }
 
   const [registry, project, imageWithVersion] = parts;
   if (!registry || !project || !imageWithVersion) {
+    console.error(`${imageId} is missing registry, project, or imageWithVersion.`);
     return false;
   }
 
   const [imageName, version] = imageWithVersion.split(':');
-  return Boolean(imageName && version);
+  if (!imageName || !version) {
+    console.error(`${imageId} is missing imageName or version.`);
+    return false;
+  }
+
+  return true;
 }
 
 /**

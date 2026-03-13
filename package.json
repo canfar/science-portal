@@ -24,7 +24,8 @@
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "recharts": "^2.15.3",
-    "zustand": "^5.0.8"
+    "zustand": "^5.0.8",
+    "xml-js": "^1.6.11"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.11",

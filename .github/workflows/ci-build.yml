@@ -108,7 +108,7 @@ jobs:
             NEXT_PUBLIC_USE_CANFAR=false
             NEXT_PUBLIC_ENABLE_QUERY_DEVTOOLS=false
             NEXT_PUBLIC_EXPERIMENTAL=true
-            NEXT_PUBLIC_BASE_PATH=/next-science-portal
+            NEXT_PUBLIC_BASE_PATH=/beta
           push: true
           tags: |
             ghcr.io/${{ github.repository }}-rc-cansrc:latest
@@ -139,7 +139,7 @@ jobs:
             NEXT_PUBLIC_USE_CANFAR=false
             NEXT_PUBLIC_ENABLE_QUERY_DEVTOOLS=false
             NEXT_PUBLIC_EXPERIMENTAL=true
-            NEXT_PUBLIC_BASE_PATH=/next-science-portal
+            NEXT_PUBLIC_BASE_PATH=/beta
           push: true
           tags: |
             ghcr.io/${{ github.repository }}-cansrc:latest
@@ -170,7 +170,7 @@ jobs:
             NEXT_PUBLIC_USE_CANFAR=false
             NEXT_PUBLIC_ENABLE_QUERY_DEVTOOLS=false
             NEXT_PUBLIC_EXPERIMENTAL=true
-            NEXT_PUBLIC_BASE_PATH=/next-science-portal
+            NEXT_PUBLIC_BASE_PATH=/beta
           push: true
           tags: |
             ghcr.io/${{ github.repository }}-kawfee:latest
