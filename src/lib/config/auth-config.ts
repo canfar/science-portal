@@ -26,8 +26,8 @@ export interface AuthConfig {
  * Get the current authentication mode from environment variables
  */
 export function getAuthMode(): AuthMode {
-  const useCanfar = process.env.NEXT_USE_CANFAR === 'true' ||
-                    process.env.NEXT_PUBLIC_USE_CANFAR === 'true';
+  const useCanfar =
+    process.env.NEXT_USE_CANFAR === 'true' || process.env.NEXT_PUBLIC_USE_CANFAR === 'true';
   return useCanfar ? 'CANFAR' : 'OIDC';
 }
 
@@ -53,9 +53,12 @@ export function getOIDCConfig(allowMissing = false): OIDCConfig {
   const issuer = process.env.NEXT_OIDC_URI || process.env.NEXT_PUBLIC_OIDC_URI;
   const clientId = process.env.NEXT_OIDC_CLIENT_ID || process.env.NEXT_PUBLIC_OIDC_CLIENT_ID;
   const clientSecret = process.env.NEXT_OIDC_CLIENT_SECRET || '';
-  const callbackUrl = process.env.NEXT_OIDC_CALLBACK_URI || process.env.NEXT_PUBLIC_OIDC_CALLBACK_URI;
-  const redirectUrl = process.env.NEXT_OIDC_REDIRECT_URI || process.env.NEXT_PUBLIC_OIDC_REDIRECT_URI;
-  const scope = process.env.NEXT_OIDC_SCOPE || process.env.NEXT_PUBLIC_OIDC_SCOPE || 'openid profile email';
+  const callbackUrl =
+    process.env.NEXT_OIDC_CALLBACK_URI || process.env.NEXT_PUBLIC_OIDC_CALLBACK_URI;
+  const redirectUrl =
+    process.env.NEXT_OIDC_REDIRECT_URI || process.env.NEXT_PUBLIC_OIDC_REDIRECT_URI;
+  const scope =
+    process.env.NEXT_OIDC_SCOPE || process.env.NEXT_PUBLIC_OIDC_SCOPE || 'openid profile email';
 
   const isBuildTime = process.env.NEXT_PHASE === 'phase-production-build';
 
@@ -67,19 +70,19 @@ export function getOIDCConfig(allowMissing = false): OIDCConfig {
         issuer: issuer || 'https://example.com/',
         clientId: clientId || 'dummy-client-id',
         clientSecret: clientSecret || 'dummy-secret',
-        callbackUrl: callbackUrl || 'http://localhost:3000/science-portal',
-        redirectUrl: redirectUrl || 'http://localhost:3000/api/auth/callback/oidc',
+        callbackUrl: callbackUrl || 'http://localhost:3000/',
+        redirectUrl: redirectUrl || 'http://localhost:3000/oidc-callback',
         scope,
       };
     }
 
     throw new Error(
       'Missing required OIDC configuration. Please check your environment variables:\n' +
-      `- NEXT_OIDC_URI: ${issuer ? '✓' : '✗'}\n` +
-      `- NEXT_OIDC_CLIENT_ID: ${clientId ? '✓' : '✗'}\n` +
-      `- NEXT_OIDC_CLIENT_SECRET: ${clientSecret ? '✓' : '✗'}\n` +
-      `- NEXT_OIDC_CALLBACK_URI: ${callbackUrl ? '✓' : '✗'}\n` +
-      `- NEXT_OIDC_REDIRECT_URI: ${redirectUrl ? '✓' : '✗'}`
+        `- NEXT_OIDC_URI: ${issuer ? '✓' : '✗'}\n` +
+        `- NEXT_OIDC_CLIENT_ID: ${clientId ? '✓' : '✗'}\n` +
+        `- NEXT_OIDC_CLIENT_SECRET: ${clientSecret ? '✓' : '✗'}\n` +
+        `- NEXT_OIDC_CALLBACK_URI: ${callbackUrl ? '✓' : '✗'}\n` +
+        `- NEXT_OIDC_REDIRECT_URI: ${redirectUrl ? '✓' : '✗'}`,
     );
   }
 

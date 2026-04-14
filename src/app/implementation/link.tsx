@@ -40,7 +40,7 @@ export const LinkImpl = React.forwardRef<HTMLAnchorElement, LinkProps>(
         {...props}
       />
     );
-  }
+  },
 );
 
 LinkImpl.displayName = 'LinkImpl';

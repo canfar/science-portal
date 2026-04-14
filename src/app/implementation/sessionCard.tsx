@@ -19,44 +19,80 @@ import {
   Flag as FlagIcon,
   Description as LogsIcon,
   Schedule as ExtendIcon,
-  Science as JupyterIcon,
   Code as CodeIcon,
 } from '@mui/icons-material';
-import {
-  SessionCardProps,
-  SessionType,
-  SessionStatus,
-} from '@/app/types/SessionCardProps';
-import React, { useState, useMemo, useCallback } from 'react';
+import { SessionCardProps, SessionType, SessionStatus } from '@/app/types/SessionCardProps';
+import { apiRoutes } from '@/lib/config/api';
+import React, { useState, useCallback } from 'react';
+import Image from 'next/image';
 import { EventsModal } from '@/app/components/EventsModal/EventsModal';
 import { DeleteSessionModal } from '@/app/components/DeleteSessionModal/DeleteSessionModal';
 import { SessionRenewModal } from '@/app/components/SessionRenewModal/SessionRenewModal';
 
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+
 const getSessionIcon = (type: SessionType): React.ReactNode => {
   const iconSize = 24; // Standard icon size
-  const iconStyle = { width: iconSize, height: iconSize, objectFit: 'contain' as const };
 
   switch (type) {
     case 'notebook':
     case 'contributednotebook':
-        return <img src="/notebook_icon.jpg" alt="Desktop" style={iconStyle} />;
+      return (
+        <Image
+          src={`${basePath}/notebook_icon.jpg`}
+          alt="Notebook"
+          width={iconSize}
+          height={iconSize}
+          style={{ objectFit: 'contain' }}
+        />
+      );
     case 'desktop':
     case 'contributeddesktop':
-      return <img src="/desktop_icon.png" alt="Desktop" style={iconStyle} />;
+      return (
+        <Image
+          src={`${basePath}/desktop_icon.png`}
+          alt="Desktop"
+          width={iconSize}
+          height={iconSize}
+          style={{ objectFit: 'contain' }}
+        />
+      );
     case 'carta':
-      return <img src="/carta_icon.png" alt="CARTA" style={iconStyle} />;
+      return (
+        <Image
+          src={`${basePath}/carta_icon.png`}
+          alt="CARTA"
+          width={iconSize}
+          height={iconSize}
+          style={{ objectFit: 'contain' }}
+        />
+      );
     case 'contributed':
-      return <img src="/contributed_icon.png" alt="Contributed" style={iconStyle} />;
+      return (
+        <Image
+          src={`${basePath}/contributed_icon.png`}
+          alt="Contributed"
+          width={iconSize}
+          height={iconSize}
+          style={{ objectFit: 'contain' }}
+        />
+      );
     case 'firefly':
-      return <img src="/firefly_icon.png" alt="Firefly" style={iconStyle} />;
+      return (
+        <Image
+          src={`${basePath}/firefly_icon.png`}
+          alt="Firefly"
+          width={iconSize}
+          height={iconSize}
+          style={{ objectFit: 'contain' }}
+        />
+      );
     default:
       return <CodeIcon />;
   }
 };
 
-const getStatusColor = (
-  status: SessionStatus
-): 'success' | 'warning' | 'error' | 'default' => {
+const getStatusColor = (status: SessionStatus): 'success' | 'warning' | 'error' | 'default' => {
   switch (status) {
     case 'Running':
       return 'success';
@@ -103,13 +139,13 @@ const formatTimestamp = (timestamp: string): string => {
 
   // Remove seconds and 'Z' from ISO timestamp, replace 'T' with space
   // Format: YYYY-MM-DDTHH:MM:SSZ -> YYYY-MM-DD HH:MM
-  return timestamp.replace(/:\d{2}Z?\s*$/, '').replace('Z', '').replace('T', ' ');
+  return timestamp
+    .replace(/:\d{2}Z?\s*$/, '')
+    .replace('Z', '')
+    .replace('T', ' ');
 };
 
-export const SessionCardImpl = React.forwardRef<
-  HTMLDivElement,
-  SessionCardProps
->(
+export const SessionCardImpl = React.forwardRef<HTMLDivElement, SessionCardProps>(
   (
     {
       sessionType,
@@ -136,7 +172,7 @@ export const SessionCardImpl = React.forwardRef<
       // disableHover = true, // Hover effects removed globally
       ...cardProps
     },
-    ref
+    ref,
   ) => {
     const theme = useTheme();
     const [showEventsModal, setShowEventsModal] = useState(false);
@@ -196,24 +232,27 @@ export const SessionCardImpl = React.forwardRef<
       setShowRenewModal(true);
     };
 
-    const handleRenewConfirm = useCallback(async (hours: number) => {
-      setIsRenewing(true);
-      try {
-        // Call the actual renew function
-        if (onExtendTime) {
-          await onExtendTime();
+    const handleRenewConfirm = useCallback(
+      async (_hours: number) => {
+        setIsRenewing(true);
+        try {
+          // Call the actual renew function
+          if (onExtendTime) {
+            await onExtendTime();
+          }
+          // Wait a bit to show success state
+          await new Promise((resolve) => setTimeout(resolve, 500));
+        } catch (error) {
+          console.error('Error renewing session:', error);
+        } finally {
+          setIsRenewing(false);
+          setTimeout(() => {
+            setShowRenewModal(false);
+          }, 500);
         }
-        // Wait a bit to show success state
-        await new Promise((resolve) => setTimeout(resolve, 500));
-      } catch (error) {
-        console.error('Error renewing session:', error);
-      } finally {
-        setIsRenewing(false);
-        setTimeout(() => {
-          setShowRenewModal(false);
-        }, 500);
-      }
-    }, [onExtendTime]);
+      },
+      [onExtendTime],
+    );
 
     if (loading) {
       return (
@@ -228,11 +267,7 @@ export const SessionCardImpl = React.forwardRef<
         >
           <CardContent>
             <Stack spacing={2}>
-              <Box
-                display="flex"
-                alignItems="center"
-                justifyContent="space-between"
-              >
+              <Box display="flex" alignItems="center" justifyContent="space-between">
                 <Box display="flex" alignItems="center" gap={1}>
                   <Skeleton variant="circular" width={24} height={24} />
                   <Skeleton variant="text" width={150} />
@@ -275,9 +310,8 @@ export const SessionCardImpl = React.forwardRef<
               sx={{
                 position: 'absolute',
                 zIndex: theme.zIndex.drawer + 1,
-                backgroundColor: theme.palette.mode === 'dark'
-                  ? 'rgba(0, 0, 0, 0.7)'
-                  : 'rgba(255, 255, 255, 0.7)',
+                backgroundColor:
+                  theme.palette.mode === 'dark' ? 'rgba(0, 0, 0, 0.7)' : 'rgba(255, 255, 255, 0.7)',
                 borderRadius: theme.shape.borderRadius,
               }}
             >
@@ -427,11 +461,7 @@ export const SessionCardImpl = React.forwardRef<
                 </Typography>
               </Box>
 
-              <Box
-                display="flex"
-                flexDirection="column"
-                gap={theme.spacing(0.5)}
-              >
+              <Box display="flex" flexDirection="column" gap={theme.spacing(0.5)}>
                 <Box sx={{ minWidth: 0 }}>
                   <Typography
                     variant="body2"
@@ -525,9 +555,8 @@ export const SessionCardImpl = React.forwardRef<
                     }}
                   >
                     {isFixedResources === false
-                      ? (memoryUsage || 'N/A')
-                      : `${memoryUsage || 'N/A'} / ${memoryAllocated}`
-                    }
+                      ? memoryUsage || 'N/A'
+                      : `${memoryUsage || 'N/A'} / ${memoryAllocated}`}
                   </Typography>
                 </Box>
                 <Box
@@ -567,9 +596,8 @@ export const SessionCardImpl = React.forwardRef<
                     }}
                   >
                     {isFixedResources === false
-                      ? (cpuUsage || 'N/A')
-                      : `${cpuUsage || 'N/A'} / ${cpuAllocated}`
-                    }
+                      ? cpuUsage || 'N/A'
+                      : `${cpuUsage || 'N/A'} / ${cpuAllocated}`}
                   </Typography>
                 </Box>
                 <Box
@@ -679,7 +707,9 @@ export const SessionCardImpl = React.forwardRef<
                   <LogsIcon fontSize="small" />
                 </IconButton>
               </Tooltip>
-              <Tooltip title={status === 'Pending' ? "Cannot extend a pending session" : "Extend time"}>
+              <Tooltip
+                title={status === 'Pending' ? 'Cannot extend a pending session' : 'Extend time'}
+              >
                 <span>
                   <IconButton
                     size="small"
@@ -708,7 +738,7 @@ export const SessionCardImpl = React.forwardRef<
           sessionName={sessionName}
           onClose={() => setShowEventsModal(false)}
           showRefreshButton={true}
-          eventsEndpoint={`/api/sessions/${sessionId || sessionName}/events`}
+          eventsEndpoint={apiRoutes.sessions.events(sessionId || sessionName)}
         />
 
         {/* Logs Modal (Raw view only, parsing disabled) */}
@@ -720,7 +750,7 @@ export const SessionCardImpl = React.forwardRef<
           showRefreshButton={true}
           forceRawView={true}
           defaultView="raw"
-          eventsEndpoint={`/api/sessions/${sessionId || sessionName}/logs`}
+          eventsEndpoint={apiRoutes.sessions.logs(sessionId || sessionName)}
         />
 
         {/* Delete Confirmation Modal */}
@@ -744,7 +774,7 @@ export const SessionCardImpl = React.forwardRef<
         />
       </>
     );
-  }
+  },
 );
 
 SessionCardImpl.displayName = 'SessionCardImpl';

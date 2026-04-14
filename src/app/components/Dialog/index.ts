@@ -1,7 +1,1 @@
-export {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  DialogContentText,
-} from './Dialog';
+export { Dialog, DialogTitle, DialogContent, DialogActions, DialogContentText } from './Dialog';

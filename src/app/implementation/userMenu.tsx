@@ -10,13 +10,7 @@ import {
   ListItemText,
   Divider,
 } from '@mui/material';
-import {
-  AccountCircle,
-  PersonOutline,
-  VpnKey,
-  Verified,
-  Logout,
-} from '@mui/icons-material';
+import { AccountCircle, PersonOutline, VpnKey, Verified, Logout } from '@mui/icons-material';
 import { UserMenuProps } from '@/app/types/UserMenuProps';
 
 export const UserMenuImpl = React.forwardRef<HTMLDivElement, UserMenuProps>(
@@ -30,7 +24,7 @@ export const UserMenuImpl = React.forwardRef<HTMLDivElement, UserMenuProps>(
       onResetPassword,
       onObtainCertificate,
     },
-    ref
+    ref,
   ) => {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
@@ -50,7 +44,7 @@ export const UserMenuImpl = React.forwardRef<HTMLDivElement, UserMenuProps>(
           callback?.();
         };
       },
-      [handleClose]
+      [handleClose],
     );
 
     // If not authenticated, show login button
@@ -137,7 +131,7 @@ export const UserMenuImpl = React.forwardRef<HTMLDivElement, UserMenuProps>(
         </Menu>
       </div>
     );
-  }
+  },
 );
 
 UserMenuImpl.displayName = 'UserMenuImpl';

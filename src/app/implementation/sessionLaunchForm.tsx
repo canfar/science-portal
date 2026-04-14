@@ -69,18 +69,15 @@ function TabPanel(props: TabPanelProps) {
 }
 
 const DEFAULT_MEMORY_OPTIONS = [
-  1, 2, 4, 6, 8, 10, 12, 14, 16, 20, 24, 26, 28, 30, 32, 36, 40, 44, 48, 56, 64,
-  80, 92, 112, 128, 140, 170, 192,
+  1, 2, 4, 6, 8, 10, 12, 14, 16, 20, 24, 26, 28, 30, 32, 36, 40, 44, 48, 56, 64, 80, 92, 112, 128,
+  140, 170, 192,
 ];
 const DEFAULT_CORE_OPTIONS = Array.from({ length: 16 }, (_, i) => i + 1);
 
 // Read experimental feature flag from env
 const USE_EXPERIMENTAL_FEATURES = process.env.NEXT_PUBLIC_EXPERIMENTAL === 'true';
 
-export const SessionLaunchFormImpl = React.forwardRef<
-  HTMLDivElement,
-  SessionLaunchFormProps
->(
+export const SessionLaunchFormImpl = React.forwardRef<HTMLDivElement, SessionLaunchFormProps>(
   (
     {
       onLaunch,
@@ -104,7 +101,7 @@ export const SessionLaunchFormImpl = React.forwardRef<
       errorMessage,
       activeSessions = [],
     },
-    ref
+    ref,
   ) => {
     const theme = useTheme();
 
@@ -122,14 +119,17 @@ export const SessionLaunchFormImpl = React.forwardRef<
       },
       {
         history: 'replace', // Use replace to avoid cluttering browser history
-      }
+      },
     );
 
     // Initialize tab from URL parameter
     const [tabValue, setTabValue] = useState(urlParams.tab);
 
     // Initialize resource type based on presence of cores/memory/gpus in URL
-    const initialResourceType = (urlParams.cores !== null || urlParams.memory !== null || urlParams.gpus !== null) ? 'fixed' : 'flexible';
+    const initialResourceType =
+      urlParams.cores !== null || urlParams.memory !== null || urlParams.gpus !== null
+        ? 'fixed'
+        : 'flexible';
     const [resourceType, setResourceType] = useState<'flexible' | 'fixed'>(initialResourceType);
 
     const [formData, setFormData] = useState<SessionFormData>({
@@ -142,7 +142,8 @@ export const SessionLaunchFormImpl = React.forwardRef<
       gpus: urlParams.gpus ?? defaultValues.gpus ?? 0,
       resourceType: initialResourceType, // Track resource type
       // Advanced tab fields
-      repositoryHost: repositoryHosts.find(host => host && typeof host === 'string') || 'images-rc.canfar.net',
+      repositoryHost:
+        repositoryHosts.find((host) => host && typeof host === 'string') || 'images-rc.canfar.net',
       image: '',
       repositoryAuthUsername: '',
       repositoryAuthSecret: '',
@@ -164,11 +165,11 @@ export const SessionLaunchFormImpl = React.forwardRef<
       if (!imagesForProject) return [];
 
       // Filter images to only show those from the primary repository host
-      const validHosts = repositoryHosts.filter(host => host && typeof host === 'string');
+      const validHosts = repositoryHosts.filter((host) => host && typeof host === 'string');
       const primaryHost = validHosts[0];
       if (!primaryHost) return imagesForProject;
 
-      return imagesForProject.filter(img => img.registry === primaryHost);
+      return imagesForProject.filter((img) => img.registry === primaryHost);
     }, [imagesByType, formData.type, formData.project, repositoryHosts]);
 
     // Check if the selected session type supports resource configuration
@@ -181,13 +182,16 @@ export const SessionLaunchFormImpl = React.forwardRef<
     const activeSessionsCount = useMemo(() => activeSessions.length, [activeSessions.length]);
 
     // Generate the next available session name based on active sessions
-    const generateSessionName = useCallback((sessionType: string): string => {
-      // Count all active sessions (regardless of type) to determine the next counter
-      // The counter starts at activeSessionsCount + 1
-      const counter = activeSessionsCount + 1;
+    const generateSessionName = useCallback(
+      (sessionType: string): string => {
+        // Count all active sessions (regardless of type) to determine the next counter
+        // The counter starts at activeSessionsCount + 1
+        const counter = activeSessionsCount + 1;
 
-      return `${sessionType}${counter}`;
-    }, [activeSessionsCount]);
+        return `${sessionType}${counter}`;
+      },
+      [activeSessionsCount],
+    );
 
     // Update session name when active sessions count changes or type changes
     // Auto-generate session name when type changes or on mount
@@ -212,7 +216,7 @@ export const SessionLaunchFormImpl = React.forwardRef<
       if (!imagesForProject || imagesForProject.length === 0) return;
 
       // Check if current containerImage is valid for the current type/project
-      const currentImageValid = imagesForProject.some(img => img.id === formData.containerImage);
+      const currentImageValid = imagesForProject.some((img) => img.id === formData.containerImage);
 
       // If no image selected or current image is invalid, select the first available image
       if (!formData.containerImage || !currentImageValid) {
@@ -227,7 +231,7 @@ export const SessionLaunchFormImpl = React.forwardRef<
 
     // Update repositoryHost when repositoryHosts changes (API loads)
     useEffect(() => {
-      const validHosts = repositoryHosts.filter(host => host && typeof host === 'string');
+      const validHosts = repositoryHosts.filter((host) => host && typeof host === 'string');
       if (validHosts.length > 0) {
         // Update if no host is set OR if current host is the fallback value
         // This ensures we use the API value instead of the fallback
@@ -251,9 +255,10 @@ export const SessionLaunchFormImpl = React.forwardRef<
     const handleFieldChange = useCallback(
       (field: keyof SessionFormData) =>
         (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-          const value = field === 'memory' || field === 'cores' || field === 'gpus'
-            ? Number(event.target.value)
-            : event.target.value;
+          const value =
+            field === 'memory' || field === 'cores' || field === 'gpus'
+              ? Number(event.target.value)
+              : event.target.value;
 
           setFormData((prev) => ({
             ...prev,
@@ -265,14 +270,15 @@ export const SessionLaunchFormImpl = React.forwardRef<
             setUrlParams({ name: value as string });
           }
         },
-      [setUrlParams]
+      [setUrlParams],
     );
 
     const handleSelectChange = useCallback(
       (field: keyof SessionFormData) => (event: SelectChangeEvent) => {
-        const value = field === 'memory' || field === 'cores' || field === 'gpus'
-          ? Number(event.target.value)
-          : event.target.value;
+        const value =
+          field === 'memory' || field === 'cores' || field === 'gpus'
+            ? Number(event.target.value)
+            : event.target.value;
 
         setFormData((prev) => {
           const newData = { ...prev, [field]: value };
@@ -298,7 +304,14 @@ export const SessionLaunchFormImpl = React.forwardRef<
           const newType = value as string;
           // If switching to firefly or desktop, clear resource params
           if (newType === FIREFLY_TYPE || newType === DESKTOP_TYPE) {
-            setUrlParams({ type: newType, project: SKAHA_PROJECT, image: '', cores: null, memory: null, gpus: null });
+            setUrlParams({
+              type: newType,
+              project: SKAHA_PROJECT,
+              image: '',
+              cores: null,
+              memory: null,
+              gpus: null,
+            });
             setResourceType('flexible'); // Reset to flexible
           } else {
             setUrlParams({ type: newType, project: SKAHA_PROJECT, image: '' });
@@ -320,7 +333,7 @@ export const SessionLaunchFormImpl = React.forwardRef<
           onSessionTypeChange(value);
         }
       },
-      [onSessionTypeChange, generateSessionName, setUrlParams]
+      [onSessionTypeChange, generateSessionName, setUrlParams],
     );
 
     const handleSubmit = useCallback(
@@ -330,7 +343,7 @@ export const SessionLaunchFormImpl = React.forwardRef<
           await onLaunch(formData);
         }
       },
-      [formData, onLaunch]
+      [formData, onLaunch],
     );
 
     const handleReset = useCallback(() => {
@@ -343,7 +356,9 @@ export const SessionLaunchFormImpl = React.forwardRef<
         cores: defaultValues.cores || DEFAULT_CORES_NUMBER,
         gpus: defaultValues.gpus ?? 0,
         // Advanced tab fields
-        repositoryHost: repositoryHosts.find(host => host && typeof host === 'string') || 'images-rc.canfar.net',
+        repositoryHost:
+          repositoryHosts.find((host) => host && typeof host === 'string') ||
+          'images-rc.canfar.net',
         image: '',
         repositoryAuthUsername: '',
         repositoryAuthSecret: '',
@@ -368,9 +383,7 @@ export const SessionLaunchFormImpl = React.forwardRef<
       }
     }, [defaultValues, onReset, repositoryHosts, setUrlParams]);
 
-    const handleResourceTypeChange = (
-      event: React.ChangeEvent<HTMLInputElement>
-    ) => {
+    const handleResourceTypeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
       const newResourceType = event.target.value as 'flexible' | 'fixed';
       setResourceType(newResourceType);
 
@@ -397,7 +410,7 @@ export const SessionLaunchFormImpl = React.forwardRef<
         }));
         setUrlParams({ [field]: value });
       },
-      [setUrlParams]
+      [setUrlParams],
     );
 
     // Input change handlers with startsWithNumber validation
@@ -419,7 +432,7 @@ export const SessionLaunchFormImpl = React.forwardRef<
             }));
           }
         },
-      []
+      [],
     );
 
     // Input blur handlers - validate exact match
@@ -431,11 +444,7 @@ export const SessionLaunchFormImpl = React.forwardRef<
 
           // If value doesn't exist exactly in available options, reset to default
           if (
-            !(
-              maybeNumber > 0 &&
-              maybeNumber <= maxValue &&
-              availableOptions.includes(maybeNumber)
-            )
+            !(maybeNumber > 0 && maybeNumber <= maxValue && availableOptions.includes(maybeNumber))
           ) {
             setFormData((prev) => ({
               ...prev,
@@ -446,7 +455,7 @@ export const SessionLaunchFormImpl = React.forwardRef<
             setUrlParams({ [field]: maybeNumber });
           }
         },
-      [setUrlParams]
+      [setUrlParams],
     );
 
     // Helper component for the help icon tooltip
@@ -500,16 +509,8 @@ export const SessionLaunchFormImpl = React.forwardRef<
                 },
               }}
             >
-              <Tab
-                label="Standard"
-                id="session-tab-0"
-                aria-controls="session-tabpanel-0"
-              />
-              <Tab
-                label="Advanced"
-                id="session-tab-1"
-                aria-controls="session-tabpanel-1"
-              />
+              <Tab label="Standard" id="session-tab-0" aria-controls="session-tabpanel-0" />
+              <Tab label="Advanced" id="session-tab-1" aria-controls="session-tabpanel-1" />
             </Tabs>
           </Box>
 
@@ -529,7 +530,12 @@ export const SessionLaunchFormImpl = React.forwardRef<
                     <Skeleton variant="text" width="60%" height={20} />
                   </Grid>
                   <Grid size={{ xs: 12, sm: 8 }}>
-                    <Skeleton variant="rectangular" width="100%" height={40} sx={{ borderRadius: 1 }} />
+                    <Skeleton
+                      variant="rectangular"
+                      width="100%"
+                      height={40}
+                      sx={{ borderRadius: 1 }}
+                    />
                   </Grid>
                 </Grid>
 
@@ -539,7 +545,12 @@ export const SessionLaunchFormImpl = React.forwardRef<
                     <Skeleton variant="text" width="60%" height={20} />
                   </Grid>
                   <Grid size={{ xs: 12, sm: 8 }}>
-                    <Skeleton variant="rectangular" width="100%" height={40} sx={{ borderRadius: 1 }} />
+                    <Skeleton
+                      variant="rectangular"
+                      width="100%"
+                      height={40}
+                      sx={{ borderRadius: 1 }}
+                    />
                   </Grid>
                 </Grid>
 
@@ -549,7 +560,12 @@ export const SessionLaunchFormImpl = React.forwardRef<
                     <Skeleton variant="text" width="80%" height={20} />
                   </Grid>
                   <Grid size={{ xs: 12, sm: 8 }}>
-                    <Skeleton variant="rectangular" width="100%" height={40} sx={{ borderRadius: 1 }} />
+                    <Skeleton
+                      variant="rectangular"
+                      width="100%"
+                      height={40}
+                      sx={{ borderRadius: 1 }}
+                    />
                   </Grid>
                 </Grid>
 
@@ -559,7 +575,12 @@ export const SessionLaunchFormImpl = React.forwardRef<
                     <Skeleton variant="text" width="70%" height={20} />
                   </Grid>
                   <Grid size={{ xs: 12, sm: 8 }}>
-                    <Skeleton variant="rectangular" width="100%" height={40} sx={{ borderRadius: 1 }} />
+                    <Skeleton
+                      variant="rectangular"
+                      width="100%"
+                      height={40}
+                      sx={{ borderRadius: 1 }}
+                    />
                   </Grid>
                 </Grid>
 
@@ -570,8 +591,18 @@ export const SessionLaunchFormImpl = React.forwardRef<
                   </Grid>
                   <Grid size={{ xs: 12, sm: 8 }}>
                     <Box sx={{ display: 'flex', gap: 2 }}>
-                      <Skeleton variant="rectangular" width={120} height={32} sx={{ borderRadius: 1 }} />
-                      <Skeleton variant="rectangular" width={120} height={32} sx={{ borderRadius: 1 }} />
+                      <Skeleton
+                        variant="rectangular"
+                        width={120}
+                        height={32}
+                        sx={{ borderRadius: 1 }}
+                      />
+                      <Skeleton
+                        variant="rectangular"
+                        width={120}
+                        height={32}
+                        sx={{ borderRadius: 1 }}
+                      />
                     </Box>
                   </Grid>
                 </Grid>
@@ -581,8 +612,18 @@ export const SessionLaunchFormImpl = React.forwardRef<
                   <Grid size={{ xs: 12, sm: 4 }} />
                   <Grid size={{ xs: 12, sm: 8 }}>
                     <Box sx={{ display: 'flex', gap: theme.spacing(2) }}>
-                      <Skeleton variant="rectangular" width={80} height={32} sx={{ borderRadius: 1 }} />
-                      <Skeleton variant="rectangular" width={80} height={32} sx={{ borderRadius: 1 }} />
+                      <Skeleton
+                        variant="rectangular"
+                        width={80}
+                        height={32}
+                        sx={{ borderRadius: 1 }}
+                      />
+                      <Skeleton
+                        variant="rectangular"
+                        width={80}
+                        height={32}
+                        sx={{ borderRadius: 1 }}
+                      />
                     </Box>
                   </Grid>
                 </Grid>
@@ -591,971 +632,446 @@ export const SessionLaunchFormImpl = React.forwardRef<
           ) : (
             <form onSubmit={handleSubmit}>
               <TabPanel value={tabValue} index={0}>
-              <Box
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: theme.spacing(2.5),
-                }}
-              >
-                {/* Type field */}
-                <Grid container alignItems="center" spacing={2}>
-                  <Grid size={{ xs: 12, sm: 4 }}>
-                    <FormLabel
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        fontSize: '0.875rem',
-                        fontWeight: 500,
-                      }}
-                    >
-                      type
-                      <HelpIcon title="Select the type of session to launch" />
-                    </FormLabel>
-                  </Grid>
-                  <Grid size={{ xs: 12, sm: 8 }}>
-                    <Select
-                      id="session-type"
-                      value={formData.type}
-                      onChange={
-                        handleSelectChange('type') as React.ComponentProps<
-                          typeof Select
-                        >['onChange']
-                      }
-                      disabled={isLoading}
-                      fullWidth
-                      size="sm"
-                    >
-                      <MenuItem value="notebook">notebook</MenuItem>
-                      <MenuItem value="desktop">desktop</MenuItem>
-                      <MenuItem value="carta">carta</MenuItem>
-                      <MenuItem value="contributed">contributed</MenuItem>
-                      <MenuItem value="firefly">firefly</MenuItem>
-                    </Select>
-                  </Grid>
-                </Grid>
-
-                {/* Project field */}
-                <Grid container alignItems="center" spacing={2}>
-                  <Grid size={{ xs: 12, sm: 4 }}>
-                    <FormLabel
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        fontSize: '0.875rem',
-                        fontWeight: 500,
-                      }}
-                    >
-                      project
-                      <HelpIcon title="Select your project allocation" />
-                    </FormLabel>
-                  </Grid>
-                  <Grid size={{ xs: 12, sm: 8 }}>
-                    <Select
-                      id="session-project"
-                      value={formData.project}
-                      onChange={
-                        handleSelectChange('project') as React.ComponentProps<
-                          typeof Select
-                        >['onChange']
-                      }
-                      disabled={isLoading || availableProjects.length === 0}
-                      fullWidth
-                      size="sm"
-                    >
-                      <MenuItem value="">
-                        <em>Select project</em>
-                      </MenuItem>
-                      {availableProjects.map((project) => (
-                        <MenuItem key={project} value={project}>
-                          {project}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </Grid>
-                </Grid>
-
-                {/* Container Image field */}
-                <Grid container alignItems="center" spacing={2}>
-                  <Grid size={{ xs: 12, sm: 4 }}>
-                    <FormLabel
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        fontSize: '0.875rem',
-                        fontWeight: 500,
-                      }}
-                    >
-                      container image
-                      <HelpIcon title="Select the container image for your session" />
-                    </FormLabel>
-                  </Grid>
-                  <Grid size={{ xs: 12, sm: 8 }}>
-                    <Select
-                      id="session-image"
-                      value={formData.containerImage}
-                      onChange={
-                        handleSelectChange(
-                          'containerImage'
-                        ) as React.ComponentProps<typeof Select>['onChange']
-                      }
-                      disabled={isLoading || !formData.project || availableImages.length === 0}
-                      fullWidth
-                      size="sm"
-                    >
-                      <MenuItem value="">
-                        <em>Select image</em>
-                      </MenuItem>
-                      {availableImages.map((image) => (
-                        <MenuItem key={image.id} value={image.id}>
-                          {image.label}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </Grid>
-                </Grid>
-
-                {/* Session Name field */}
-                <Grid container alignItems="center" spacing={2}>
-                  <Grid size={{ xs: 12, sm: 4 }}>
-                    <FormLabel
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        fontSize: '0.875rem',
-                        fontWeight: 500,
-                      }}
-                    >
-                      session name
-                      <HelpIcon title="Enter a unique name for your session (max 15 characters)" />
-                    </FormLabel>
-                  </Grid>
-                  <Grid size={{ xs: 12, sm: 8 }}>
-                    <TextField
-                      id="session-name"
-                      value={formData.sessionName}
-                      onChange={handleFieldChange('sessionName')}
-                      disabled={isLoading}
-                      inputProps={{ maxLength: 15 }}
-                      placeholder="Enter session name"
-                      fullWidth
-                      size="sm"
-                    />
-                  </Grid>
-                </Grid>
-
-                {/* Resources field - only show for session types that support it */}
-                {supportsResourceConfig && (
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: theme.spacing(2.5),
+                  }}
+                >
+                  {/* Type field */}
                   <Grid container alignItems="center" spacing={2}>
                     <Grid size={{ xs: 12, sm: 4 }}>
                       <FormLabel
                         sx={{
+                          display: 'flex',
+                          alignItems: 'center',
                           fontSize: '0.875rem',
                           fontWeight: 500,
                         }}
                       >
-                        resources
+                        type
+                        <HelpIcon title="Select the type of session to launch" />
                       </FormLabel>
                     </Grid>
                     <Grid size={{ xs: 12, sm: 8 }}>
-                      <FormControl component="fieldset">
-                        <RadioGroup
-                          row
-                          value={resourceType}
-                          onChange={handleResourceTypeChange}
-                        >
-                          <FormControlLabel
-                            value="flexible"
-                            control={<Radio size="small" />}
-                            label="Flexible"
-                            disabled={isLoading}
-                            sx={{ mr: 1 }}
-                          />
-                          <HelpIcon title="Flexible resources allow dynamic allocation based on availability" />
-                          <FormControlLabel
-                            value="fixed"
-                            control={<Radio size="small" />}
-                            label="Fixed"
-                            disabled={isLoading}
-                            sx={{ ml: 2, mr: 1 }}
-                          />
-                          <HelpIcon title="Fixed resources guarantee specific CPU and memory allocation" />
-                        </RadioGroup>
-                      </FormControl>
+                      <Select
+                        id="session-type"
+                        value={formData.type}
+                        onChange={
+                          handleSelectChange('type') as React.ComponentProps<
+                            typeof Select
+                          >['onChange']
+                        }
+                        disabled={isLoading}
+                        fullWidth
+                        size="sm"
+                      >
+                        <MenuItem value="notebook">notebook</MenuItem>
+                        <MenuItem value="desktop">desktop</MenuItem>
+                        <MenuItem value="carta">carta</MenuItem>
+                        <MenuItem value="contributed">contributed</MenuItem>
+                        <MenuItem value="firefly">firefly</MenuItem>
+                      </Select>
                     </Grid>
                   </Grid>
-                )}
 
-                {/* Conditional Memory, CPU, and GPU fields when Fixed is selected and supported */}
-                {supportsResourceConfig && resourceType === 'fixed' && (
-                  <Grid container alignItems="flex-start" spacing={2}>
+                  {/* Project field */}
+                  <Grid container alignItems="center" spacing={2}>
                     <Grid size={{ xs: 12, sm: 4 }}>
-                      {/* Empty grid for alignment */}
+                      <FormLabel
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          fontSize: '0.875rem',
+                          fontWeight: 500,
+                        }}
+                      >
+                        project
+                        <HelpIcon title="Select your project allocation" />
+                      </FormLabel>
                     </Grid>
                     <Grid size={{ xs: 12, sm: 8 }}>
-                      {USE_EXPERIMENTAL_FEATURES ? (
-                        <Grid container spacing={2}>
-                          {/* Memory Column */}
-                          <Grid size={{ xs: 12, sm: 4 }}>
-                            <FormLabel
-                              sx={{
-                                fontSize: '0.75rem',
-                                fontWeight: 400,
-                                mb: 1,
-                                display: 'block',
-                              }}
-                            >
-                              Memory (GB)
-                            </FormLabel>
-                            <CanfarRange
-                              value={formData.memory}
-                              range={memoryOptions || DEFAULT_MEMORY_OPTIONS}
-                              onChange={handleRangeChange('memory')}
-                              disabled={isLoading}
-                              label="Memory (GB)"
-                            />
-                            <TextField
-                              type="number"
-                              value={formData.memory}
-                              onChange={handleInputChange('memory', memoryOptions || DEFAULT_MEMORY_OPTIONS)}
-                              onBlur={handleInputBlur('memory', memoryOptions || DEFAULT_MEMORY_OPTIONS, DEFAULT_RAM_NUMBER)}
-                              disabled={isLoading}
-                              inputProps={{
-                                min: 1,
-                                max: (memoryOptions || DEFAULT_MEMORY_OPTIONS)[(memoryOptions || DEFAULT_MEMORY_OPTIONS).length - 1],
-                              }}
-                              fullWidth
-                              size="sm"
-                              sx={{ mt: 1 }}
-                            />
-                          </Grid>
-
-                          {/* CPU Cores Column */}
-                          <Grid size={{ xs: 12, sm: 4 }}>
-                            <FormLabel
-                              sx={{
-                                fontSize: '0.75rem',
-                                fontWeight: 400,
-                                mb: 1,
-                                display: 'block',
-                              }}
-                            >
-                              CPU Cores
-                            </FormLabel>
-                            <CanfarRange
-                              value={formData.cores}
-                              range={coreOptions || DEFAULT_CORE_OPTIONS}
-                              onChange={handleRangeChange('cores')}
-                              disabled={isLoading}
-                              label="CPU Cores"
-                            />
-                            <TextField
-                              type="number"
-                              value={formData.cores}
-                              onChange={handleInputChange('cores', coreOptions || DEFAULT_CORE_OPTIONS)}
-                              onBlur={handleInputBlur('cores', coreOptions || DEFAULT_CORE_OPTIONS, DEFAULT_CORES_NUMBER)}
-                              disabled={isLoading}
-                              inputProps={{
-                                min: 1,
-                                max: (coreOptions || DEFAULT_CORE_OPTIONS)[(coreOptions || DEFAULT_CORE_OPTIONS).length - 1],
-                              }}
-                              fullWidth
-                              size="sm"
-                              sx={{ mt: 1 }}
-                            />
-                          </Grid>
-
-                          {/* GPU Column */}
-                          <Grid size={{ xs: 12, sm: 4 }}>
-                            <FormLabel
-                              sx={{
-                                fontSize: '0.75rem',
-                                fontWeight: 400,
-                                mb: 1,
-                                display: 'block',
-                              }}
-                            >
-                              GPU
-                            </FormLabel>
-                            <CanfarRange
-                              value={formData.gpus || 0}
-                              range={gpuOptions || [0]}
-                              onChange={handleRangeChange('gpus')}
-                              disabled={isLoading}
-                              label="GPU"
-                            />
-                            <TextField
-                              type="number"
-                              value={formData.gpus || 0}
-                              onChange={handleInputChange('gpus', gpuOptions || [0])}
-                              onBlur={handleInputBlur('gpus', gpuOptions || [0], 0)}
-                              disabled={isLoading}
-                              inputProps={{
-                                min: 0,
-                                max: gpuOptions?.[gpuOptions.length - 1] || 0,
-                              }}
-                              fullWidth
-                              size="sm"
-                              sx={{ mt: 1 }}
-                            />
-                          </Grid>
-                        </Grid>
-                      ) : (
-                        <Grid container spacing={2}>
-                          {/* Memory Column */}
-                          <Grid size={{ xs: 12, sm: 4 }}>
-                            <FormLabel
-                              sx={{
-                                fontSize: '0.75rem',
-                                fontWeight: 400,
-                                mb: 1,
-                                display: 'block',
-                              }}
-                            >
-                              Memory (GB)
-                            </FormLabel>
-                            <Select
-                              id="session-memory"
-                              value={String(formData.memory)}
-                              onChange={
-                                handleSelectChange('memory') as React.ComponentProps<
-                                  typeof Select
-                                >['onChange']
-                              }
-                              disabled={isLoading}
-                              fullWidth
-                              size="sm"
-                            >
-                              {(memoryOptions || DEFAULT_MEMORY_OPTIONS).map(
-                                (mem) => (
-                                  <MenuItem key={mem} value={String(mem)}>
-                                    {mem}
-                                  </MenuItem>
-                                )
-                              )}
-                            </Select>
-                          </Grid>
-
-                          {/* CPU Cores Column */}
-                          <Grid size={{ xs: 12, sm: 4 }}>
-                            <FormLabel
-                              sx={{
-                                fontSize: '0.75rem',
-                                fontWeight: 400,
-                                mb: 1,
-                                display: 'block',
-                              }}
-                            >
-                              CPU Cores
-                            </FormLabel>
-                            <Select
-                              id="session-cores"
-                              value={String(formData.cores)}
-                              onChange={
-                                handleSelectChange('cores') as React.ComponentProps<
-                                  typeof Select
-                                >['onChange']
-                              }
-                              disabled={isLoading}
-                              fullWidth
-                              size="sm"
-                            >
-                              {(coreOptions || DEFAULT_CORE_OPTIONS).map((core) => (
-                                <MenuItem key={core} value={String(core)}>
-                                  {core}
-                                </MenuItem>
-                              ))}
-                            </Select>
-                          </Grid>
-
-                          {/* GPU Column */}
-                          <Grid size={{ xs: 12, sm: 4 }}>
-                            <FormLabel
-                              sx={{
-                                fontSize: '0.75rem',
-                                fontWeight: 400,
-                                mb: 1,
-                                display: 'block',
-                              }}
-                            >
-                              GPU
-                            </FormLabel>
-                            <Select
-                              id="session-gpus"
-                              value={String(formData.gpus || 0)}
-                              onChange={
-                                handleSelectChange('gpus') as React.ComponentProps<
-                                  typeof Select
-                                >['onChange']
-                              }
-                              disabled={isLoading}
-                              fullWidth
-                              size="sm"
-                            >
-                              {/* Always show "None" option first */}
-                              <MenuItem value="0">None</MenuItem>
-                              {/* Then show other GPU options if available */}
-                              {gpuOptions?.filter(gpu => gpu > 0).map((gpu) => (
-                                <MenuItem key={gpu} value={String(gpu)}>
-                                  {gpu}
-                                </MenuItem>
-                              ))}
-                            </Select>
-                          </Grid>
-                        </Grid>
-                      )}
+                      <Select
+                        id="session-project"
+                        value={formData.project}
+                        onChange={
+                          handleSelectChange('project') as React.ComponentProps<
+                            typeof Select
+                          >['onChange']
+                        }
+                        disabled={isLoading || availableProjects.length === 0}
+                        fullWidth
+                        size="sm"
+                      >
+                        <MenuItem value="">
+                          <em>Select project</em>
+                        </MenuItem>
+                        {availableProjects.map((project) => (
+                          <MenuItem key={project} value={project}>
+                            {project}
+                          </MenuItem>
+                        ))}
+                      </Select>
                     </Grid>
                   </Grid>
-                )}
-              </Box>
 
-              {/* Buttons */}
-              <Grid container spacing={2} sx={{ mt: theme.spacing(3) }}>
-                <Grid size={{ xs: 12, sm: 4 }}>
-                  {/* Empty grid for alignment */}
-                </Grid>
-                <Grid size={{ xs: 12, sm: 8 }}>
-                  <Box sx={{ display: 'flex', gap: theme.spacing(2) }}>
-                    <Button
-                      type="submit"
-                      variant="contained"
-                      size="small"
-                      disabled={isLoading || !formData.project || !formData.containerImage}
-                    >
-                      Launch
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outlined"
-                      size="small"
-                      onClick={handleReset}
-                      disabled={isLoading}
-                    >
-                      Reset
-                    </Button>
-                  </Box>
-                </Grid>
-              </Grid>
-            </TabPanel>
-
-            <TabPanel value={tabValue} index={1}>
-              <Box>
-                {/* Image access section */}
-                <Box sx={{ mb: theme.spacing(4) }}>
-                  <Typography
-                    variant="subtitle2"
-                    sx={{
-                      fontWeight: 500,
-                      mb: theme.spacing(1),
-                      ml: theme.spacing(2),
-                    }}
-                  >
-                    Image access
-                  </Typography>
-                  <Divider sx={{ mb: theme.spacing(3) }} />
-                  <Box sx={{ px: theme.spacing(2) }}>
-                    {/* Container image field */}
-                    <Grid
-                      container
-                      alignItems="center"
-                      spacing={2}
-                      sx={{ mb: 2 }}
-                    >
-                      <Grid size={{ xs: 12, sm: 4 }}>
-                        <FormLabel
-                          sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            fontSize: '0.875rem',
-                            fontWeight: 500,
-                          }}
-                        >
-                          container image
-                          <HelpIcon title="Specify a custom container image path" />
-                        </FormLabel>
-                      </Grid>
-                      <Grid size={{ xs: 12, sm: 3 }}>
-                        <Select
-                          id="repository-host"
-                          value={formData.repositoryHost || repositoryHosts.find(h => h && typeof h === 'string') || 'images-rc.canfar.net'}
-                          onChange={
-                            handleSelectChange(
-                              'repositoryHost'
-                            ) as React.ComponentProps<typeof Select>['onChange']
-                          }
-                          disabled={isLoading}
-                          fullWidth
-                          size="sm"
-                        >
-                          {repositoryHosts.filter(host => host && typeof host === 'string').length > 0 ? (
-                            repositoryHosts
-                              .filter(host => host && typeof host === 'string')
-                              .map((host) => (
-                                <MenuItem key={host} value={host}>
-                                  {host}
-                                </MenuItem>
-                              ))
-                          ) : (
-                            <MenuItem value="images-rc.canfar.net">
-                              images-rc.canfar.net
-                            </MenuItem>
-                          )}
-                        </Select>
-                      </Grid>
-                      <Grid size={{ xs: 12, sm: 5 }}>
-                        <TextField
-                          id="image"
-                          value={formData.image}
-                          onChange={handleFieldChange('image')}
-                          disabled={isLoading}
-                          fullWidth
-                          size="sm"
-                          placeholder="project/example-image:1.0.0"
-                        />
-                      </Grid>
+                  {/* Container Image field */}
+                  <Grid container alignItems="center" spacing={2}>
+                    <Grid size={{ xs: 12, sm: 4 }}>
+                      <FormLabel
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          fontSize: '0.875rem',
+                          fontWeight: 500,
+                        }}
+                      >
+                        container image
+                        <HelpIcon title="Select the container image for your session" />
+                      </FormLabel>
                     </Grid>
-
-                    {/* Repository username field */}
-                    <Grid
-                      container
-                      alignItems="center"
-                      spacing={2}
-                      sx={{ mb: 2 }}
-                    >
-                      <Grid size={{ xs: 12, sm: 4 }}>
-                        <FormLabel
-                          sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            fontSize: '0.875rem',
-                            fontWeight: 500,
-                          }}
-                        >
-                          repository username
-                          <HelpIcon title="Username for private repository access" />
-                        </FormLabel>
-                      </Grid>
-                      <Grid size={{ xs: 12, sm: 8 }}>
-                        <TextField
-                          id="repository-username"
-                          value={formData.repositoryAuthUsername}
-                          onChange={handleFieldChange('repositoryAuthUsername')}
-                          disabled={isLoading}
-                          fullWidth
-                          size="sm"
-                          placeholder="Repository username"
-                          autoComplete="username"
-                        />
-                      </Grid>
+                    <Grid size={{ xs: 12, sm: 8 }}>
+                      <Select
+                        id="session-image"
+                        value={formData.containerImage}
+                        onChange={
+                          handleSelectChange('containerImage') as React.ComponentProps<
+                            typeof Select
+                          >['onChange']
+                        }
+                        disabled={isLoading || !formData.project || availableImages.length === 0}
+                        fullWidth
+                        size="sm"
+                      >
+                        <MenuItem value="">
+                          <em>Select image</em>
+                        </MenuItem>
+                        {availableImages.map((image) => (
+                          <MenuItem key={image.id} value={image.id}>
+                            {image.label}
+                          </MenuItem>
+                        ))}
+                      </Select>
                     </Grid>
+                  </Grid>
 
-                    {/* Repository secret field */}
+                  {/* Session Name field */}
+                  <Grid container alignItems="center" spacing={2}>
+                    <Grid size={{ xs: 12, sm: 4 }}>
+                      <FormLabel
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          fontSize: '0.875rem',
+                          fontWeight: 500,
+                        }}
+                      >
+                        session name
+                        <HelpIcon title="Enter a unique name for your session (max 15 characters)" />
+                      </FormLabel>
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 8 }}>
+                      <TextField
+                        id="session-name"
+                        value={formData.sessionName}
+                        onChange={handleFieldChange('sessionName')}
+                        disabled={isLoading}
+                        inputProps={{ maxLength: 15 }}
+                        placeholder="Enter session name"
+                        fullWidth
+                        size="sm"
+                      />
+                    </Grid>
+                  </Grid>
+
+                  {/* Resources field - only show for session types that support it */}
+                  {supportsResourceConfig && (
                     <Grid container alignItems="center" spacing={2}>
                       <Grid size={{ xs: 12, sm: 4 }}>
                         <FormLabel
                           sx={{
-                            display: 'flex',
-                            alignItems: 'center',
                             fontSize: '0.875rem',
                             fontWeight: 500,
                           }}
                         >
-                          repository secret
-                          <HelpIcon title="Password or token for private repository" />
+                          resources
                         </FormLabel>
                       </Grid>
                       <Grid size={{ xs: 12, sm: 8 }}>
-                        <TextField
-                          id="repository-secret"
-                          type="password"
-                          value={formData.repositoryAuthSecret}
-                          onChange={handleFieldChange('repositoryAuthSecret')}
-                          disabled={isLoading}
-                          fullWidth
-                          size="sm"
-                          placeholder="Repository secret"
-                          autoComplete="current-password"
-                        />
+                        <FormControl component="fieldset">
+                          <RadioGroup row value={resourceType} onChange={handleResourceTypeChange}>
+                            <FormControlLabel
+                              value="flexible"
+                              control={<Radio size="small" />}
+                              label="Flexible"
+                              disabled={isLoading}
+                              sx={{ mr: 1 }}
+                            />
+                            <HelpIcon title="Flexible resources allow dynamic allocation based on availability" />
+                            <FormControlLabel
+                              value="fixed"
+                              control={<Radio size="small" />}
+                              label="Fixed"
+                              disabled={isLoading}
+                              sx={{ ml: 2, mr: 1 }}
+                            />
+                            <HelpIcon title="Fixed resources guarantee specific CPU and memory allocation" />
+                          </RadioGroup>
+                        </FormControl>
                       </Grid>
                     </Grid>
-                  </Box>
-                </Box>
+                  )}
 
-                {/* Launch session section */}
-                <Box>
-                  <Typography
-                    variant="subtitle2"
-                    sx={{
-                      fontWeight: 500,
-                      mb: theme.spacing(1),
-                      ml: theme.spacing(2),
-                    }}
-                  >
-                    Launch session
-                  </Typography>
-                  <Divider sx={{ mb: theme.spacing(3) }} />
-                  <Box sx={{ px: theme.spacing(2) }}>
-                    {/* Type field */}
-                    <Grid
-                      container
-                      alignItems="center"
-                      spacing={2}
-                      sx={{ mb: 2 }}
-                    >
-                      <Grid size={{ xs: 12, sm: 4 }}>
-                        <FormLabel
-                          sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            fontSize: '0.875rem',
-                            fontWeight: 500,
-                          }}
-                        >
-                          type
-                          <HelpIcon title="Select the type of session to launch" />
-                        </FormLabel>
-                      </Grid>
+                  {/* Conditional Memory, CPU, and GPU fields when Fixed is selected and supported */}
+                  {supportsResourceConfig && resourceType === 'fixed' && (
+                    <Grid container alignItems="flex-start" spacing={2}>
+                      <Grid size={{ xs: 12, sm: 4 }}>{/* Empty grid for alignment */}</Grid>
                       <Grid size={{ xs: 12, sm: 8 }}>
-                        <Select
-                          id="advanced-session-type"
-                          value={formData.type}
-                          onChange={
-                            handleSelectChange('type') as React.ComponentProps<
-                              typeof Select
-                            >['onChange']
-                          }
-                          disabled={isLoading}
-                          fullWidth
-                          size="sm"
-                        >
-                          <MenuItem value="notebook">notebook</MenuItem>
-                          <MenuItem value="desktop">desktop</MenuItem>
-                          <MenuItem value="carta">carta</MenuItem>
-                          <MenuItem value="contributed">contributed</MenuItem>
-                          <MenuItem value="firefly">firefly</MenuItem>
-                        </Select>
-                      </Grid>
-                    </Grid>
-
-                    {/* Session name field */}
-                    <Grid
-                      container
-                      alignItems="center"
-                      spacing={2}
-                      sx={{ mb: 2 }}
-                    >
-                      <Grid size={{ xs: 12, sm: 4 }}>
-                        <FormLabel
-                          sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            fontSize: '0.875rem',
-                            fontWeight: 500,
-                          }}
-                        >
-                          session name
-                          <HelpIcon title="Choose a unique name for your session (max 15 characters)" />
-                        </FormLabel>
-                      </Grid>
-                      <Grid size={{ xs: 12, sm: 8 }}>
-                        <TextField
-                          id="advanced-session-name"
-                          value={formData.sessionName}
-                          onChange={handleFieldChange('sessionName')}
-                          disabled={isLoading}
-                          fullWidth
-                          size="sm"
-                          inputProps={{ maxLength: 15 }}
-                          placeholder="Enter session name"
-                        />
-                      </Grid>
-                    </Grid>
-
-                    {/* Resources field - only show for session types that support it */}
-                    {supportsResourceConfig && (
-                      <>
-                        <Grid
-                          container
-                          alignItems="center"
-                          spacing={2}
-                          sx={{ mb: 2 }}
-                        >
-                          <Grid size={{ xs: 12, sm: 4 }}>
-                            <FormLabel
-                              sx={{
-                                fontSize: '0.875rem',
-                                fontWeight: 500,
-                              }}
-                            >
-                              resources
-                            </FormLabel>
-                          </Grid>
-                          <Grid size={{ xs: 12, sm: 8 }}>
-                            <FormControl component="fieldset">
-                              <RadioGroup
-                                row
-                                value={resourceType}
-                                onChange={handleResourceTypeChange}
-                              >
-                                <FormControlLabel
-                                  value="flexible"
-                                  control={<Radio size="small" />}
-                                  label="Flexible"
-                                  disabled={isLoading}
-                                  sx={{ mr: 1 }}
-                                />
-                                <HelpIcon title="Flexible resources allow dynamic allocation based on availability" />
-                                <FormControlLabel
-                                  value="fixed"
-                                  control={<Radio size="small" />}
-                                  label="Fixed"
-                                  disabled={isLoading}
-                                  sx={{ ml: 2, mr: 1 }}
-                                />
-                                <HelpIcon title="Fixed resources guarantee specific CPU and memory allocation" />
-                              </RadioGroup>
-                            </FormControl>
-                          </Grid>
-                        </Grid>
-
-                        {/* Conditional Memory, CPU, and GPU fields when Fixed is selected */}
-                        {resourceType === 'fixed' && (
-                          <Grid container alignItems="flex-start" spacing={2}>
+                        {USE_EXPERIMENTAL_FEATURES ? (
+                          <Grid container spacing={2}>
+                            {/* Memory Column */}
                             <Grid size={{ xs: 12, sm: 4 }}>
-                              {/* Empty grid for alignment */}
+                              <FormLabel
+                                sx={{
+                                  fontSize: '0.75rem',
+                                  fontWeight: 400,
+                                  mb: 1,
+                                  display: 'block',
+                                }}
+                              >
+                                Memory (GB)
+                              </FormLabel>
+                              <CanfarRange
+                                value={formData.memory}
+                                range={memoryOptions || DEFAULT_MEMORY_OPTIONS}
+                                onChange={handleRangeChange('memory')}
+                                disabled={isLoading}
+                                label="Memory (GB)"
+                              />
+                              <TextField
+                                type="number"
+                                value={formData.memory}
+                                onChange={handleInputChange(
+                                  'memory',
+                                  memoryOptions || DEFAULT_MEMORY_OPTIONS,
+                                )}
+                                onBlur={handleInputBlur(
+                                  'memory',
+                                  memoryOptions || DEFAULT_MEMORY_OPTIONS,
+                                  DEFAULT_RAM_NUMBER,
+                                )}
+                                disabled={isLoading}
+                                inputProps={{
+                                  min: 1,
+                                  max: (memoryOptions || DEFAULT_MEMORY_OPTIONS)[
+                                    (memoryOptions || DEFAULT_MEMORY_OPTIONS).length - 1
+                                  ],
+                                }}
+                                fullWidth
+                                size="sm"
+                                sx={{ mt: 1 }}
+                              />
                             </Grid>
-                            <Grid size={{ xs: 12, sm: 8 }}>
-                              {USE_EXPERIMENTAL_FEATURES ? (
-                                <Grid container spacing={2}>
-                                  {/* Memory Column */}
-                                  <Grid size={{ xs: 12, sm: 4 }}>
-                                    <FormLabel
-                                      sx={{
-                                        fontSize: '0.75rem',
-                                        fontWeight: 400,
-                                        mb: 1,
-                                        display: 'block',
-                                      }}
-                                    >
-                                      Memory (GB)
-                                    </FormLabel>
-                                    <CanfarRange
-                                      value={formData.memory}
-                                      range={memoryOptions || DEFAULT_MEMORY_OPTIONS}
-                                      onChange={handleRangeChange('memory')}
-                                      disabled={isLoading}
-                                      label="Memory (GB)"
-                                    />
-                                    <TextField
-                                      type="number"
-                                      value={formData.memory}
-                                      onChange={handleInputChange('memory', memoryOptions || DEFAULT_MEMORY_OPTIONS)}
-                                      onBlur={handleInputBlur('memory', memoryOptions || DEFAULT_MEMORY_OPTIONS, DEFAULT_RAM_NUMBER)}
-                                      disabled={isLoading}
-                                      inputProps={{
-                                        min: 1,
-                                        max: (memoryOptions || DEFAULT_MEMORY_OPTIONS)[(memoryOptions || DEFAULT_MEMORY_OPTIONS).length - 1],
-                                      }}
-                                      fullWidth
-                                      size="sm"
-                                      sx={{ mt: 1 }}
-                                    />
-                                  </Grid>
 
-                                  {/* CPU Cores Column */}
-                                  <Grid size={{ xs: 12, sm: 4 }}>
-                                    <FormLabel
-                                      sx={{
-                                        fontSize: '0.75rem',
-                                        fontWeight: 400,
-                                        mb: 1,
-                                        display: 'block',
-                                      }}
-                                    >
-                                      CPU Cores
-                                    </FormLabel>
-                                    <CanfarRange
-                                      value={formData.cores}
-                                      range={coreOptions || DEFAULT_CORE_OPTIONS}
-                                      onChange={handleRangeChange('cores')}
-                                      disabled={isLoading}
-                                      label="CPU Cores"
-                                    />
-                                    <TextField
-                                      type="number"
-                                      value={formData.cores}
-                                      onChange={handleInputChange('cores', coreOptions || DEFAULT_CORE_OPTIONS)}
-                                      onBlur={handleInputBlur('cores', coreOptions || DEFAULT_CORE_OPTIONS, DEFAULT_CORES_NUMBER)}
-                                      disabled={isLoading}
-                                      inputProps={{
-                                        min: 1,
-                                        max: (coreOptions || DEFAULT_CORE_OPTIONS)[(coreOptions || DEFAULT_CORE_OPTIONS).length - 1],
-                                      }}
-                                      fullWidth
-                                      size="sm"
-                                      sx={{ mt: 1 }}
-                                    />
-                                  </Grid>
+                            {/* CPU Cores Column */}
+                            <Grid size={{ xs: 12, sm: 4 }}>
+                              <FormLabel
+                                sx={{
+                                  fontSize: '0.75rem',
+                                  fontWeight: 400,
+                                  mb: 1,
+                                  display: 'block',
+                                }}
+                              >
+                                CPU Cores
+                              </FormLabel>
+                              <CanfarRange
+                                value={formData.cores}
+                                range={coreOptions || DEFAULT_CORE_OPTIONS}
+                                onChange={handleRangeChange('cores')}
+                                disabled={isLoading}
+                                label="CPU Cores"
+                              />
+                              <TextField
+                                type="number"
+                                value={formData.cores}
+                                onChange={handleInputChange(
+                                  'cores',
+                                  coreOptions || DEFAULT_CORE_OPTIONS,
+                                )}
+                                onBlur={handleInputBlur(
+                                  'cores',
+                                  coreOptions || DEFAULT_CORE_OPTIONS,
+                                  DEFAULT_CORES_NUMBER,
+                                )}
+                                disabled={isLoading}
+                                inputProps={{
+                                  min: 1,
+                                  max: (coreOptions || DEFAULT_CORE_OPTIONS)[
+                                    (coreOptions || DEFAULT_CORE_OPTIONS).length - 1
+                                  ],
+                                }}
+                                fullWidth
+                                size="sm"
+                                sx={{ mt: 1 }}
+                              />
+                            </Grid>
 
-                                  {/* GPU Column */}
-                                  <Grid size={{ xs: 12, sm: 4 }}>
-                                    <FormLabel
-                                      sx={{
-                                        fontSize: '0.75rem',
-                                        fontWeight: 400,
-                                        mb: 1,
-                                        display: 'block',
-                                      }}
-                                    >
-                                      GPU
-                                    </FormLabel>
-                                    <CanfarRange
-                                      value={formData.gpus || 0}
-                                      range={gpuOptions || [0]}
-                                      onChange={handleRangeChange('gpus')}
-                                      disabled={isLoading}
-                                      label="GPU"
-                                    />
-                                    <TextField
-                                      type="number"
-                                      value={formData.gpus || 0}
-                                      onChange={handleInputChange('gpus', gpuOptions || [0])}
-                                      onBlur={handleInputBlur('gpus', gpuOptions || [0], 0)}
-                                      disabled={isLoading}
-                                      inputProps={{
-                                        min: 0,
-                                        max: gpuOptions?.[gpuOptions.length - 1] || 0,
-                                      }}
-                                      fullWidth
-                                      size="sm"
-                                      sx={{ mt: 1 }}
-                                    />
-                                  </Grid>
-                                </Grid>
-                              ) : (
-                                <Grid container spacing={2}>
-                                  {/* Memory Column */}
-                                  <Grid size={{ xs: 12, sm: 4 }}>
-                                    <FormLabel
-                                      sx={{
-                                        fontSize: '0.75rem',
-                                        fontWeight: 400,
-                                        mb: 1,
-                                        display: 'block',
-                                      }}
-                                    >
-                                      Memory (GB)
-                                    </FormLabel>
-                                    <Select
-                                      id="advanced-session-memory"
-                                      value={String(formData.memory)}
-                                      onChange={
-                                        handleSelectChange('memory') as React.ComponentProps<
-                                          typeof Select
-                                        >['onChange']
-                                      }
-                                      disabled={isLoading}
-                                      fullWidth
-                                      size="sm"
-                                    >
-                                      {(memoryOptions || DEFAULT_MEMORY_OPTIONS).map(
-                                        (mem) => (
-                                          <MenuItem key={mem} value={String(mem)}>
-                                            {mem}
-                                          </MenuItem>
-                                        )
-                                      )}
-                                    </Select>
-                                  </Grid>
+                            {/* GPU Column */}
+                            <Grid size={{ xs: 12, sm: 4 }}>
+                              <FormLabel
+                                sx={{
+                                  fontSize: '0.75rem',
+                                  fontWeight: 400,
+                                  mb: 1,
+                                  display: 'block',
+                                }}
+                              >
+                                GPU
+                              </FormLabel>
+                              <CanfarRange
+                                value={formData.gpus || 0}
+                                range={gpuOptions || [0]}
+                                onChange={handleRangeChange('gpus')}
+                                disabled={isLoading}
+                                label="GPU"
+                              />
+                              <TextField
+                                type="number"
+                                value={formData.gpus || 0}
+                                onChange={handleInputChange('gpus', gpuOptions || [0])}
+                                onBlur={handleInputBlur('gpus', gpuOptions || [0], 0)}
+                                disabled={isLoading}
+                                inputProps={{
+                                  min: 0,
+                                  max: gpuOptions?.[gpuOptions.length - 1] || 0,
+                                }}
+                                fullWidth
+                                size="sm"
+                                sx={{ mt: 1 }}
+                              />
+                            </Grid>
+                          </Grid>
+                        ) : (
+                          <Grid container spacing={2}>
+                            {/* Memory Column */}
+                            <Grid size={{ xs: 12, sm: 4 }}>
+                              <FormLabel
+                                sx={{
+                                  fontSize: '0.75rem',
+                                  fontWeight: 400,
+                                  mb: 1,
+                                  display: 'block',
+                                }}
+                              >
+                                Memory (GB)
+                              </FormLabel>
+                              <Select
+                                id="session-memory"
+                                value={String(formData.memory)}
+                                onChange={
+                                  handleSelectChange('memory') as React.ComponentProps<
+                                    typeof Select
+                                  >['onChange']
+                                }
+                                disabled={isLoading}
+                                fullWidth
+                                size="sm"
+                              >
+                                {(memoryOptions || DEFAULT_MEMORY_OPTIONS).map((mem) => (
+                                  <MenuItem key={mem} value={String(mem)}>
+                                    {mem}
+                                  </MenuItem>
+                                ))}
+                              </Select>
+                            </Grid>
 
-                                  {/* CPU Cores Column */}
-                                  <Grid size={{ xs: 12, sm: 4 }}>
-                                    <FormLabel
-                                      sx={{
-                                        fontSize: '0.75rem',
-                                        fontWeight: 400,
-                                        mb: 1,
-                                        display: 'block',
-                                      }}
-                                    >
-                                      CPU Cores
-                                    </FormLabel>
-                                    <Select
-                                      id="advanced-session-cores"
-                                      value={String(formData.cores)}
-                                      onChange={
-                                        handleSelectChange('cores') as React.ComponentProps<
-                                          typeof Select
-                                        >['onChange']
-                                      }
-                                      disabled={isLoading}
-                                      fullWidth
-                                      size="sm"
-                                    >
-                                      {(coreOptions || DEFAULT_CORE_OPTIONS).map((core) => (
-                                        <MenuItem key={core} value={String(core)}>
-                                          {core}
-                                        </MenuItem>
-                                      ))}
-                                    </Select>
-                                  </Grid>
+                            {/* CPU Cores Column */}
+                            <Grid size={{ xs: 12, sm: 4 }}>
+                              <FormLabel
+                                sx={{
+                                  fontSize: '0.75rem',
+                                  fontWeight: 400,
+                                  mb: 1,
+                                  display: 'block',
+                                }}
+                              >
+                                CPU Cores
+                              </FormLabel>
+                              <Select
+                                id="session-cores"
+                                value={String(formData.cores)}
+                                onChange={
+                                  handleSelectChange('cores') as React.ComponentProps<
+                                    typeof Select
+                                  >['onChange']
+                                }
+                                disabled={isLoading}
+                                fullWidth
+                                size="sm"
+                              >
+                                {(coreOptions || DEFAULT_CORE_OPTIONS).map((core) => (
+                                  <MenuItem key={core} value={String(core)}>
+                                    {core}
+                                  </MenuItem>
+                                ))}
+                              </Select>
+                            </Grid>
 
-                                  {/* GPU Column */}
-                                  <Grid size={{ xs: 12, sm: 4 }}>
-                                    <FormLabel
-                                      sx={{
-                                        fontSize: '0.75rem',
-                                        fontWeight: 400,
-                                        mb: 1,
-                                        display: 'block',
-                                      }}
-                                    >
-                                      GPU
-                                    </FormLabel>
-                                    <Select
-                                      id="advanced-session-gpus"
-                                      value={String(formData.gpus || 0)}
-                                      onChange={
-                                        handleSelectChange('gpus') as React.ComponentProps<
-                                          typeof Select
-                                        >['onChange']
-                                      }
-                                      disabled={isLoading}
-                                      fullWidth
-                                      size="sm"
-                                    >
-                                      {/* Always show "None" option first */}
-                                      <MenuItem value="0">None</MenuItem>
-                                      {/* Then show other GPU options if available */}
-                                      {gpuOptions?.filter(gpu => gpu > 0).map((gpu) => (
-                                        <MenuItem key={gpu} value={String(gpu)}>
-                                          {gpu}
-                                        </MenuItem>
-                                      ))}
-                                    </Select>
-                                  </Grid>
-                                </Grid>
-                              )}
+                            {/* GPU Column */}
+                            <Grid size={{ xs: 12, sm: 4 }}>
+                              <FormLabel
+                                sx={{
+                                  fontSize: '0.75rem',
+                                  fontWeight: 400,
+                                  mb: 1,
+                                  display: 'block',
+                                }}
+                              >
+                                GPU
+                              </FormLabel>
+                              <Select
+                                id="session-gpus"
+                                value={String(formData.gpus || 0)}
+                                onChange={
+                                  handleSelectChange('gpus') as React.ComponentProps<
+                                    typeof Select
+                                  >['onChange']
+                                }
+                                disabled={isLoading}
+                                fullWidth
+                                size="sm"
+                              >
+                                {/* Always show "None" option first */}
+                                <MenuItem value="0">None</MenuItem>
+                                {/* Then show other GPU options if available */}
+                                {gpuOptions
+                                  ?.filter((gpu) => gpu > 0)
+                                  .map((gpu) => (
+                                    <MenuItem key={gpu} value={String(gpu)}>
+                                      {gpu}
+                                    </MenuItem>
+                                  ))}
+                              </Select>
                             </Grid>
                           </Grid>
                         )}
-                      </>
-                    )}
-                  </Box>
+                      </Grid>
+                    </Grid>
+                  )}
                 </Box>
 
                 {/* Buttons */}
                 <Grid container spacing={2} sx={{ mt: theme.spacing(3) }}>
-                  <Grid size={{ xs: 12, sm: 4 }}>
-                    {/* Empty grid for alignment */}
-                  </Grid>
+                  <Grid size={{ xs: 12, sm: 4 }}>{/* Empty grid for alignment */}</Grid>
                   <Grid size={{ xs: 12, sm: 8 }}>
                     <Box sx={{ display: 'flex', gap: theme.spacing(2) }}>
                       <Button
                         type="submit"
                         variant="contained"
                         size="small"
-                        disabled={isLoading}
+                        disabled={isLoading || !formData.project || !formData.containerImage}
                       >
                         Launch
                       </Button>
@@ -1571,14 +1087,536 @@ export const SessionLaunchFormImpl = React.forwardRef<
                     </Box>
                   </Grid>
                 </Grid>
-              </Box>
-            </TabPanel>
-          </form>
+              </TabPanel>
+
+              <TabPanel value={tabValue} index={1}>
+                <Box>
+                  {/* Image access section */}
+                  <Box sx={{ mb: theme.spacing(4) }}>
+                    <Typography
+                      variant="subtitle2"
+                      sx={{
+                        fontWeight: 500,
+                        mb: theme.spacing(1),
+                        ml: theme.spacing(2),
+                      }}
+                    >
+                      Image access
+                    </Typography>
+                    <Divider sx={{ mb: theme.spacing(3) }} />
+                    <Box sx={{ px: theme.spacing(2) }}>
+                      {/* Container image field */}
+                      <Grid container alignItems="center" spacing={2} sx={{ mb: 2 }}>
+                        <Grid size={{ xs: 12, sm: 4 }}>
+                          <FormLabel
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              fontSize: '0.875rem',
+                              fontWeight: 500,
+                            }}
+                          >
+                            container image
+                            <HelpIcon title="Specify a custom container image path" />
+                          </FormLabel>
+                        </Grid>
+                        <Grid size={{ xs: 12, sm: 3 }}>
+                          <Select
+                            id="repository-host"
+                            value={
+                              formData.repositoryHost ||
+                              repositoryHosts.find((h) => h && typeof h === 'string') ||
+                              'images-rc.canfar.net'
+                            }
+                            onChange={
+                              handleSelectChange('repositoryHost') as React.ComponentProps<
+                                typeof Select
+                              >['onChange']
+                            }
+                            disabled={isLoading}
+                            fullWidth
+                            size="sm"
+                          >
+                            {repositoryHosts.filter((host) => host && typeof host === 'string')
+                              .length > 0 ? (
+                              repositoryHosts
+                                .filter((host) => host && typeof host === 'string')
+                                .map((host) => (
+                                  <MenuItem key={host} value={host}>
+                                    {host}
+                                  </MenuItem>
+                                ))
+                            ) : (
+                              <MenuItem value="images-rc.canfar.net">images-rc.canfar.net</MenuItem>
+                            )}
+                          </Select>
+                        </Grid>
+                        <Grid size={{ xs: 12, sm: 5 }}>
+                          <TextField
+                            id="image"
+                            value={formData.image}
+                            onChange={handleFieldChange('image')}
+                            disabled={isLoading}
+                            fullWidth
+                            size="sm"
+                            placeholder="project/example-image:1.0.0"
+                          />
+                        </Grid>
+                      </Grid>
+
+                      {/* Repository username field */}
+                      <Grid container alignItems="center" spacing={2} sx={{ mb: 2 }}>
+                        <Grid size={{ xs: 12, sm: 4 }}>
+                          <FormLabel
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              fontSize: '0.875rem',
+                              fontWeight: 500,
+                            }}
+                          >
+                            repository username
+                            <HelpIcon title="Username for private repository access" />
+                          </FormLabel>
+                        </Grid>
+                        <Grid size={{ xs: 12, sm: 8 }}>
+                          <TextField
+                            id="repository-username"
+                            value={formData.repositoryAuthUsername}
+                            onChange={handleFieldChange('repositoryAuthUsername')}
+                            disabled={isLoading}
+                            fullWidth
+                            size="sm"
+                            placeholder="Repository username"
+                            autoComplete="username"
+                          />
+                        </Grid>
+                      </Grid>
+
+                      {/* Repository secret field */}
+                      <Grid container alignItems="center" spacing={2}>
+                        <Grid size={{ xs: 12, sm: 4 }}>
+                          <FormLabel
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              fontSize: '0.875rem',
+                              fontWeight: 500,
+                            }}
+                          >
+                            repository secret
+                            <HelpIcon title="Password or token for private repository" />
+                          </FormLabel>
+                        </Grid>
+                        <Grid size={{ xs: 12, sm: 8 }}>
+                          <TextField
+                            id="repository-secret"
+                            type="password"
+                            value={formData.repositoryAuthSecret}
+                            onChange={handleFieldChange('repositoryAuthSecret')}
+                            disabled={isLoading}
+                            fullWidth
+                            size="sm"
+                            placeholder="Repository secret"
+                            autoComplete="current-password"
+                          />
+                        </Grid>
+                      </Grid>
+                    </Box>
+                  </Box>
+
+                  {/* Launch session section */}
+                  <Box>
+                    <Typography
+                      variant="subtitle2"
+                      sx={{
+                        fontWeight: 500,
+                        mb: theme.spacing(1),
+                        ml: theme.spacing(2),
+                      }}
+                    >
+                      Launch session
+                    </Typography>
+                    <Divider sx={{ mb: theme.spacing(3) }} />
+                    <Box sx={{ px: theme.spacing(2) }}>
+                      {/* Type field */}
+                      <Grid container alignItems="center" spacing={2} sx={{ mb: 2 }}>
+                        <Grid size={{ xs: 12, sm: 4 }}>
+                          <FormLabel
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              fontSize: '0.875rem',
+                              fontWeight: 500,
+                            }}
+                          >
+                            type
+                            <HelpIcon title="Select the type of session to launch" />
+                          </FormLabel>
+                        </Grid>
+                        <Grid size={{ xs: 12, sm: 8 }}>
+                          <Select
+                            id="advanced-session-type"
+                            value={formData.type}
+                            onChange={
+                              handleSelectChange('type') as React.ComponentProps<
+                                typeof Select
+                              >['onChange']
+                            }
+                            disabled={isLoading}
+                            fullWidth
+                            size="sm"
+                          >
+                            <MenuItem value="notebook">notebook</MenuItem>
+                            <MenuItem value="desktop">desktop</MenuItem>
+                            <MenuItem value="carta">carta</MenuItem>
+                            <MenuItem value="contributed">contributed</MenuItem>
+                            <MenuItem value="firefly">firefly</MenuItem>
+                          </Select>
+                        </Grid>
+                      </Grid>
+
+                      {/* Session name field */}
+                      <Grid container alignItems="center" spacing={2} sx={{ mb: 2 }}>
+                        <Grid size={{ xs: 12, sm: 4 }}>
+                          <FormLabel
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              fontSize: '0.875rem',
+                              fontWeight: 500,
+                            }}
+                          >
+                            session name
+                            <HelpIcon title="Choose a unique name for your session (max 15 characters)" />
+                          </FormLabel>
+                        </Grid>
+                        <Grid size={{ xs: 12, sm: 8 }}>
+                          <TextField
+                            id="advanced-session-name"
+                            value={formData.sessionName}
+                            onChange={handleFieldChange('sessionName')}
+                            disabled={isLoading}
+                            fullWidth
+                            size="sm"
+                            inputProps={{ maxLength: 15 }}
+                            placeholder="Enter session name"
+                          />
+                        </Grid>
+                      </Grid>
+
+                      {/* Resources field - only show for session types that support it */}
+                      {supportsResourceConfig && (
+                        <>
+                          <Grid container alignItems="center" spacing={2} sx={{ mb: 2 }}>
+                            <Grid size={{ xs: 12, sm: 4 }}>
+                              <FormLabel
+                                sx={{
+                                  fontSize: '0.875rem',
+                                  fontWeight: 500,
+                                }}
+                              >
+                                resources
+                              </FormLabel>
+                            </Grid>
+                            <Grid size={{ xs: 12, sm: 8 }}>
+                              <FormControl component="fieldset">
+                                <RadioGroup
+                                  row
+                                  value={resourceType}
+                                  onChange={handleResourceTypeChange}
+                                >
+                                  <FormControlLabel
+                                    value="flexible"
+                                    control={<Radio size="small" />}
+                                    label="Flexible"
+                                    disabled={isLoading}
+                                    sx={{ mr: 1 }}
+                                  />
+                                  <HelpIcon title="Flexible resources allow dynamic allocation based on availability" />
+                                  <FormControlLabel
+                                    value="fixed"
+                                    control={<Radio size="small" />}
+                                    label="Fixed"
+                                    disabled={isLoading}
+                                    sx={{ ml: 2, mr: 1 }}
+                                  />
+                                  <HelpIcon title="Fixed resources guarantee specific CPU and memory allocation" />
+                                </RadioGroup>
+                              </FormControl>
+                            </Grid>
+                          </Grid>
+
+                          {/* Conditional Memory, CPU, and GPU fields when Fixed is selected */}
+                          {resourceType === 'fixed' && (
+                            <Grid container alignItems="flex-start" spacing={2}>
+                              <Grid size={{ xs: 12, sm: 4 }}>{/* Empty grid for alignment */}</Grid>
+                              <Grid size={{ xs: 12, sm: 8 }}>
+                                {USE_EXPERIMENTAL_FEATURES ? (
+                                  <Grid container spacing={2}>
+                                    {/* Memory Column */}
+                                    <Grid size={{ xs: 12, sm: 4 }}>
+                                      <FormLabel
+                                        sx={{
+                                          fontSize: '0.75rem',
+                                          fontWeight: 400,
+                                          mb: 1,
+                                          display: 'block',
+                                        }}
+                                      >
+                                        Memory (GB)
+                                      </FormLabel>
+                                      <CanfarRange
+                                        value={formData.memory}
+                                        range={memoryOptions || DEFAULT_MEMORY_OPTIONS}
+                                        onChange={handleRangeChange('memory')}
+                                        disabled={isLoading}
+                                        label="Memory (GB)"
+                                      />
+                                      <TextField
+                                        type="number"
+                                        value={formData.memory}
+                                        onChange={handleInputChange(
+                                          'memory',
+                                          memoryOptions || DEFAULT_MEMORY_OPTIONS,
+                                        )}
+                                        onBlur={handleInputBlur(
+                                          'memory',
+                                          memoryOptions || DEFAULT_MEMORY_OPTIONS,
+                                          DEFAULT_RAM_NUMBER,
+                                        )}
+                                        disabled={isLoading}
+                                        inputProps={{
+                                          min: 1,
+                                          max: (memoryOptions || DEFAULT_MEMORY_OPTIONS)[
+                                            (memoryOptions || DEFAULT_MEMORY_OPTIONS).length - 1
+                                          ],
+                                        }}
+                                        fullWidth
+                                        size="sm"
+                                        sx={{ mt: 1 }}
+                                      />
+                                    </Grid>
+
+                                    {/* CPU Cores Column */}
+                                    <Grid size={{ xs: 12, sm: 4 }}>
+                                      <FormLabel
+                                        sx={{
+                                          fontSize: '0.75rem',
+                                          fontWeight: 400,
+                                          mb: 1,
+                                          display: 'block',
+                                        }}
+                                      >
+                                        CPU Cores
+                                      </FormLabel>
+                                      <CanfarRange
+                                        value={formData.cores}
+                                        range={coreOptions || DEFAULT_CORE_OPTIONS}
+                                        onChange={handleRangeChange('cores')}
+                                        disabled={isLoading}
+                                        label="CPU Cores"
+                                      />
+                                      <TextField
+                                        type="number"
+                                        value={formData.cores}
+                                        onChange={handleInputChange(
+                                          'cores',
+                                          coreOptions || DEFAULT_CORE_OPTIONS,
+                                        )}
+                                        onBlur={handleInputBlur(
+                                          'cores',
+                                          coreOptions || DEFAULT_CORE_OPTIONS,
+                                          DEFAULT_CORES_NUMBER,
+                                        )}
+                                        disabled={isLoading}
+                                        inputProps={{
+                                          min: 1,
+                                          max: (coreOptions || DEFAULT_CORE_OPTIONS)[
+                                            (coreOptions || DEFAULT_CORE_OPTIONS).length - 1
+                                          ],
+                                        }}
+                                        fullWidth
+                                        size="sm"
+                                        sx={{ mt: 1 }}
+                                      />
+                                    </Grid>
+
+                                    {/* GPU Column */}
+                                    <Grid size={{ xs: 12, sm: 4 }}>
+                                      <FormLabel
+                                        sx={{
+                                          fontSize: '0.75rem',
+                                          fontWeight: 400,
+                                          mb: 1,
+                                          display: 'block',
+                                        }}
+                                      >
+                                        GPU
+                                      </FormLabel>
+                                      <CanfarRange
+                                        value={formData.gpus || 0}
+                                        range={gpuOptions || [0]}
+                                        onChange={handleRangeChange('gpus')}
+                                        disabled={isLoading}
+                                        label="GPU"
+                                      />
+                                      <TextField
+                                        type="number"
+                                        value={formData.gpus || 0}
+                                        onChange={handleInputChange('gpus', gpuOptions || [0])}
+                                        onBlur={handleInputBlur('gpus', gpuOptions || [0], 0)}
+                                        disabled={isLoading}
+                                        inputProps={{
+                                          min: 0,
+                                          max: gpuOptions?.[gpuOptions.length - 1] || 0,
+                                        }}
+                                        fullWidth
+                                        size="sm"
+                                        sx={{ mt: 1 }}
+                                      />
+                                    </Grid>
+                                  </Grid>
+                                ) : (
+                                  <Grid container spacing={2}>
+                                    {/* Memory Column */}
+                                    <Grid size={{ xs: 12, sm: 4 }}>
+                                      <FormLabel
+                                        sx={{
+                                          fontSize: '0.75rem',
+                                          fontWeight: 400,
+                                          mb: 1,
+                                          display: 'block',
+                                        }}
+                                      >
+                                        Memory (GB)
+                                      </FormLabel>
+                                      <Select
+                                        id="advanced-session-memory"
+                                        value={String(formData.memory)}
+                                        onChange={
+                                          handleSelectChange('memory') as React.ComponentProps<
+                                            typeof Select
+                                          >['onChange']
+                                        }
+                                        disabled={isLoading}
+                                        fullWidth
+                                        size="sm"
+                                      >
+                                        {(memoryOptions || DEFAULT_MEMORY_OPTIONS).map((mem) => (
+                                          <MenuItem key={mem} value={String(mem)}>
+                                            {mem}
+                                          </MenuItem>
+                                        ))}
+                                      </Select>
+                                    </Grid>
+
+                                    {/* CPU Cores Column */}
+                                    <Grid size={{ xs: 12, sm: 4 }}>
+                                      <FormLabel
+                                        sx={{
+                                          fontSize: '0.75rem',
+                                          fontWeight: 400,
+                                          mb: 1,
+                                          display: 'block',
+                                        }}
+                                      >
+                                        CPU Cores
+                                      </FormLabel>
+                                      <Select
+                                        id="advanced-session-cores"
+                                        value={String(formData.cores)}
+                                        onChange={
+                                          handleSelectChange('cores') as React.ComponentProps<
+                                            typeof Select
+                                          >['onChange']
+                                        }
+                                        disabled={isLoading}
+                                        fullWidth
+                                        size="sm"
+                                      >
+                                        {(coreOptions || DEFAULT_CORE_OPTIONS).map((core) => (
+                                          <MenuItem key={core} value={String(core)}>
+                                            {core}
+                                          </MenuItem>
+                                        ))}
+                                      </Select>
+                                    </Grid>
+
+                                    {/* GPU Column */}
+                                    <Grid size={{ xs: 12, sm: 4 }}>
+                                      <FormLabel
+                                        sx={{
+                                          fontSize: '0.75rem',
+                                          fontWeight: 400,
+                                          mb: 1,
+                                          display: 'block',
+                                        }}
+                                      >
+                                        GPU
+                                      </FormLabel>
+                                      <Select
+                                        id="advanced-session-gpus"
+                                        value={String(formData.gpus || 0)}
+                                        onChange={
+                                          handleSelectChange('gpus') as React.ComponentProps<
+                                            typeof Select
+                                          >['onChange']
+                                        }
+                                        disabled={isLoading}
+                                        fullWidth
+                                        size="sm"
+                                      >
+                                        {/* Always show "None" option first */}
+                                        <MenuItem value="0">None</MenuItem>
+                                        {/* Then show other GPU options if available */}
+                                        {gpuOptions
+                                          ?.filter((gpu) => gpu > 0)
+                                          .map((gpu) => (
+                                            <MenuItem key={gpu} value={String(gpu)}>
+                                              {gpu}
+                                            </MenuItem>
+                                          ))}
+                                      </Select>
+                                    </Grid>
+                                  </Grid>
+                                )}
+                              </Grid>
+                            </Grid>
+                          )}
+                        </>
+                      )}
+                    </Box>
+                  </Box>
+
+                  {/* Buttons */}
+                  <Grid container spacing={2} sx={{ mt: theme.spacing(3) }}>
+                    <Grid size={{ xs: 12, sm: 4 }}>{/* Empty grid for alignment */}</Grid>
+                    <Grid size={{ xs: 12, sm: 8 }}>
+                      <Box sx={{ display: 'flex', gap: theme.spacing(2) }}>
+                        <Button type="submit" variant="contained" size="small" disabled={isLoading}>
+                          Launch
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outlined"
+                          size="small"
+                          onClick={handleReset}
+                          disabled={isLoading}
+                        >
+                          Reset
+                        </Button>
+                      </Box>
+                    </Grid>
+                  </Grid>
+                </Box>
+              </TabPanel>
+            </form>
           )}
         </CardContent>
       </Card>
     );
-  }
+  },
 );
 
 SessionLaunchFormImpl.displayName = 'SessionLaunchFormImpl';

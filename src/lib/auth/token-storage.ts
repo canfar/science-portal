@@ -11,14 +11,6 @@
 const TOKEN_KEY = 'canfar_auth_token';
 
 /**
- * Check if currently using OIDC authentication mode
- */
-function isOIDCMode(): boolean {
-  return typeof window !== 'undefined' &&
-         process.env.NEXT_PUBLIC_USE_CANFAR !== 'true';
-}
-
-/**
  * Save authentication token
  *
  * @param token - The authentication token to store
@@ -100,7 +92,10 @@ export function saveCredentials(username: string, password: string): void {
  *
  * @returns Credentials object with username and password, or null if not found
  */
-export function getCredentials(): { username: string; password: string } | null {
+export function getCredentials(): {
+  username: string;
+  password: string;
+} | null {
   if (typeof window === 'undefined') return null;
   const stored = sessionStorage.getItem(CREDENTIALS_KEY);
   if (!stored) return null;

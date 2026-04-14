@@ -16,8 +16,7 @@ export interface AppBarMenuItem {
   divider?: boolean;
 }
 
-export interface AppBarProps
-  extends Omit<MuiAppBarProps, 'position' | 'variant'> {
+export interface AppBarProps extends Omit<MuiAppBarProps, 'position' | 'variant'> {
   logo?: ReactNode;
   logoHref?: string;
   onLogoClick?: () => void;

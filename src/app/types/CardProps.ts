@@ -31,8 +31,7 @@ export interface CardActionsProps extends MuiCardActionsProps {
 }
 
 // CardHeader Component Props
-export interface CardHeaderProps
-  extends Omit<MuiCardHeaderProps, 'title' | 'subheader'> {
+export interface CardHeaderProps extends Omit<MuiCardHeaderProps, 'title' | 'subheader'> {
   title: ReactNode;
   subheader?: ReactNode;
   loading?: boolean;

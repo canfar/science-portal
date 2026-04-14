@@ -112,7 +112,7 @@ export async function getAuthStatus(): Promise<AuthStatus> {
 
     const data: AuthStatus = await response.json();
     return data;
-  } catch (error) {
+  } catch {
     return {
       authenticated: false,
     };
@@ -143,7 +143,7 @@ export async function getUserDetails(username: string): Promise<User> {
 export async function checkPermission(
   username: string,
   resource: string,
-  permission: 'read' | 'write' | 'execute'
+  permission: 'read' | 'write' | 'execute',
 ): Promise<boolean> {
   try {
     const authHeaders = getAuthHeader();
@@ -164,7 +164,7 @@ export async function checkPermission(
 
     const result = await response.json();
     return result.granted === true;
-  } catch (error) {
+  } catch {
     return false;
   }
 }

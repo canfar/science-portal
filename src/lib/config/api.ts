@@ -88,7 +88,7 @@ export const defaultFetchConfig: RequestInit = {
 export async function fetchWithTimeout(
   url: string,
   options: RequestInit = {},
-  timeout: number = apiConfig.storage.timeout
+  timeout: number = apiConfig.storage.timeout,
 ): Promise<Response> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);

@@ -24,7 +24,7 @@ export const MetricBlockImpl: React.FC<MetricBlockProps> = React.memo(
         // RAM - Values are already in GB from the API
         return `Available RAM: ${series.free}GB / ${max}GB`;
       }
-    }, [series.used, series.free, max, label]);
+    }, [series.free, max, label]);
 
     // Define colors based on metric type
     const chartColors = useMemo(() => {
@@ -52,16 +52,16 @@ export const MetricBlockImpl: React.FC<MetricBlockProps> = React.memo(
 
     // Define legend items based on metric type
     const legendItems = useMemo(() => {
-        return [
-          { key: 'used', label: 'used', color: chartColors.used },
-          { key: 'free', label: 'free', color: chartColors.free },
-        ];
-    }, [label, chartColors]);
+      return [
+        { key: 'used', label: 'used', color: chartColors.used },
+        { key: 'free', label: 'free', color: chartColors.free },
+      ];
+    }, [chartColors]);
 
     // Define stack keys based on metric type
     const stackKeys = useMemo(() => {
-        return ['used', 'free'];
-    }, [label, series]);
+      return ['used', 'free'];
+    }, []);
 
     return (
       <Box className={className} sx={{ marginBottom: theme.spacing(2) }}>
@@ -93,7 +93,7 @@ export const MetricBlockImpl: React.FC<MetricBlockProps> = React.memo(
         )}
       </Box>
     );
-  }
+  },
 );
 
 MetricBlockImpl.displayName = 'MetricBlockImpl';

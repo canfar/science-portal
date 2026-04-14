@@ -39,12 +39,12 @@ export default function OIDCCallbackPage() {
 
       // Redirect to dashboard after saving token
       setTimeout(() => {
-        router.push('/science-portal');
+        router.push('/');
       }, 500);
     } else if (status === 'unauthenticated') {
       // Authentication failed, redirect back to login
       console.error('❌ Authentication failed in OIDC callback');
-      router.push('/science-portal');
+      router.push('/');
     }
   }, [status, session, tokenSaved, router]);
 

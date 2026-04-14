@@ -24,11 +24,7 @@ interface LogContext {
 class Logger {
   private isDevelopment = process.env.NODE_ENV === 'development';
 
-  private formatMessage(
-    level: LogLevel,
-    message: string,
-    context?: LogContext
-  ): string {
+  private formatMessage(level: LogLevel, message: string, context?: LogContext): string {
     const timestamp = new Date().toISOString();
     const logEntry = {
       timestamp,
@@ -36,13 +32,16 @@ class Logger {
       message,
       ...context,
       // Add error details if present
-      ...(context?.error ? {
-        error: {
-          message: context.error instanceof Error ? context.error.message : String(context.error),
-          stack: context.error instanceof Error ? context.error.stack : undefined,
-          name: context.error instanceof Error ? context.error.name : 'Error',
-        },
-      } : {}),
+      ...(context?.error
+        ? {
+            error: {
+              message:
+                context.error instanceof Error ? context.error.message : String(context.error),
+              stack: context.error instanceof Error ? context.error.stack : undefined,
+              name: context.error instanceof Error ? context.error.name : 'Error',
+            },
+          }
+        : {}),
       // Environment info
       env: process.env.NODE_ENV,
       // Service name
@@ -84,7 +83,7 @@ class Logger {
     path: string,
     statusCode: number,
     duration: number,
-    context?: LogContext
+    context?: LogContext,
   ): void {
     this.info('HTTP Request', {
       method,
@@ -99,7 +98,7 @@ class Logger {
   authEvent(
     event: 'login' | 'logout' | 'token_refresh' | 'auth_failure',
     userId?: string,
-    context?: LogContext
+    context?: LogContext,
   ): void {
     this.info(`Auth: ${event}`, {
       event,

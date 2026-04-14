@@ -1,12 +1,7 @@
 'use client';
 
 import React, { useState, useCallback, useMemo } from 'react';
-import {
-  AppBar as MuiAppBar,
-  useTheme as useMuiTheme,
-  useMediaQuery,
-  Drawer,
-} from '@mui/material';
+import { AppBar as MuiAppBar, useTheme as useMuiTheme, useMediaQuery, Drawer } from '@mui/material';
 import type { Theme } from '@mui/material/styles';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -41,7 +36,7 @@ export const AppBarImpl = React.forwardRef<HTMLDivElement, AppBarProps>(
       variant = 'surface',
       ...props
     },
-    ref
+    ref,
   ) => {
     const theme = useMuiTheme() as Theme;
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -57,12 +52,9 @@ export const AppBarImpl = React.forwardRef<HTMLDivElement, AppBarProps>(
     const variantStyles = useMemo(() => {
       const baseStyles = {
         fontFamily: theme.typography.fontFamily,
-        transition: theme.transitions.create(
-          ['background-color', 'color', 'box-shadow'],
-          {
-            duration: theme.transitions.duration.short,
-          }
-        ),
+        transition: theme.transitions.create(['background-color', 'color', 'box-shadow'], {
+          duration: theme.transitions.duration.short,
+        }),
       };
 
       switch (variant) {
@@ -106,9 +98,7 @@ export const AppBarImpl = React.forwardRef<HTMLDivElement, AppBarProps>(
           return {
             ...baseStyles,
             backgroundColor:
-              theme.palette.mode === 'dark'
-                ? theme.palette.grey[800]
-                : theme.palette.grey[900],
+              theme.palette.mode === 'dark' ? theme.palette.grey[800] : theme.palette.grey[900],
             color: theme.palette.common.white,
             boxShadow: theme.shadows[1],
             '& .MuiLink-root, & .nav-button': {
@@ -147,12 +137,9 @@ export const AppBarImpl = React.forwardRef<HTMLDivElement, AppBarProps>(
     }, [variant, theme]); // Only recalculate when variant or theme changes
 
     // Memoized event handlers to prevent recreating functions on each render
-    const handleMenuOpen = useCallback(
-      (event: React.MouseEvent<HTMLElement>) => {
-        setAnchorEl(event.currentTarget);
-      },
-      []
-    );
+    const handleMenuOpen = useCallback((event: React.MouseEvent<HTMLElement>) => {
+      setAnchorEl(event.currentTarget);
+    }, []);
 
     const handleMenuClose = useCallback(() => {
       setAnchorEl(null);
@@ -164,7 +151,7 @@ export const AppBarImpl = React.forwardRef<HTMLDivElement, AppBarProps>(
         handleMenuClose();
         onClick?.();
       },
-      [handleMenuClose]
+      [handleMenuClose],
     );
 
     // Memoized factory function for link menu handlers
@@ -175,23 +162,20 @@ export const AppBarImpl = React.forwardRef<HTMLDivElement, AppBarProps>(
           [index]: event.currentTarget,
         }));
       },
-      []
+      [],
     );
 
     const handleLinkMenuClose = useCallback(
       (index: number) => () => {
         setLinkMenuAnchors((prev) => ({ ...prev, [index]: null }));
       },
-      []
+      [],
     );
 
-    const handleLinkMenuItemClick = useCallback(
-      (index: number, onClick?: () => void) => {
-        setLinkMenuAnchors((prev) => ({ ...prev, [index]: null }));
-        onClick?.();
-      },
-      []
-    );
+    const handleLinkMenuItemClick = useCallback((index: number, onClick?: () => void) => {
+      setLinkMenuAnchors((prev) => ({ ...prev, [index]: null }));
+      onClick?.();
+    }, []);
 
     const handleLogoClick = useCallback(
       (e: React.MouseEvent) => {
@@ -200,7 +184,7 @@ export const AppBarImpl = React.forwardRef<HTMLDivElement, AppBarProps>(
           onLogoClick();
         }
       },
-      [onLogoClick]
+      [onLogoClick],
     );
 
     const handleMobileDrawerToggle = useCallback(() => {
@@ -230,7 +214,7 @@ export const AppBarImpl = React.forwardRef<HTMLDivElement, AppBarProps>(
           onAccountButtonClick();
         }
       },
-      [menuItems, handleMenuOpen, onAccountButtonClick]
+      [menuItems, handleMenuOpen, onAccountButtonClick],
     );
 
     const { sx, ...otherProps } = props;
@@ -322,10 +306,7 @@ export const AppBarImpl = React.forwardRef<HTMLDivElement, AppBarProps>(
         <Box sx={{ flex: 1, overflow: 'auto' }}>
           <List sx={{ pt: 2 }}>
             {links.map((link, index) => (
-              <ListItem
-                key={index}
-                sx={{ flexDirection: 'column', alignItems: 'stretch' }}
-              >
+              <ListItem key={index} sx={{ flexDirection: 'column', alignItems: 'stretch' }}>
                 {link.menuItems && link.menuItems.length > 0 ? (
                   <Box>
                     <Typography
@@ -341,9 +322,7 @@ export const AppBarImpl = React.forwardRef<HTMLDivElement, AppBarProps>(
                     </Typography>
                     {link.menuItems.map((menuItem, menuIndex) => (
                       <Box key={menuIndex}>
-                        {menuItem.divider && menuIndex > 0 && (
-                          <Divider sx={{ mx: 2 }} />
-                        )}
+                        {menuItem.divider && menuIndex > 0 && <Divider sx={{ mx: 2 }} />}
                         <Link
                           href={menuItem.href}
                           onClick={() => {
@@ -432,9 +411,7 @@ export const AppBarImpl = React.forwardRef<HTMLDivElement, AppBarProps>(
                     }}
                   >
                     {item.icon && (
-                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        {item.icon}
-                      </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>{item.icon}</Box>
                     )}
                     {item.label}
                   </Link>
@@ -485,10 +462,7 @@ export const AppBarImpl = React.forwardRef<HTMLDivElement, AppBarProps>(
                 flex: isMobile ? 1 : 'none',
                 minWidth: 0, // Allow content to shrink if needed
                 // Ensure proper spacing from hamburger menu
-                ml:
-                  isMobile && (links.length > 0 || menuItems.length > 0)
-                    ? 0
-                    : 'auto',
+                ml: isMobile && (links.length > 0 || menuItems.length > 0) ? 0 : 'auto',
               }}
             >
               {logo && (
@@ -545,9 +519,7 @@ export const AppBarImpl = React.forwardRef<HTMLDivElement, AppBarProps>(
                     },
                   }}
                   component={logo ? 'span' : Link}
-                  {...(logo
-                    ? {}
-                    : { href: logoHref, onClick: handleLogoClick })}
+                  {...(logo ? {} : { href: logoHref, onClick: handleLogoClick })}
                 >
                   {wordmark}
                 </Typography>
@@ -595,14 +567,13 @@ export const AppBarImpl = React.forwardRef<HTMLDivElement, AppBarProps>(
                                 fontFamily: theme.typography.fontFamily,
                                 padding: `${theme.spacing(1)} ${theme.spacing(1.5)}`,
                                 borderRadius:
-                                  theme.customBorderRadius?.md ||
-                                  theme.shape.borderRadius,
+                                  theme.customBorderRadius?.md || theme.shape.borderRadius,
                                 minHeight: '48px',
                                 transition: theme.transitions.create(
                                   ['background-color', 'color'],
                                   {
                                     duration: theme.transitions.duration.short,
-                                  }
+                                  },
                                 ),
                                 '&:focus-visible': {
                                   outline: `2px solid ${theme.palette.primary.main}`,
@@ -610,16 +581,10 @@ export const AppBarImpl = React.forwardRef<HTMLDivElement, AppBarProps>(
                                 },
                               }}
                               aria-controls={
-                                Boolean(linkMenuAnchors[index])
-                                  ? `link-menu-${index}`
-                                  : undefined
+                                Boolean(linkMenuAnchors[index]) ? `link-menu-${index}` : undefined
                               }
                               aria-haspopup="menu"
-                              aria-expanded={
-                                Boolean(linkMenuAnchors[index])
-                                  ? 'true'
-                                  : 'false'
-                              }
+                              aria-expanded={Boolean(linkMenuAnchors[index]) ? 'true' : 'false'}
                               onClick={handleLinkMenuOpen(index)}
                             >
                               {link.label}
@@ -627,13 +592,9 @@ export const AppBarImpl = React.forwardRef<HTMLDivElement, AppBarProps>(
                                 sx={{
                                   fontSize: '1.2rem',
                                   color: 'inherit',
-                                  transition: theme.transitions.create(
-                                    'transform',
-                                    {
-                                      duration:
-                                        theme.transitions.duration.short,
-                                    }
-                                  ),
+                                  transition: theme.transitions.create('transform', {
+                                    duration: theme.transitions.duration.short,
+                                  }),
                                   transform: Boolean(linkMenuAnchors[index])
                                     ? 'rotate(180deg)'
                                     : 'rotate(0deg)',
@@ -663,9 +624,7 @@ export const AppBarImpl = React.forwardRef<HTMLDivElement, AppBarProps>(
                               {link.menuItems.flatMap((menuItem, menuIndex) => {
                                 const elements = [];
                                 if (menuItem.divider && menuIndex > 0) {
-                                  elements.push(
-                                    <Divider key={`divider-${menuIndex}`} />
-                                  );
+                                  elements.push(<Divider key={`divider-${menuIndex}`} />);
                                 }
                                 elements.push(
                                   <MenuItem
@@ -673,17 +632,18 @@ export const AppBarImpl = React.forwardRef<HTMLDivElement, AppBarProps>(
                                     icon={menuItem.icon}
                                     component={menuItem.href ? 'a' : undefined}
                                     href={menuItem.href}
-                                    target={menuItem.href?.startsWith('http') ? '_blank' : undefined}
-                                    rel={menuItem.href?.startsWith('http') ? 'noopener noreferrer' : undefined}
-                                    onClick={() =>
-                                      handleLinkMenuItemClick(
-                                        index,
-                                        menuItem.onClick
-                                      )
+                                    target={
+                                      menuItem.href?.startsWith('http') ? '_blank' : undefined
                                     }
+                                    rel={
+                                      menuItem.href?.startsWith('http')
+                                        ? 'noopener noreferrer'
+                                        : undefined
+                                    }
+                                    onClick={() => handleLinkMenuItemClick(index, menuItem.onClick)}
                                   >
                                     {menuItem.label}
-                                  </MenuItem>
+                                  </MenuItem>,
                                 );
                                 return elements;
                               })}
@@ -704,15 +664,11 @@ export const AppBarImpl = React.forwardRef<HTMLDivElement, AppBarProps>(
                               fontWeight: theme.typography.fontWeightRegular,
                               padding: `${theme.spacing(1)} ${theme.spacing(1.5)}`,
                               borderRadius:
-                                theme.customBorderRadius?.md ||
-                                theme.shape.borderRadius,
+                                theme.customBorderRadius?.md || theme.shape.borderRadius,
                               minHeight: '48px',
-                              transition: theme.transitions.create(
-                                ['background-color', 'color'],
-                                {
-                                  duration: theme.transitions.duration.short,
-                                }
-                              ),
+                              transition: theme.transitions.create(['background-color', 'color'], {
+                                duration: theme.transitions.duration.short,
+                              }),
                               '&:focus-visible': {
                                 outline: `2px solid ${theme.palette.primary.main}`,
                                 outlineOffset: theme.spacing(0.25),
@@ -744,9 +700,7 @@ export const AppBarImpl = React.forwardRef<HTMLDivElement, AppBarProps>(
                       color: theme.palette.text.primary,
                       cursor: 'pointer',
                       padding: `${theme.spacing(0.75)} ${theme.spacing(1.5)}`,
-                      borderRadius:
-                        theme.customBorderRadius?.md ||
-                        theme.shape.borderRadius,
+                      borderRadius: theme.customBorderRadius?.md || theme.shape.borderRadius,
                       fontSize: theme.typography.body1.fontSize,
                       fontWeight: theme.typography.fontWeightMedium,
                       fontFamily: theme.typography.fontFamily,
@@ -756,7 +710,7 @@ export const AppBarImpl = React.forwardRef<HTMLDivElement, AppBarProps>(
                         ['background-color', 'border-color', 'color'],
                         {
                           duration: theme.transitions.duration.short,
-                        }
+                        },
                       ),
                       '&:hover': {
                         backgroundColor: theme.palette.action.hover,
@@ -820,7 +774,7 @@ export const AppBarImpl = React.forwardRef<HTMLDivElement, AppBarProps>(
                           onClick={() => handleMenuItemClick(item.onClick)}
                         >
                           {item.label}
-                        </MenuItem>
+                        </MenuItem>,
                       );
                       return elements;
                     })}
@@ -867,7 +821,7 @@ export const AppBarImpl = React.forwardRef<HTMLDivElement, AppBarProps>(
         </Drawer>
       </>
     );
-  }
+  },
 );
 
 AppBarImpl.displayName = 'AppBarImpl';

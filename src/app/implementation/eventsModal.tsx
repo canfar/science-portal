@@ -25,6 +25,7 @@ import {
   useTheme,
   useMediaQuery,
 } from '@mui/material';
+import { apiRoutes } from '@/lib/config/api';
 import {
   Close as CloseIcon,
   Refresh as RefreshIcon,
@@ -47,9 +48,7 @@ import { getAuthHeader } from '@/lib/auth/token-storage';
 /**
  * Parse raw log data into structured events
  */
-const parseEventLog = (
-  logData: string
-): { events: SessionEvent[]; hasParseErrors: boolean } => {
+const parseEventLog = (logData: string): { events: SessionEvent[]; hasParseErrors: boolean } => {
   const lines = logData.trim().split('\n');
   if (lines.length < 2) return { events: [], hasParseErrors: false };
 
@@ -63,9 +62,7 @@ const parseEventLog = (
 
     // Parse the log line - format: TYPE REASON MESSAGE FIRST-TIME LAST-TIME
     // Using regex to handle spaces in message
-    const match = line.match(
-      /^(\S+)\s+(\S+)\s+(.*?)\s+(\S+|<nil>)\s+(\S+|<nil>)$/
-    );
+    const match = line.match(/^(\S+)\s+(\S+)\s+(.*?)\s+(\S+|<nil>)\s+(\S+|<nil>)$/);
 
     if (match) {
       const [, type, reason, message, firstTime, lastTime] = match;
@@ -132,9 +129,7 @@ const getEventIcon = (reason: EventReason) => {
 /**
  * Get chip color for event type
  */
-const getEventTypeColor = (
-  type: EventType
-): 'success' | 'warning' | 'error' | 'default' => {
+const getEventTypeColor = (type: EventType): 'success' | 'warning' | 'error' | 'default' => {
   switch (type) {
     case 'Normal':
       return 'success';
@@ -154,7 +149,7 @@ const useSessionEvents = (
   sessionId: string,
   open: boolean,
   eventsEndpoint?: string,
-  initialEvents?: SessionEvent[]
+  initialEvents?: SessionEvent[],
 ): UseSessionEventsReturn => {
   const [events, setEvents] = useState<SessionEvent[]>(initialEvents || []);
   const [rawData, setRawData] = useState<string | null>(null);
@@ -170,15 +165,14 @@ const useSessionEvents = (
     setParseError(false);
 
     try {
-      const endpoint =
-        eventsEndpoint || `/api/sessions/${sessionId}/logs`;
+      const endpoint = eventsEndpoint || apiRoutes.sessions.logs(sessionId);
 
       const authHeaders = getAuthHeader();
 
       const response = await fetch(endpoint, {
         method: 'GET',
         headers: {
-          'Accept': 'text/plain',
+          Accept: 'text/plain',
           ...authHeaders,
         },
         credentials: 'include',
@@ -216,7 +210,7 @@ const useSessionEvents = (
         'TYPE     REASON      MESSAGE                                                                                                                        FIRST-TIME             LAST-TIME';
       const lines = initialEvents.map(
         (e) =>
-          `${e.type}   ${e.reason}   ${e.message}   ${e.firstTime || '<nil>'}   ${e.lastTime || '<nil>'}`
+          `${e.type}   ${e.reason}   ${e.message}   ${e.firstTime || '<nil>'}   ${e.lastTime || '<nil>'}`,
       );
       setRawData([header, ...lines].join('\n'));
     }
@@ -252,12 +246,14 @@ export const EventsModalImpl: React.FC<EventsModalProps> = ({
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isTablet = useMediaQuery(theme.breakpoints.down('md'));
-  const [showRawView, setShowRawView] = useState(
-    forceRawView || defaultView === 'raw'
-  );
+  const [showRawView, setShowRawView] = useState(forceRawView || defaultView === 'raw');
 
-  const { events, rawData, loading, error, parseError, refresh } =
-    useSessionEvents(sessionId, open, eventsEndpoint, initialEvents);
+  const { events, rawData, loading, error, parseError, refresh } = useSessionEvents(
+    sessionId,
+    open,
+    eventsEndpoint,
+    initialEvents,
+  );
 
   // Sort events by timestamp (most recent first)
   const sortedEvents = useMemo(() => {
@@ -305,18 +301,12 @@ export const EventsModalImpl: React.FC<EventsModalProps> = ({
         <Box display="flex" alignItems="center" justifyContent="space-between">
           <Box display="flex" alignItems="center" gap={1}>
             <FlagIcon />
-            <Typography variant="h6">
-              Container Events - {sessionName}
-            </Typography>
+            <Typography variant="h6">Container Events - {sessionName}</Typography>
           </Box>
           <Box display="flex" alignItems="center" gap={1}>
             {showRefreshButton && !loading && (
               <Tooltip title="Refresh events">
-                <IconButton
-                  onClick={handleRefresh}
-                  size="small"
-                  aria-label="refresh events"
-                >
+                <IconButton onClick={handleRefresh} size="small" aria-label="refresh events">
                   <RefreshIcon />
                 </IconButton>
               </Tooltip>
@@ -330,12 +320,7 @@ export const EventsModalImpl: React.FC<EventsModalProps> = ({
 
       <DialogContent id="events-modal-content" dividers>
         {/* View toggle and parse error warning */}
-        <Box
-          display="flex"
-          alignItems="center"
-          justifyContent="space-between"
-          mb={2}
-        >
+        <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
           <FormControlLabel
             control={
               <Checkbox
@@ -355,12 +340,7 @@ export const EventsModalImpl: React.FC<EventsModalProps> = ({
         </Box>
 
         {loading && (
-          <Box
-            display="flex"
-            justifyContent="center"
-            alignItems="center"
-            py={4}
-          >
+          <Box display="flex" justifyContent="center" alignItems="center" py={4}>
             <CircularProgress />
           </Box>
         )}

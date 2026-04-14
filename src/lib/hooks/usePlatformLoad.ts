@@ -27,7 +27,7 @@ export const platformLoadKeys = {
  */
 export function usePlatformLoad(
   isAuthenticated?: boolean,
-  options?: Omit<UseQueryOptions<PlatformLoad>, 'queryKey' | 'queryFn'>
+  options?: Omit<UseQueryOptions<PlatformLoad>, 'queryKey' | 'queryFn'>,
 ) {
   return useQuery({
     queryKey: platformLoadKeys.current(),

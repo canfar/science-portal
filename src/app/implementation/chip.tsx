@@ -7,12 +7,11 @@ import { ChipProps, ChipStatus } from '../types/ChipProps';
 /**
  * Maps custom status to Material-UI color variants
  */
-const statusToColorMapping: Record<ChipStatus, 'success' | 'info' | 'warning'> =
-  {
-    running: 'success',
-    pending: 'info',
-    terminating: 'warning',
-  } as const;
+const statusToColorMapping: Record<ChipStatus, 'success' | 'info' | 'warning'> = {
+  running: 'success',
+  pending: 'info',
+  terminating: 'warning',
+} as const;
 
 /**
  * Default status messages

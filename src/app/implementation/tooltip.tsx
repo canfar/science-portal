@@ -30,31 +30,20 @@ export const TooltipImpl: React.FC<TooltipProps> = ({
     fontWeight: theme.typography.fontWeightMedium,
     borderRadius: `${theme.shape.borderRadius}px`,
     backgroundColor:
-      theme.palette.mode === 'dark'
-        ? theme.palette.grey[700]
-        : theme.palette.grey[800],
+      theme.palette.mode === 'dark' ? theme.palette.grey[700] : theme.palette.grey[800],
     color: theme.palette.common.white,
     padding: theme.spacing(1, 1.5),
     maxWidth: '300px',
     boxShadow: theme.shadows[4],
     lineHeight: '1.5',
-    border:
-      theme.palette.mode === 'dark'
-        ? `1px solid ${theme.palette.divider}`
-        : 'none',
+    border: theme.palette.mode === 'dark' ? `1px solid ${theme.palette.divider}` : 'none',
     ...(theme.palette.mode === 'light' && {
       backgroundColor: theme.palette.grey[800],
     }),
     '& .MuiTooltip-arrow': {
-      color:
-        theme.palette.mode === 'dark'
-          ? theme.palette.grey[700]
-          : theme.palette.grey[800],
+      color: theme.palette.mode === 'dark' ? theme.palette.grey[700] : theme.palette.grey[800],
       '&::before': {
-        border:
-          theme.palette.mode === 'dark'
-            ? `1px solid ${theme.palette.divider}`
-            : 'none',
+        border: theme.palette.mode === 'dark' ? `1px solid ${theme.palette.divider}` : 'none',
       },
     },
   };
@@ -97,10 +86,7 @@ export const TooltipImpl: React.FC<TooltipProps> = ({
 
   if (clickable && React.isValidElement(children)) {
     const wrappedChild = (
-      <span
-        onClick={handleClick}
-        style={{ cursor: 'pointer', display: 'inline-flex' }}
-      >
+      <span onClick={handleClick} style={{ cursor: 'pointer', display: 'inline-flex' }}>
         {children}
       </span>
     );

@@ -226,31 +226,17 @@ export const createTheme = (mode: ThemeMode, overrides?: ThemeOptions) => {
           : tokens.colors.surface.background.paper,
       },
       text: {
-        primary: isDark
-          ? tokens.colors.text.primary.dark
-          : tokens.colors.text.primary.light,
-        secondary: isDark
-          ? tokens.colors.text.secondary.dark
-          : tokens.colors.text.secondary.light,
-        disabled: isDark
-          ? tokens.colors.text.disabled.dark
-          : tokens.colors.text.disabled.light,
+        primary: isDark ? tokens.colors.text.primary.dark : tokens.colors.text.primary.light,
+        secondary: isDark ? tokens.colors.text.secondary.dark : tokens.colors.text.secondary.light,
+        disabled: isDark ? tokens.colors.text.disabled.dark : tokens.colors.text.disabled.light,
       },
       divider: isDark ? tokens.colors.neutral[700] : tokens.colors.neutral[300],
       action: {
-        active: isDark
-          ? tokens.colors.neutral[400]
-          : tokens.colors.neutral[600],
+        active: isDark ? tokens.colors.neutral[400] : tokens.colors.neutral[600],
         hover: isDark ? tokens.colors.neutral[800] : tokens.colors.neutral[100],
-        selected: isDark
-          ? tokens.colors.neutral[700]
-          : tokens.colors.neutral[200],
-        disabled: isDark
-          ? tokens.colors.neutral[600]
-          : tokens.colors.neutral[400],
-        disabledBackground: isDark
-          ? tokens.colors.neutral[800]
-          : tokens.colors.neutral[200],
+        selected: isDark ? tokens.colors.neutral[700] : tokens.colors.neutral[200],
+        disabled: isDark ? tokens.colors.neutral[600] : tokens.colors.neutral[400],
+        disabledBackground: isDark ? tokens.colors.neutral[800] : tokens.colors.neutral[200],
         focus: tokens.colors.border.focus,
       },
     },
@@ -431,9 +417,7 @@ export const createTheme = (mode: ThemeMode, overrides?: ThemeOptions) => {
             fontFamily: tokens.typography.fontFamily.primary,
             fontSize: tokens.typography.fontSize.base,
             lineHeight: tokens.typography.lineHeight.normal,
-            color: isDark
-              ? tokens.colors.text.primary.dark
-              : tokens.colors.text.primary.light,
+            color: isDark ? tokens.colors.text.primary.dark : tokens.colors.text.primary.light,
             backgroundColor: isDark
               ? tokens.colors.surface.backgroundDark.default
               : tokens.colors.surface.background.default,
@@ -541,9 +525,7 @@ export const createTheme = (mode: ThemeMode, overrides?: ThemeOptions) => {
             borderRadius: tokens.borderRadius.md,
             transition: 'none',
             '&:hover': {
-              backgroundColor: isDark
-                ? tokens.colors.neutral[700]
-                : tokens.colors.neutral[100],
+              backgroundColor: isDark ? tokens.colors.neutral[700] : tokens.colors.neutral[100],
             },
             '&:focus-visible': {
               outline: `2px solid ${tokens.colors.border.focus}`,
@@ -571,9 +553,7 @@ export const createTheme = (mode: ThemeMode, overrides?: ThemeOptions) => {
             padding: `${tokens.spacing[2]} ${tokens.spacing[3]}`,
             transition: 'none',
             '&:hover': {
-              backgroundColor: isDark
-                ? tokens.colors.neutral[700]
-                : tokens.colors.neutral[100],
+              backgroundColor: isDark ? tokens.colors.neutral[700] : tokens.colors.neutral[100],
             },
             '&:focus-visible': {
               outline: `2px solid ${tokens.colors.border.focus}`,
@@ -609,9 +589,7 @@ export const createTheme = (mode: ThemeMode, overrides?: ThemeOptions) => {
               borderRadius: tokens.borderRadius.md,
               transition: 'none',
               '&:hover .MuiOutlinedInput-notchedOutline': {
-                borderColor: isDark
-                  ? tokens.colors.neutral[500]
-                  : tokens.colors.neutral[400],
+                borderColor: isDark ? tokens.colors.neutral[500] : tokens.colors.neutral[400],
               },
               '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
                 borderColor: tokens.colors.border.focus,
@@ -654,9 +632,7 @@ export const createTheme = (mode: ThemeMode, overrides?: ThemeOptions) => {
             transition: 'none',
             '&:hover': {
               color: tokens.colors.primary[500],
-              backgroundColor: isDark
-                ? tokens.colors.neutral[800]
-                : tokens.colors.neutral[50],
+              backgroundColor: isDark ? tokens.colors.neutral[800] : tokens.colors.neutral[50],
             },
             '&.Mui-selected': {
               color: tokens.colors.primary[500],
@@ -700,13 +676,9 @@ export const createTheme = (mode: ThemeMode, overrides?: ThemeOptions) => {
             borderColor: isDark
               ? tokens.colors.semantic.error[700]
               : tokens.colors.semantic.error[200],
-            color: isDark
-              ? tokens.colors.semantic.error[100]
-              : tokens.colors.semantic.error[800],
+            color: isDark ? tokens.colors.semantic.error[100] : tokens.colors.semantic.error[800],
             '& .MuiAlert-icon': {
-              color: isDark
-                ? tokens.colors.semantic.error[300]
-                : tokens.colors.semantic.error[600],
+              color: isDark ? tokens.colors.semantic.error[300] : tokens.colors.semantic.error[600],
             },
           },
           standardWarning: {
@@ -717,9 +689,7 @@ export const createTheme = (mode: ThemeMode, overrides?: ThemeOptions) => {
               ? tokens.colors.semantic.warning[700]
               : tokens.colors.semantic.warning[200],
             // Use darker shades for better contrast in both modes
-            color: isDark
-              ? tokens.colors.neutral[100]
-              : tokens.colors.neutral[900],
+            color: isDark ? tokens.colors.neutral[100] : tokens.colors.neutral[900],
             '& .MuiAlert-icon': {
               color: isDark
                 ? tokens.colors.semantic.warning[300]
@@ -733,13 +703,9 @@ export const createTheme = (mode: ThemeMode, overrides?: ThemeOptions) => {
             borderColor: isDark
               ? tokens.colors.semantic.info[700]
               : tokens.colors.semantic.info[200],
-            color: isDark
-              ? tokens.colors.semantic.info[100]
-              : tokens.colors.semantic.info[800],
+            color: isDark ? tokens.colors.semantic.info[100] : tokens.colors.semantic.info[800],
             '& .MuiAlert-icon': {
-              color: isDark
-                ? tokens.colors.semantic.info[300]
-                : tokens.colors.semantic.info[600],
+              color: isDark ? tokens.colors.semantic.info[300] : tokens.colors.semantic.info[600],
             },
           },
         },

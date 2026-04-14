@@ -19,11 +19,7 @@ const variantStyles = {
   },
 };
 
-const getDrawerWidth = (
-  anchor: string,
-  width?: number | string,
-  height?: number | string
-) => {
+const getDrawerWidth = (anchor: string, width?: number | string, height?: number | string) => {
   if (anchor === 'left' || anchor === 'right') {
     return width || 280;
   }
@@ -54,9 +50,7 @@ export const DrawerImpl: React.FC<DrawerProps> = ({
   const paperStyles = {
     backgroundColor: theme.palette.background.paper,
     borderColor: theme.palette.divider,
-    ...(anchor === 'left' || anchor === 'right'
-      ? { width: drawerSize }
-      : { height: drawerSize }),
+    ...(anchor === 'left' || anchor === 'right' ? { width: drawerSize } : { height: drawerSize }),
   };
 
   return (

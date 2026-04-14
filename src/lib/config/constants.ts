@@ -35,28 +35,24 @@ export const DEFAULT_IMAGE_NAMES = {
 } as const;
 
 // Session types that support custom resource allocation (fixed resources)
-export const HAS_FIXED_RESOURCES = [
-  CARTA_TYPE,
-  CONTRIBUTED_TYPE,
-  NOTEBOOK_TYPE,
-] as const;
+export const HAS_FIXED_RESOURCES = [CARTA_TYPE, CONTRIBUTED_TYPE, NOTEBOOK_TYPE] as const;
 
 // Session types that use flexible (platform-managed) resources only
-export const HAS_FLEXIBLE_RESOURCES_ONLY = [
-  DESKTOP_TYPE,
-  FIREFLY_TYPE,
-] as const;
+export const HAS_FLEXIBLE_RESOURCES_ONLY = [DESKTOP_TYPE, FIREFLY_TYPE] as const;
 
 /**
  * Check if a session type supports custom resource allocation
  */
 export function supportsCustomResources(sessionType: string): boolean {
-  return HAS_FIXED_RESOURCES.includes(sessionType as typeof HAS_FIXED_RESOURCES[number]);
+  return HAS_FIXED_RESOURCES.includes(sessionType as (typeof HAS_FIXED_RESOURCES)[number]);
 }
 
 /**
  * Get the default container image for a session type
  */
 export function getDefaultImageForType(sessionType: string): string {
-  return DEFAULT_IMAGE_NAMES[sessionType as keyof typeof DEFAULT_IMAGE_NAMES] || DEFAULT_NOTEBOOK_SKAHA_IMAGE;
+  return (
+    DEFAULT_IMAGE_NAMES[sessionType as keyof typeof DEFAULT_IMAGE_NAMES] ||
+    DEFAULT_NOTEBOOK_SKAHA_IMAGE
+  );
 }

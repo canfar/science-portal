@@ -24,7 +24,7 @@ export interface ApiError {
 export function errorResponse(
   message: string,
   status: number = HTTP_STATUS.INTERNAL_SERVER_ERROR,
-  details?: unknown
+  details?: unknown,
 ): NextResponse<ApiError> {
   return NextResponse.json(
     {
@@ -33,20 +33,19 @@ export function errorResponse(
       status,
       details,
     },
-    { status }
+    { status },
   );
 }
 
 /**
  * Creates a standardized success response
  */
-export function successResponse<T>(
-  data: T,
-  status: number = HTTP_STATUS.OK
-): NextResponse<T> {
+export function successResponse<T>(data: T, status: number = HTTP_STATUS.OK): NextResponse<T> {
   // Handle 204 No Content - must not have a body
   if (status === HTTP_STATUS.NO_CONTENT) {
-    return new NextResponse(null, { status: HTTP_STATUS.NO_CONTENT }) as NextResponse<T>;
+    return new NextResponse(null, {
+      status: HTTP_STATUS.NO_CONTENT,
+    }) as NextResponse<T>;
   }
   return NextResponse.json(data, { status });
 }
@@ -61,10 +60,7 @@ function getErrorName(status: number): string {
 /**
  * Validates HTTP method
  */
-export function validateMethod(
-  request: NextRequest,
-  allowedMethods: string[]
-): boolean {
+export function validateMethod(request: NextRequest, allowedMethods: string[]): boolean {
   return allowedMethods.includes(request.method);
 }
 
@@ -74,7 +70,7 @@ export function validateMethod(
 export async function getRequestBody<T>(request: NextRequest): Promise<T> {
   try {
     return await request.json();
-  } catch (error) {
+  } catch {
     throw new Error('Invalid JSON in request body');
   }
 }
@@ -85,7 +81,7 @@ export async function getRequestBody<T>(request: NextRequest): Promise<T> {
 export async function fetchExternalApi(
   url: string,
   options: RequestInit = {},
-  timeout: number = API_TIMEOUTS.DEFAULT
+  timeout: number = API_TIMEOUTS.DEFAULT,
 ): Promise<Response> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
@@ -174,7 +170,7 @@ export async function fetchExternalApi(
         console.log('\n📦 Response Text:');
         console.log(text.substring(0, 500) + (text.length > 500 ? '...' : ''));
       }
-    } catch (parseError) {
+    } catch {
       // If we can't parse, just skip logging the body
       console.log('\n📦 Response body: (unable to parse)');
     }
@@ -207,9 +203,7 @@ export async function fetchExternalApi(
  */
 export function forwardCookies(clientRequest: NextRequest): HeadersInit {
   const cookieHeader = clientRequest.headers.get('cookie');
-  return cookieHeader
-    ? { Cookie: cookieHeader }
-    : {};
+  return cookieHeader ? { Cookie: cookieHeader } : {};
 }
 
 /**
@@ -233,7 +227,10 @@ export async function forwardAuthHeader(clientRequest: NextRequest): Promise<Hea
     const session = await auth();
 
     console.log('   Session:', session ? 'present' : 'missing');
-    console.log('   Access token:', session?.accessToken ? `${session.accessToken.substring(0, 30)}...` : 'missing');
+    console.log(
+      '   Access token:',
+      session?.accessToken ? `${session.accessToken.substring(0, 30)}...` : 'missing',
+    );
 
     if (session?.accessToken) {
       console.log('✅ Using JWT from NextAuth session');
@@ -246,7 +243,10 @@ export async function forwardAuthHeader(clientRequest: NextRequest): Promise<Hea
 
   // In CANFAR mode, forward the Authorization header from the client request
   const authHeader = clientRequest.headers.get('authorization');
-  console.log('   Client Authorization header:', authHeader ? `${authHeader.substring(0, 30)}...` : 'missing');
+  console.log(
+    '   Client Authorization header:',
+    authHeader ? `${authHeader.substring(0, 30)}...` : 'missing',
+  );
 
   if (authHeader) {
     console.log('✅ Forwarding Authorization header from client (CANFAR mode)');
@@ -275,7 +275,7 @@ export function getBearerToken(clientRequest: NextRequest): string | null {
  */
 export function copyCookies(
   externalResponse: Response,
-  clientResponse: NextResponse
+  clientResponse: NextResponse,
 ): NextResponse {
   const setCookieHeaders = externalResponse.headers.get('set-cookie');
   if (setCookieHeaders) {
@@ -290,17 +290,17 @@ export function copyCookies(
 export function methodNotAllowed(allowedMethods: string[]): NextResponse {
   return errorResponse(
     `Method not allowed. Allowed methods: ${allowedMethods.join(', ')}`,
-    HTTP_STATUS.METHOD_NOT_ALLOWED
+    HTTP_STATUS.METHOD_NOT_ALLOWED,
   );
 }
 
 /**
  * Wraps API route handler with error handling
  */
-export function withErrorHandling(
-  handler: (request: NextRequest, context?: any) => Promise<NextResponse>
+export function withErrorHandling<TContext = { params: Promise<Record<string, string>> }>(
+  handler: (request: NextRequest, context: TContext) => Promise<NextResponse>,
 ) {
-  return async (request: NextRequest, context?: any): Promise<NextResponse> => {
+  return async (request: NextRequest, context: TContext): Promise<NextResponse> => {
     try {
       return await handler(request, context);
     } catch (error) {

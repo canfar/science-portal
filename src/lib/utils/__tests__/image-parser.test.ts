@@ -22,9 +22,7 @@ describe('isValidImageId', () => {
   });
 
   it('should validate latest tag', () => {
-    expect(isValidImageId('images.canfar.net/skaha/notebook:latest')).toBe(
-      true
-    );
+    expect(isValidImageId('images.canfar.net/skaha/notebook:latest')).toBe(true);
   });
 
   it('should reject image ID without version', () => {
@@ -40,12 +38,12 @@ describe('isValidImageId', () => {
   });
 
   it('should reject null or undefined', () => {
-    expect(isValidImageId(null as any)).toBe(false);
-    expect(isValidImageId(undefined as any)).toBe(false);
+    expect(isValidImageId(null as unknown as string)).toBe(false);
+    expect(isValidImageId(undefined as unknown as string)).toBe(false);
   });
 
   it('should reject non-string values', () => {
-    expect(isValidImageId(123 as any)).toBe(false);
+    expect(isValidImageId(123 as unknown as string)).toBe(false);
   });
 
   it('should reject image with empty version', () => {
@@ -178,12 +176,7 @@ describe('sortImages', () => {
 
     const sorted = sortImages(images);
     const names = sorted.map((img) => `${img.imageName}:${img.version}`);
-    expect(names).toEqual([
-      'alpha:1.0',
-      'beta:latest',
-      'beta:2.0',
-      'beta:1.0',
-    ]);
+    expect(names).toEqual(['alpha:1.0', 'beta:latest', 'beta:2.0', 'beta:1.0']);
   });
 });
 
@@ -264,15 +257,9 @@ describe('groupImagesByTypeAndProject', () => {
     expect(result.carta.project).toHaveLength(1);
 
     // All should reference the same image ID
-    expect(result.notebook.project[0].id).toBe(
-      'images.canfar.net/project/multi-type:1.0'
-    );
-    expect(result.desktop.project[0].id).toBe(
-      'images.canfar.net/project/multi-type:1.0'
-    );
-    expect(result.carta.project[0].id).toBe(
-      'images.canfar.net/project/multi-type:1.0'
-    );
+    expect(result.notebook.project[0].id).toBe('images.canfar.net/project/multi-type:1.0');
+    expect(result.desktop.project[0].id).toBe('images.canfar.net/project/multi-type:1.0');
+    expect(result.carta.project[0].id).toBe('images.canfar.net/project/multi-type:1.0');
   });
 
   it('should skip images with invalid IDs', () => {
@@ -296,9 +283,7 @@ describe('groupImagesByTypeAndProject', () => {
     const result = groupImagesByTypeAndProject(rawImages);
 
     expect(result.notebook.skaha).toHaveLength(1);
-    expect(result.notebook.skaha[0].id).toBe(
-      'images.canfar.net/skaha/notebook:latest'
-    );
+    expect(result.notebook.skaha[0].id).toBe('images.canfar.net/skaha/notebook:latest');
     expect(consoleWarnSpy).toHaveBeenCalledTimes(2);
 
     consoleWarnSpy.mockRestore();
@@ -312,8 +297,8 @@ describe('groupImagesByTypeAndProject', () => {
   });
 
   it('should handle null and undefined inputs', () => {
-    expect(groupImagesByTypeAndProject(null as any)).toEqual({});
-    expect(groupImagesByTypeAndProject(undefined as any)).toEqual({});
+    expect(groupImagesByTypeAndProject(null as unknown as RawImage[])).toEqual({});
+    expect(groupImagesByTypeAndProject(undefined as unknown as RawImage[])).toEqual({});
   });
 
   it('should handle images without types property', () => {
@@ -344,9 +329,7 @@ describe('groupImagesByTypeAndProject', () => {
     ];
 
     const result = groupImagesByTypeAndProject(rawImages);
-    const names = result.notebook.project.map(
-      (img) => `${img.imageName}:${img.version}`
-    );
+    const names = result.notebook.project.map((img) => `${img.imageName}:${img.version}`);
     expect(names).toEqual(['alpha:latest', 'alpha:1.0', 'zebra:1.0']);
   });
 });
@@ -495,8 +478,8 @@ describe('getProjectNames', () => {
   });
 
   it('should handle null or undefined inputs', () => {
-    expect(getProjectNames(null as any)).toEqual([]);
-    expect(getProjectNames(undefined as any)).toEqual([]);
+    expect(getProjectNames(null as unknown as ImagesByProject)).toEqual([]);
+    expect(getProjectNames(undefined as unknown as ImagesByProject)).toEqual([]);
   });
 
   it('should sort case-insensitively', () => {

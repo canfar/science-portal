@@ -6,6 +6,7 @@
  */
 
 import { getAuthHeader } from '@/lib/auth/token-storage';
+import { apiRoutes } from '@/lib/config/api';
 
 export interface UserStorageQuota {
   name: string;
@@ -28,9 +29,9 @@ export interface StorageNode {
  */
 export async function getUserStorageQuota(username: string): Promise<UserStorageQuota> {
   const authHeaders = getAuthHeader();
-  const response = await fetch(`/api/storage/quota/${username}`, {
+  const response = await fetch(apiRoutes.storage.quota(username), {
     method: 'GET',
-    headers: { 'Accept': 'application/json', ...authHeaders },
+    headers: { Accept: 'application/json', ...authHeaders },
     credentials: 'include',
   });
 
@@ -46,13 +47,13 @@ export async function getUserStorageQuota(username: string): Promise<UserStorage
  */
 export async function listStorageNodes(
   username: string,
-  path: string = ''
+  path: string = '',
 ): Promise<StorageNode[]> {
   const authHeaders = getAuthHeader();
-  const url = `/api/storage/files/${username}${path ? `?path=${encodeURIComponent(path)}` : ''}`;
+  const url = `${apiRoutes.storage.files(username)}${path ? `?path=${encodeURIComponent(path)}` : ''}`;
   const response = await fetch(url, {
     method: 'GET',
-    headers: { 'Accept': 'application/json', ...authHeaders },
+    headers: { Accept: 'application/json', ...authHeaders },
     credentials: 'include',
   });
 
@@ -66,13 +67,9 @@ export async function listStorageNodes(
 /**
  * Upload a file to storage
  */
-export async function uploadFile(
-  username: string,
-  path: string,
-  file: File
-): Promise<void> {
+export async function uploadFile(username: string, path: string, file: File): Promise<void> {
   const authHeaders = getAuthHeader();
-  const url = `/api/storage/files/${username}${path ? `?path=${encodeURIComponent(path)}` : ''}`;
+  const url = `${apiRoutes.storage.files(username)}${path ? `?path=${encodeURIComponent(path)}` : ''}`;
   const formData = new FormData();
   formData.append('file', file);
 
@@ -91,15 +88,12 @@ export async function uploadFile(
 /**
  * Delete a file or directory
  */
-export async function deleteStorageNode(
-  username: string,
-  path: string
-): Promise<void> {
+export async function deleteStorageNode(username: string, path: string): Promise<void> {
   const authHeaders = getAuthHeader();
-  const url = `/api/storage/files/${username}?path=${encodeURIComponent(path)}`;
+  const url = `${apiRoutes.storage.files(username)}?path=${encodeURIComponent(path)}`;
   const response = await fetch(url, {
     method: 'DELETE',
-    headers: { 'Accept': 'application/json', ...authHeaders },
+    headers: { Accept: 'application/json', ...authHeaders },
     credentials: 'include',
   });
 
@@ -111,17 +105,14 @@ export async function deleteStorageNode(
 /**
  * Create a directory
  */
-export async function createDirectory(
-  username: string,
-  path: string
-): Promise<void> {
+export async function createDirectory(username: string, path: string): Promise<void> {
   const authHeaders = getAuthHeader();
-  const url = `/api/storage/files/${username}?path=${encodeURIComponent(path)}`;
+  const url = `${apiRoutes.storage.files(username)}?path=${encodeURIComponent(path)}`;
   const response = await fetch(url, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
-      'Accept': 'application/json',
+      Accept: 'application/json',
       ...authHeaders,
     },
     credentials: 'include',

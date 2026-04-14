@@ -52,7 +52,7 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
   if (!['read', 'write', 'execute'].includes(permission)) {
     return errorResponse(
       'Permission must be one of: read, write, execute',
-      HTTP_STATUS.BAD_REQUEST
+      HTTP_STATUS.BAD_REQUEST,
     );
   }
 
@@ -64,10 +64,10 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
       method: 'GET',
       headers: {
         ...cookies,
-        'Accept': 'application/json',
+        Accept: 'application/json',
       },
     },
-    serverApiConfig.login.timeout
+    serverApiConfig.login.timeout,
   );
 
   // Handle permission check failures gracefully

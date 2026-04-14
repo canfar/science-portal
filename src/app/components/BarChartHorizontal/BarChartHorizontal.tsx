@@ -24,8 +24,6 @@ import { BarChartHorizontalImpl } from '../../implementation/barChartHorizontal'
  * />
  * ```
  */
-export const BarChartHorizontal: React.FC<BarChartHorizontalProps> = (
-  props
-) => {
+export const BarChartHorizontal: React.FC<BarChartHorizontalProps> = (props) => {
   return <BarChartHorizontalImpl {...props} />;
 };

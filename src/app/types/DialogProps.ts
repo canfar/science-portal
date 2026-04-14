@@ -2,8 +2,7 @@ import { DialogProps as MuiDialogProps } from '@mui/material/Dialog';
 import { DialogContentTextProps as MuiDialogContentTextProps } from '@mui/material/DialogContentText';
 import { ReactNode } from 'react';
 
-export interface DialogProps
-  extends Omit<MuiDialogProps, 'children' | 'title'> {
+export interface DialogProps extends Omit<MuiDialogProps, 'children' | 'title'> {
   /**
    * Dialog title content
    */
@@ -26,7 +25,7 @@ export interface DialogProps
    */
   onClose?: (
     event: React.SyntheticEvent | Event,
-    reason: 'backdropClick' | 'escapeKeyDown'
+    reason: 'backdropClick' | 'escapeKeyDown',
   ) => void;
   /**
    * If true, the dialog is open

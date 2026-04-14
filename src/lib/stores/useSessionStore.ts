@@ -110,6 +110,6 @@ export const useSessionStore = create<SessionState>()(
     }),
     {
       name: 'SessionStore',
-    }
-  )
+    },
+  ),
 );

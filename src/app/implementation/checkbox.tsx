@@ -1,11 +1,6 @@
 'use client';
 
-import {
-  Checkbox as MuiCheckbox,
-  FormControlLabel,
-  FormHelperText,
-  Box,
-} from '@mui/material';
+import { Checkbox as MuiCheckbox, FormControlLabel, FormHelperText, Box } from '@mui/material';
 import { CheckboxProps } from '@/app/types/CheckboxProps';
 import { tokens } from '@/app/design-system/tokens';
 import React from 'react';
@@ -17,18 +12,7 @@ const sizeMapping = {
 } as const;
 
 export const CheckboxImpl = React.forwardRef<HTMLButtonElement, CheckboxProps>(
-  (
-    {
-      label,
-      size = 'md',
-      error = false,
-      helperText,
-      formControlLabelProps,
-      sx,
-      ...props
-    },
-    ref
-  ) => {
+  ({ label, size = 'md', error = false, helperText, formControlLabelProps, sx, ...props }, ref) => {
     const muiSize = sizeMapping[size];
 
     const checkboxSx = {
@@ -46,9 +30,7 @@ export const CheckboxImpl = React.forwardRef<HTMLButtonElement, CheckboxProps>(
       ...sx,
     };
 
-    const checkbox = (
-      <MuiCheckbox ref={ref} size={muiSize} sx={checkboxSx} {...props} />
-    );
+    const checkbox = <MuiCheckbox ref={ref} size={muiSize} sx={checkboxSx} {...props} />;
 
     if (!label && !helperText) {
       return checkbox;
@@ -85,7 +67,7 @@ export const CheckboxImpl = React.forwardRef<HTMLButtonElement, CheckboxProps>(
         )}
       </Box>
     );
-  }
+  },
 );
 
 CheckboxImpl.displayName = 'CheckboxImpl';

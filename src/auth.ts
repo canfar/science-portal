@@ -9,15 +9,34 @@ import { getOIDCConfig, isOIDCAuth } from '@/lib/config/auth-config';
  * When NEXT_USE_CANFAR=true, the custom CANFAR auth flow is used instead
  */
 
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+// Token type for refresh token handling - extends JWT for compatibility
+interface TokenWithRefresh {
+  accessToken?: string;
+  refreshToken?: string;
+  accessTokenExpires?: number;
+  user?: Record<string, unknown>;
+  error?: string;
+  [key: string]: unknown; // Index signature for JWT compatibility
+}
+
+// OIDC profile type
+interface OIDCProfile {
+  sub: string;
+  email?: string;
+  name?: string;
+  preferred_username?: string;
+  given_name?: string;
+  family_name?: string;
+}
+
 export const authConfig: NextAuthConfig = {
   providers: [],
   pages: {
-    signIn: `/science-portal`,
+    signIn: `/`,
   },
   callbacks: {
-    authorized({ auth, request: { nextUrl } }) {
-      const isOnDashboard = nextUrl.pathname.startsWith('/science-portal');
+    authorized({ request: { nextUrl } }) {
+      const isOnDashboard = nextUrl.pathname.startsWith('/');
 
       // Allow access if using CANFAR auth (handled separately)
       if (!isOIDCAuth()) {
@@ -31,7 +50,7 @@ export const authConfig: NextAuthConfig = {
 
       return true;
     },
-    async jwt({ token, user, account, profile }) {
+    async jwt({ token, user, account }) {
       // Initial sign in
       if (account && user) {
         console.log('\n' + '🔐'.repeat(40));
@@ -67,13 +86,16 @@ export const authConfig: NextAuthConfig = {
     async session({ session, token }) {
       if (token) {
         console.log('📋 Session Callback:');
-        console.log('  - token.accessToken:', token.accessToken ? token.accessToken.substring(0, 50) + '...' : 'missing');
+        console.log(
+          '  - token.accessToken:',
+          token.accessToken ? token.accessToken.substring(0, 50) + '...' : 'missing',
+        );
         console.log('  - token.user:', JSON.stringify(token.user, null, 2));
         console.log('  - token.error:', token.error);
 
         session.user = {
           ...session.user,
-          ...(token.user as any),
+          ...(token.user as Record<string, unknown>),
         };
         session.accessToken = token.accessToken as string;
         session.error = token.error as string | undefined;
@@ -87,10 +109,14 @@ export const authConfig: NextAuthConfig = {
 /**
  * Refresh the access token using the refresh token
  */
-async function refreshAccessToken(token: any) {
+async function refreshAccessToken(token: TokenWithRefresh): Promise<TokenWithRefresh> {
   try {
     const oidcConfig = getOIDCConfig();
     const url = `${oidcConfig.issuer}token`;
+
+    if (!token.refreshToken) {
+      throw new Error('No refresh token available');
+    }
 
     const response = await fetch(url, {
       method: 'POST',
@@ -151,7 +177,7 @@ function initializeAuth() {
             },
           },
           checks: ['state', 'pkce'],
-          profile(profile: any) {
+          profile(profile: OIDCProfile) {
             return {
               id: profile.sub,
               email: profile.email,
@@ -161,7 +187,8 @@ function initializeAuth() {
               lastName: profile.family_name,
             };
           },
-        } as any,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } as any, // NextAuth provider type requires any cast
       ];
     } catch (error) {
       console.error('Failed to initialize OIDC configuration:', error);

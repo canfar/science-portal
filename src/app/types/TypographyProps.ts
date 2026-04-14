@@ -19,12 +19,5 @@ export interface TypographyProps extends Omit<MuiTypographyProps, 'variant'> {
   /** Text content */
   children: ReactNode;
   /** Text color */
-  color?:
-    | 'primary'
-    | 'secondary'
-    | 'inherit'
-    | 'error'
-    | 'warning'
-    | 'info'
-    | 'success';
+  color?: 'primary' | 'secondary' | 'inherit' | 'error' | 'warning' | 'info' | 'success';
 }

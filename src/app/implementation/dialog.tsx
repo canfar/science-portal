@@ -84,10 +84,7 @@ export function DialogTitleImplementation({
   );
 }
 
-export function DialogContentImplementation({
-  children,
-  dividers = false,
-}: DialogContentProps) {
+export function DialogContentImplementation({ children, dividers = false }: DialogContentProps) {
   return <MuiDialogContent dividers={dividers}>{children}</MuiDialogContent>;
 }
 
@@ -108,9 +105,6 @@ export function DialogActionsImplementation({
   );
 }
 
-export function DialogContentTextImplementation({
-  children,
-  ...muiProps
-}: DialogContentTextProps) {
+export function DialogContentTextImplementation({ children, ...muiProps }: DialogContentTextProps) {
   return <MuiDialogContentText {...muiProps}>{children}</MuiDialogContentText>;
 }

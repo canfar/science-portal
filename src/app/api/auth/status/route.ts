@@ -47,6 +47,51 @@ export interface AuthStatus {
   user?: User;
 }
 
+// CADC API response types
+interface CADCIdentityItem {
+  identity?: {
+    '@type'?: string;
+    $?: string | number;
+  };
+}
+
+interface CADCUserResponse {
+  user?: CADCUserDetails;
+  posixDetails?: CADCPosixDetails;
+  personalDetails?: CADCPersonalDetails;
+  identities?: {
+    $?: CADCIdentityItem[];
+  };
+  internalID?: {
+    uri?: { $?: string };
+  };
+}
+
+interface CADCUserDetails {
+  posixDetails?: CADCPosixDetails;
+  personalDetails?: CADCPersonalDetails;
+  identities?: {
+    $?: CADCIdentityItem[];
+  };
+  internalID?: {
+    uri?: { $?: string };
+  };
+}
+
+interface CADCPosixDetails {
+  username?: { $?: string };
+  uid?: { $?: number };
+  gid?: { $?: number };
+  homeDirectory?: { $?: string };
+}
+
+interface CADCPersonalDetails {
+  firstName?: { $?: string };
+  lastName?: { $?: string };
+  email?: { $?: string };
+  institute?: { $?: string };
+}
+
 export const GET = withErrorHandling(async (request: NextRequest) => {
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
   const authAPIEndpoint = `${basePath}/api/auth`;
@@ -104,7 +149,9 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
         lastName: payload.family_name || undefined,
       };
 
-      logger.info('OIDC user authenticated from JWT token', { username: user.username });
+      logger.info('OIDC user authenticated from JWT token', {
+        username: user.username,
+      });
 
       const result: AuthStatus = {
         authenticated: true,
@@ -123,7 +170,10 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
   const authHeaders = await forwardAuthHeader(request);
   const externalUrl = `${serverApiConfig.login.baseUrl}/whoami`;
 
-  logger.logExternalCall(externalUrl, 'GET', { ...authHeaders, 'Accept': 'application/json' });
+  logger.logExternalCall(externalUrl, 'GET', {
+    ...authHeaders,
+    Accept: 'application/json',
+  });
 
   const response = await fetchExternalApi(
     externalUrl,
@@ -131,10 +181,10 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
       method: 'GET',
       headers: {
         ...authHeaders,
-        'Accept': 'application/json',
+        Accept: 'application/json',
       },
     },
-    serverApiConfig.login.timeout
+    serverApiConfig.login.timeout,
   );
 
   logger.logExternalResponse(response.status, response.statusText);
@@ -164,40 +214,46 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
     return errorResponse(errorMessage, statusCode);
   }
 
-  const cadcResponse: any = await response.json();
+  const cadcResponse = (await response.json()) as CADCUserResponse;
   logger.logExternalResponse(response.status, response.statusText, cadcResponse);
 
   // Parse CADC's complex XML-based JSON structure
-  const cadcUser = cadcResponse.user || cadcResponse;
+  const cadcUser: CADCUserDetails = cadcResponse.user || cadcResponse;
 
-  // Extract username from posixDetails or identities
-  const username = cadcUser.posixDetails?.username?.$ ||
-                   cadcUser.identities?.$?.find((i: any) => i.identity?.['@type'] === 'HTTP')?.identity?.$ ||
-                   '';
+  // Extract username from posixDetails or identities (convert to string)
+  const usernameValue =
+    cadcUser.posixDetails?.username?.$ ||
+    cadcUser.identities?.$?.find((i: CADCIdentityItem) => i.identity?.['@type'] === 'HTTP')
+      ?.identity?.$ ||
+    '';
+  const username = String(usernameValue);
 
-  // Extract personal details
-  const firstName = cadcUser.personalDetails?.firstName?.$ || '';
-  const lastName = cadcUser.personalDetails?.lastName?.$ || '';
-  const email = cadcUser.personalDetails?.email?.$ || '';
-  const institute = cadcUser.personalDetails?.institute?.$ || '';
+  // Extract personal details (convert to string)
+  const firstName = String(cadcUser.personalDetails?.firstName?.$ || '');
+  const lastName = String(cadcUser.personalDetails?.lastName?.$ || '');
+  const email = String(cadcUser.personalDetails?.email?.$ || '');
+  const institute = String(cadcUser.personalDetails?.institute?.$ || '');
 
-  // Extract internal IDs
-  const internalID = cadcUser.internalID?.uri?.$ || '';
+  // Extract internal IDs (convert to string)
+  const internalID = String(cadcUser.internalID?.uri?.$ || '');
 
-  // Extract numeric ID from identities
-  const numericIdentity = cadcUser.identities?.$?.find((i: any) => i.identity?.['@type'] === 'CADC');
-  const numericID = numericIdentity?.identity?.$ || '';
+  // Extract numeric ID from identities (convert to string)
+  const numericIdentity = cadcUser.identities?.$?.find(
+    (i: CADCIdentityItem) => i.identity?.['@type'] === 'CADC',
+  );
+  const numericID = String(numericIdentity?.identity?.$ || '');
 
   // Extract POSIX details
   const uid = cadcUser.posixDetails?.uid?.$ || 0;
   const gid = cadcUser.posixDetails?.gid?.$ || 0;
-  const homeDirectory = cadcUser.posixDetails?.homeDirectory?.$ || '';
+  const homeDirectory = String(cadcUser.posixDetails?.homeDirectory?.$ || '');
 
   // Parse all identities
-  const identities = cadcUser.identities?.$?.map((item: any) => ({
-    type: item.identity?.['@type'] || '',
-    value: item.identity?.$ || '',
-  })) || [];
+  const identities =
+    cadcUser.identities?.$?.map((item: CADCIdentityItem) => ({
+      type: item.identity?.['@type'] || '',
+      value: item.identity?.$ || '',
+    })) || [];
 
   // Create complete user object with all CADC data
   const user: User = {

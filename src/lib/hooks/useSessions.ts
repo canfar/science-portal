@@ -22,6 +22,7 @@ import {
   getSessionEvents,
   type Session,
   type SessionLaunchParams,
+  type SessionEvent,
 } from '@/lib/api/skaha';
 
 /**
@@ -49,7 +50,7 @@ export const sessionKeys = {
  */
 export function useSessions(
   isAuthenticated?: boolean,
-  options?: Omit<UseQueryOptions<Session[]>, 'queryKey' | 'queryFn'>
+  options?: Omit<UseQueryOptions<Session[]>, 'queryKey' | 'queryFn'>,
 ) {
   return useQuery({
     queryKey: sessionKeys.list(),
@@ -71,7 +72,7 @@ export function useSessions(
  */
 export function useSession(
   sessionId: string,
-  options?: Omit<UseQueryOptions<Session>, 'queryKey' | 'queryFn'>
+  options?: Omit<UseQueryOptions<Session>, 'queryKey' | 'queryFn'>,
 ) {
   return useQuery({
     queryKey: sessionKeys.detail(sessionId),
@@ -91,7 +92,7 @@ export function useSession(
  */
 export function useSessionLogs(
   sessionId: string,
-  options?: Omit<UseQueryOptions<string>, 'queryKey' | 'queryFn'>
+  options?: Omit<UseQueryOptions<string>, 'queryKey' | 'queryFn'>,
 ) {
   return useQuery({
     queryKey: sessionKeys.logs(sessionId),
@@ -111,7 +112,7 @@ export function useSessionLogs(
  */
 export function useSessionEvents(
   sessionId: string,
-  options?: Omit<UseQueryOptions<any[]>, 'queryKey' | 'queryFn'>
+  options?: Omit<UseQueryOptions<SessionEvent[]>, 'queryKey' | 'queryFn'>,
 ) {
   return useQuery({
     queryKey: sessionKeys.events(sessionId),
@@ -138,7 +139,7 @@ export function useSessionEvents(
  * ```
  */
 export function useLaunchSession(
-  options?: UseMutationOptions<Session, Error, SessionLaunchParams>
+  options?: UseMutationOptions<Session, Error, SessionLaunchParams>,
 ) {
   const queryClient = useQueryClient();
   const { onSuccess: userOnSuccess, ...restOptions } = options || {};
@@ -188,7 +189,7 @@ export function useDeleteSession(options?: UseMutationOptions<void, Error, strin
 
           // If we get here, session still exists - invalidate to refetch all
           queryClient.invalidateQueries({ queryKey: sessionKeys.list() });
-        } catch (error) {
+        } catch {
           // Session not found (404) - it's been deleted successfully
           // Remove the session from the list
           const currentSessions = queryClient.getQueryData<Session[]>(sessionKeys.list()) || [];
@@ -196,7 +197,9 @@ export function useDeleteSession(options?: UseMutationOptions<void, Error, strin
           queryClient.setQueryData(sessionKeys.list(), updatedSessions);
 
           // Remove the specific session from cache
-          queryClient.removeQueries({ queryKey: sessionKeys.detail(sessionId) });
+          queryClient.removeQueries({
+            queryKey: sessionKeys.detail(sessionId),
+          });
         }
       }, 3000);
     },
@@ -214,7 +217,7 @@ export function useDeleteSession(options?: UseMutationOptions<void, Error, strin
  * ```
  */
 export function useRenewSession(
-  options?: UseMutationOptions<Session, Error, { sessionId: string; hours: number }>
+  options?: UseMutationOptions<Session, Error, { sessionId: string; hours: number }>,
 ) {
   const queryClient = useQueryClient();
   const { onSuccess: userOnSuccess, ...restOptions } = options || {};
@@ -228,7 +231,7 @@ export function useRenewSession(
       const updatedSessions = currentSessions.map((session) =>
         session.id === updatedSession.id
           ? { ...session, expiresTime: updatedSession.expiresTime }
-          : session
+          : session,
       );
       queryClient.setQueryData(sessionKeys.list(), updatedSessions);
 
@@ -262,7 +265,7 @@ export function useSessionPolling(
     onStatusChange?: (session: Session) => void;
     onComplete?: () => void;
     onError?: (error: Error) => void;
-  }
+  },
 ) {
   const queryClient = useQueryClient();
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -295,9 +298,7 @@ export function useSessionPolling(
 
       // Update the session in the list
       const currentSessions = queryClient.getQueryData<Session[]>(sessionKeys.list()) || [];
-      const updatedSessions = currentSessions.map((s) =>
-        s.id === sessionId ? session : s
-      );
+      const updatedSessions = currentSessions.map((s) => (s.id === sessionId ? session : s));
       queryClient.setQueryData(sessionKeys.list(), updatedSessions);
 
       // Notify callback

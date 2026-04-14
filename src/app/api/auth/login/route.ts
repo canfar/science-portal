@@ -12,7 +12,6 @@ import {
   successResponse,
   fetchExternalApi,
   forwardCookies,
-  copyCookies,
   validateMethod,
   methodNotAllowed,
 } from '@/app/api/lib/api-utils';
@@ -84,11 +83,11 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
   const externalUrl = `${serverApiConfig.login.baseUrl}/login`;
   logger.logExternalCall(externalUrl, 'POST', {
     ...cookies,
-    'Content-Type': 'application/x-www-form-urlencoded'
+    'Content-Type': 'application/x-www-form-urlencoded',
   });
   logger.info('Sending form-urlencoded credentials', {
     username: body.username,
-    password: '***REDACTED***'
+    password: '***REDACTED***',
   });
 
   const response = await fetchExternalApi(
@@ -101,7 +100,7 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
       },
       body: formData.toString(),
     },
-    serverApiConfig.login.timeout
+    serverApiConfig.login.timeout,
   );
 
   if (!response.ok) {
@@ -188,7 +187,7 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
     token = responseText.trim();
     logger.info('Token extracted from response body', {
       tokenLength: token.length,
-      tokenPreview: token.substring(0, 20) + '...'
+      tokenPreview: token.substring(0, 20) + '...',
     });
   }
 
@@ -196,21 +195,27 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
   const setCookieHeaders = response.headers.get('set-cookie');
   if (setCookieHeaders && !token) {
     logger.info('Checking Set-Cookie header as fallback', {
-      cookies: setCookieHeaders.substring(0, 50) + '...'
+      cookies: setCookieHeaders.substring(0, 50) + '...',
     });
 
     const cookieMatch = setCookieHeaders.match(/CADC_SSO=([^;]+)/);
     if (cookieMatch) {
       token = cookieMatch[1];
       logger.info('Token extracted from Set-Cookie header', {
-        tokenPreview: token.substring(0, 20) + '...'
+        tokenPreview: token.substring(0, 20) + '...',
       });
     }
   }
 
   if (!token) {
-    logger.logError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to extract authentication token from response');
-    return errorResponse('Failed to extract authentication token', HTTP_STATUS.INTERNAL_SERVER_ERROR);
+    logger.logError(
+      HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      'Failed to extract authentication token from response',
+    );
+    return errorResponse(
+      'Failed to extract authentication token',
+      HTTP_STATUS.INTERNAL_SERVER_ERROR,
+    );
   }
 
   // Ensure we have user data

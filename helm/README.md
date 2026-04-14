@@ -1,46 +1,46 @@
-# Science Portal Helm Chart
+# Science Portal Helm Deployment Guide
 
-This directory contains the Helm chart for deploying Science Portal to Kubernetes clusters, optimized for DigitalOcean Kubernetes (DOKS).
+This directory contains documentation and scripts for deploying Science Portal to Kubernetes clusters via Helm.
 
-## Quick Start
+> **Note**: The Helm chart is maintained in a separate repository. This directory contains deployment documentation and helper scripts.
+
+## Custom Base Path
+
+The Science Portal supports custom URL base paths (e.g., `/science-portal`, `/canfar-app`).
+
+**Important**: The base path is set at Docker build time and must match your Helm deployment configuration.
+
+See **[CUSTOM-BASE-PATH.md](./CUSTOM-BASE-PATH.md)** for complete instructions on:
+- Building Docker images with custom paths
+- Configuring Helm values to match
+- Troubleshooting path-related issues
+
+### Quick Example
 
 ```bash
-# 1. Configure your values
-cp science-portal/values-digitalocean.yaml science-portal/values-production.yaml
-vim science-portal/values-production.yaml  # Edit with your settings
+# 1. Build Docker image with your path
+docker build \
+  --build-arg NEXT_PUBLIC_BASE_PATH="/canfar-app" \
+  -t myregistry/science-portal:v1 .
 
-# 2. Create required secrets
-kubectl create secret generic science-portal-secrets \
-  --from-literal=auth-secret=$(openssl rand -base64 32) \
-  --from-literal=oidc-client-secret=YOUR_OIDC_SECRET \
-  --namespace science-portal
-
-# 3. Deploy using the script
-./deploy.sh production --wait
+# 2. Deploy with matching Helm value
+helm install science-portal ./chart \
+  --set basePath="/canfar-app" \
+  --set image.repository="myregistry/science-portal" \
+  --set image.tag="v1"
 ```
 
 ## Directory Structure
 
 ```
 helm/
-├── README.md                               # This file
-├── DEPLOYMENT.md                           # Comprehensive deployment guide
-├── deploy.sh                               # Automated deployment script
-└── science-portal/                         # Helm chart directory
-    ├── Chart.yaml                          # Chart metadata
-    ├── values.yaml                         # Default values
-    ├── values-digitalocean.yaml            # DigitalOcean-specific template
-    ├── .helmignore                         # Files to ignore in packaging
-    └── templates/                          # Kubernetes manifest templates
-        ├── _helpers.tpl                    # Template helpers
-        ├── deployment.yaml                 # Application deployment
-        ├── service.yaml                    # Service definition
-        ├── ingress.yaml                    # Ingress configuration
-        ├── serviceaccount.yaml             # Service account
-        ├── configmap.yaml                  # Configuration map
-        ├── hpa.yaml                        # Horizontal Pod Autoscaler
-        ├── pdb.yaml                        # Pod Disruption Budget
-        └── networkpolicy.yaml              # Network policies
+├── README.md                   # This file
+├── CUSTOM-BASE-PATH.md         # Custom path configuration guide
+├── DEPLOYMENT.md               # Comprehensive deployment guide
+├── DEPLOYMENT-MODES.md         # CANFAR vs OIDC mode configuration
+├── KUBERNETES-DEPLOYMENT-GUIDE.md
+├── QUICK-START.md
+└── deploy.sh                   # Automated deployment script
 ```
 
 ## Prerequisites

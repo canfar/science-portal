@@ -101,12 +101,12 @@ export const useUIStore = create<UIState>()(
           animationsEnabled: state.animationsEnabled,
           sidebarOpen: state.sidebarOpen,
         }),
-      }
+      },
     ),
     {
       name: 'UIStore',
-    }
-  )
+    },
+  ),
 );
 
 /**
@@ -118,8 +118,7 @@ export const useUIStore = create<UIState>()(
  */
 export function useSuccessNotification() {
   const addNotification = useUIStore((state) => state.addNotification);
-  return (message: string, title?: string) =>
-    addNotification({ type: 'success', message, title });
+  return (message: string, title?: string) => addNotification({ type: 'success', message, title });
 }
 
 /**
@@ -127,8 +126,7 @@ export function useSuccessNotification() {
  */
 export function useErrorNotification() {
   const addNotification = useUIStore((state) => state.addNotification);
-  return (message: string, title?: string) =>
-    addNotification({ type: 'error', message, title });
+  return (message: string, title?: string) => addNotification({ type: 'error', message, title });
 }
 
 /**
@@ -136,8 +134,7 @@ export function useErrorNotification() {
  */
 export function useWarningNotification() {
   const addNotification = useUIStore((state) => state.addNotification);
-  return (message: string, title?: string) =>
-    addNotification({ type: 'warning', message, title });
+  return (message: string, title?: string) => addNotification({ type: 'warning', message, title });
 }
 
 /**
@@ -145,6 +142,5 @@ export function useWarningNotification() {
  */
 export function useInfoNotification() {
   const addNotification = useUIStore((state) => state.addNotification);
-  return (message: string, title?: string) =>
-    addNotification({ type: 'info', message, title });
+  return (message: string, title?: string) => addNotification({ type: 'info', message, title });
 }
