@@ -22,8 +22,12 @@ WORKDIR /app
 # Copy dependencies from deps stage
 COPY --from=deps /app/node_modules ./node_modules
 
-# Copy all source files
+# Copy all source files (includes patches/ for patch-package).
 COPY . .
+
+# Apply dependency patches. The deps stage only had package.json + lockfile, so postinstall
+# could not apply patches there; @auth/core OAuth redirect_uri fix must run before next build.
+RUN npx patch-package
 
 # Build-time: basePath and client-bundled flags. External API URLs are optional here;
 # set LOGIN_API, SKAHA_API, SERVICE_STORAGE_API, SRC_*, etc. at container runtime.
