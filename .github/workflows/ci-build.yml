@@ -41,6 +41,10 @@ jobs:
           context: .
           file: Dockerfile
           push: true
+          # Explicit build-args: next.config basePath is fixed at image build time.
+          # If Dockerfile defaults change, this workflow still documents the intended CI path unless updated here.
+          build-args: |
+            NEXT_PUBLIC_BASE_PATH=/science-portal
           tags: |
             ghcr.io/${{ github.repository }}:latest
             ghcr.io/${{ github.repository }}:${{ github.sha }}
