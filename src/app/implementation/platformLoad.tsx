@@ -10,10 +10,11 @@ import {
   useMediaQuery,
   Stack,
 } from '@mui/material';
-import { Refresh as RefreshIcon } from '@mui/icons-material';
+import { Refresh as RefreshIcon, WarningAmber as WarningAmberIcon } from '@mui/icons-material';
 import { useTheme } from '@mui/material/styles';
 import { PlatformLoadProps } from '../types/PlatformLoadProps';
 import { MetricBlock } from '../components/MetricBlock/MetricBlock';
+import { PLATFORM_LOAD_DISABLED_MESSAGE } from '@/lib/config/static-platform-load';
 
 /**
  * PlatformLoad implementation component
@@ -24,9 +25,12 @@ export const PlatformLoadImpl: React.FC<PlatformLoadProps> = ({
   onRefresh,
   className,
   title = 'Platform Load',
+  showDisabledOverlay = false,
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+  const effectiveLoading = showDisabledOverlay ? false : isLoading;
 
   // Memoized to prevent recalculation on every render
   // Only recalculates when the date actually changes
@@ -35,6 +39,42 @@ export const PlatformLoadImpl: React.FC<PlatformLoadProps> = ({
       typeof data.lastUpdate === 'string' ? data.lastUpdate : data.lastUpdate.toISOString();
     return dateStr.replace('T', ' ').slice(0, -5) + ' UTC';
   }, [data.lastUpdate]);
+
+  const metricsContent = (
+    <>
+      {isMobile ? (
+        <Stack spacing={2}>
+          <MetricBlock
+            label="CPU"
+            series={data.cpu}
+            max={data.maxValues.cpu}
+            isLoading={effectiveLoading}
+          />
+          <MetricBlock
+            label="RAM"
+            series={data.ram}
+            max={data.maxValues.ram}
+            isLoading={effectiveLoading}
+          />
+        </Stack>
+      ) : (
+        <Stack spacing={1}>
+          <MetricBlock
+            label="CPU"
+            series={data.cpu}
+            max={data.maxValues.cpu}
+            isLoading={effectiveLoading}
+          />
+          <MetricBlock
+            label="RAM"
+            series={data.ram}
+            max={data.maxValues.ram}
+            isLoading={effectiveLoading}
+          />
+        </Stack>
+      )}
+    </>
+  );
 
   return (
     <Paper
@@ -63,16 +103,18 @@ export const PlatformLoadImpl: React.FC<PlatformLoadProps> = ({
         <Typography variant="h6" component="h2">
           {title}
         </Typography>
-        <IconButton aria-label="refresh" onClick={onRefresh} disabled={isLoading} size="small">
-          <RefreshIcon />
-        </IconButton>
+        {!showDisabledOverlay && (
+          <IconButton aria-label="refresh" onClick={onRefresh} disabled={isLoading} size="small">
+            <RefreshIcon />
+          </IconButton>
+        )}
       </Box>
 
       {/* Loading Bar - Always visible, positioned after title */}
       <LinearProgress
-        color={isLoading ? 'primary' : 'success'}
-        variant={isLoading ? 'indeterminate' : 'determinate'}
-        value={isLoading ? undefined : 100}
+        color={effectiveLoading ? 'primary' : 'success'}
+        variant={effectiveLoading ? 'indeterminate' : 'determinate'}
+        value={effectiveLoading ? undefined : 100}
         sx={{
           width: '100%',
           height: 4,
@@ -84,76 +126,103 @@ export const PlatformLoadImpl: React.FC<PlatformLoadProps> = ({
         }}
       />
 
-      {/* Content - Responsive MetricBlock layout */}
-      <Box sx={{ marginBottom: theme.spacing(2) }}>
-        {isMobile ? (
-          <Stack spacing={2}>
-            <MetricBlock
-              label="CPU"
-              series={data.cpu}
-              max={data.maxValues.cpu}
-              isLoading={isLoading}
-            />
-            <MetricBlock
-              label="RAM"
-              series={data.ram}
-              max={data.maxValues.ram}
-              isLoading={isLoading}
-            />
-          </Stack>
+      {/* Content - Responsive MetricBlock layout; blurred when live stats disabled (CADC-15555) */}
+      <Box sx={{ marginBottom: theme.spacing(2), position: 'relative' }}>
+        {showDisabledOverlay ? (
+          <>
+            <Box
+              sx={{
+                filter: 'blur(4px)',
+                WebkitFilter: 'blur(4px)',
+                opacity: 0.85,
+                pointerEvents: 'none',
+                userSelect: 'none',
+              }}
+            >
+              {metricsContent}
+            </Box>
+            <Box
+              sx={{
+                position: 'absolute',
+                inset: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                textAlign: 'center',
+                px: 2,
+                backgroundColor:
+                  theme.palette.mode === 'dark'
+                    ? 'rgba(0, 0, 0, 0.72)'
+                    : 'rgba(255, 255, 255, 0.72)',
+                borderRadius: 1,
+                zIndex: 5,
+              }}
+            >
+              <WarningAmberIcon
+                sx={{
+                  color: '#b58900',
+                  fontSize: 28,
+                  mb: 1.25,
+                }}
+                aria-hidden
+              />
+              <Typography
+                variant="body1"
+                sx={{
+                  fontSize: 16,
+                  lineHeight: 1.4,
+                  color: 'text.primary',
+                  fontWeight: 500,
+                  maxWidth: '90%',
+                }}
+              >
+                {PLATFORM_LOAD_DISABLED_MESSAGE}
+              </Typography>
+            </Box>
+          </>
         ) : (
-          <Stack spacing={1}>
-            <MetricBlock
-              label="CPU"
-              series={data.cpu}
-              max={data.maxValues.cpu}
-              isLoading={isLoading}
-            />
-            <MetricBlock
-              label="RAM"
-              series={data.ram}
-              max={data.maxValues.ram}
-              isLoading={isLoading}
-            />
-          </Stack>
+          metricsContent
         )}
       </Box>
 
       {/* Footer */}
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'flex-end',
-          [theme.breakpoints.down('sm')]: {
-            justifyContent: 'center', // Center text on mobile
-          },
-        }}
-      >
-        <Typography
-          variant="caption"
-          color="text.secondary"
+      {!showDisabledOverlay && (
+        <Box
           sx={{
-            fontSize: '10px',
+            display: 'flex',
+            justifyContent: 'flex-end',
             [theme.breakpoints.down('sm')]: {
-              textAlign: 'center',
+              justifyContent: 'center', // Center text on mobile
             },
           }}
         >
-          Last update:{' '}
           <Typography
-            component="span"
             variant="caption"
+            color="text.secondary"
             sx={{
               fontSize: '10px',
-              fontWeight: 'bold',
-              fontFamily: 'monospace',
-              color: 'primary.500',
+              [theme.breakpoints.down('sm')]: {
+                textAlign: 'center',
+              },
             }}
           >
-            {formattedLastUpdate}
+            Last update:{' '}
+            <Typography
+              component="span"
+              variant="caption"
+              sx={{
+                fontSize: '10px',
+                fontWeight: 'bold',
+                fontFamily: 'monospace',
+                color: 'primary.500',
+              }}
+            >
+              {formattedLastUpdate}
+            </Typography>
           </Typography>
-        </Typography>
-      </Box>
+        </Box>
+      )}
     </Paper>
   );
 };

@@ -13,7 +13,6 @@ import { Container } from '@mui/material';
 import { ThemeToggle } from '@/app/components/ThemeToggle/ThemeToggle';
 import { appBarWithUserMenu, CanfarLogo, SRCNetLogo } from '@/stories/shared/navigation';
 import type { SessionCardProps } from '@/app/types/SessionCardProps';
-import type { PlatformLoadData } from '@/app/types/PlatformLoadProps';
 import { useAuthStatus } from '@/lib/hooks/useAuth';
 import { usePublicRuntimeConfig } from '@/lib/providers/PublicRuntimeConfigProvider';
 import {
@@ -23,8 +22,8 @@ import {
   useLaunchSession,
   useSessionPolling,
 } from '@/lib/hooks/useSessions';
-import { usePlatformLoad } from '@/lib/hooks/usePlatformLoad';
 import { useContainerImages, useImageRepositories, useContext } from '@/lib/hooks/useImages';
+import { STATIC_PLATFORM_LOAD_DATA } from '@/lib/config/static-platform-load';
 import { useQueryClient } from '@tanstack/react-query';
 import type { Session, SessionLaunchParams } from '@/lib/api/skaha';
 import { saveToken, hasToken } from '@/lib/auth/token-storage';
@@ -111,13 +110,7 @@ export default function SciencePortalPage() {
     refetch: refetchSessions,
   } = useSessions(isAuthenticated);
 
-  // Fetch platform load using the hook
-  const {
-    data: platformLoadData,
-    isLoading: isPlatformLoading,
-    isFetching: isPlatformFetching,
-    refetch: refetchPlatformLoad,
-  } = usePlatformLoad(isAuthenticated);
+  // Platform load: live stats disabled (CADC-15555 / opencadc/science-portal#158) — static placeholder + overlay
 
   // Fetch container images and repositories for the Launch Form
   const {
@@ -247,7 +240,6 @@ export default function SciencePortalPage() {
   // NOT authenticated → ALWAYS show loading
   // IS authenticated → show loading while initial loading OR refetching (after 30s delay from mutations)
   const isLoadingSessions = !isAuthenticated || isLoading || isFetching;
-  const isLoadingPlatform = !isAuthenticated || isPlatformLoading || isPlatformFetching;
   const isLoadingLaunchForm =
     !isAuthenticated ||
     isLoadingImages ||
@@ -311,12 +303,6 @@ export default function SciencePortalPage() {
     refetchSessions();
   }, [refetchSessions]);
 
-  // Handle refresh for PlatformLoad
-  const handlePlatformRefresh = useCallback(() => {
-    // Refetch platform load from API
-    refetchPlatformLoad();
-  }, [refetchPlatformLoad]);
-
   // Handle refresh for Launch Form (images, repositories, and context)
   const handleLaunchFormRefresh = useCallback(() => {
     // Refetch images, repositories, and context
@@ -324,20 +310,6 @@ export default function SciencePortalPage() {
     refetchRepositories();
     refetchContext();
   }, [refetchImages, refetchRepositories, refetchContext]);
-
-  // Provide placeholder data for Platform Load when data is not yet loaded
-  const platformLoadDataOrPlaceholder: PlatformLoadData = useMemo(() => {
-    if (platformLoadData) {
-      return platformLoadData;
-    }
-    // Return placeholder data to show widget while loading
-    return {
-      cpu: { name: 'CPU', used: 0, free: 0 },
-      ram: { name: 'RAM', used: 0, free: 0 },
-      maxValues: { cpu: 1, ram: 1 },
-      lastUpdate: new Date().toISOString(),
-    };
-  }, [platformLoadData]);
 
   const footerSections = [
     {
@@ -488,9 +460,9 @@ export default function SciencePortalPage() {
               }}
             >
               <PlatformLoad
-                data={platformLoadDataOrPlaceholder}
-                isLoading={isLoadingPlatform}
-                onRefresh={handlePlatformRefresh}
+                data={STATIC_PLATFORM_LOAD_DATA}
+                isLoading={false}
+                showDisabledOverlay
               />
             </Box>
           </Box>

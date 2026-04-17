@@ -1,7 +1,8 @@
 /**
- * TanStack Query hook for Platform Load
+ * TanStack Query hook for Platform Load (legacy).
  *
- * Provides a hook for fetching Skaha platform load statistics.
+ * Live Skaha platform-load fetching is disabled (CADC-15555 / opencadc/science-portal#158).
+ * The dashboard uses {@link STATIC_PLATFORM_LOAD_DATA} and a disabled overlay instead.
  */
 
 import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
@@ -16,25 +17,16 @@ export const platformLoadKeys = {
 };
 
 /**
- * Get current platform load statistics
- *
- * @param isAuthenticated - Whether the user is authenticated (optional, defaults to true for backward compatibility)
- * @example
- * ```tsx
- * const { data: authStatus } = useAuthStatus();
- * const { data: platformLoad, isLoading, refetch } = usePlatformLoad(authStatus?.authenticated);
- * ```
+ * @deprecated Query is permanently disabled; do not use for UI. Kept for cache keys / tests only.
  */
 export function usePlatformLoad(
-  isAuthenticated?: boolean,
+  _isAuthenticated?: boolean,
   options?: Omit<UseQueryOptions<PlatformLoad>, 'queryKey' | 'queryFn'>,
 ) {
   return useQuery({
     queryKey: platformLoadKeys.current(),
     queryFn: getPlatformLoad,
-    // Only fetch if authenticated (default to true for backward compatibility)
-    enabled: isAuthenticated !== false,
-    // No auto-refresh - only manual refresh via refresh button
+    enabled: false,
     ...options,
   });
 }
