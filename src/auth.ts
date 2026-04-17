@@ -1,6 +1,7 @@
 import NextAuth from 'next-auth';
 import type { NextAuthConfig } from 'next-auth';
 import { getOIDCConfig, isOIDCAuth } from '@/lib/config/auth-config';
+import { getAuthApiBasePathFromEnv } from '@/lib/config/auth-base-path';
 
 /**
  * NextAuth Configuration for OIDC Authentication
@@ -30,6 +31,7 @@ interface OIDCProfile {
 }
 
 export const authConfig: NextAuthConfig = {
+  basePath: getAuthApiBasePathFromEnv(),
   providers: [],
   pages: {
     signIn: `/`,
