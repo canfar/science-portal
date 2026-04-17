@@ -1,6 +1,7 @@
 import NextAuth from 'next-auth';
 import type { NextAuthConfig } from 'next-auth';
 import { getOIDCConfig, isOIDCAuth } from '@/lib/config/auth-config';
+import { getProcessEnv } from '@/lib/config/safe-process-env';
 
 /**
  * NextAuth Configuration for OIDC Authentication
@@ -36,6 +37,16 @@ export const authConfig: NextAuthConfig = {
    * The browser still calls `/science-portal/api/auth/*` via `SessionProvider` in AuthProvider.
    */
   basePath: '/api/auth',
+  /**
+   * When the public URL is HTTPS but the incoming Request URL is still `http` (reverse proxy),
+   * Auth.js may pick non-secure cookie names on sign-in and secure names on callback (or the
+   * reverse), and the state/PKCE cookie JWTs will not decrypt — InvalidCheck "state value could
+   * not be parsed". Force secure cookies whenever AUTH_URL / NEXTAUTH_URL is HTTPS.
+   */
+  useSecureCookies:
+    (getProcessEnv('AUTH_URL') ?? getProcessEnv('NEXTAUTH_URL'))?.startsWith('https:') === true
+      ? true
+      : undefined,
   providers: [],
   pages: {
     signIn: `/`,

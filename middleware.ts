@@ -34,7 +34,12 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - public files (public directory)
+     * - api/auth (NextAuth / Auth.js — must not run auth() middleware here or OAuth
+     *   state/PKCE cookies can break on the callback)
+     *
+     * With next.config basePath, pathname in middleware excludes the basePath prefix,
+     * so exclude "api/auth" not "/science-portal/api/auth".
      */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|api/auth|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 };
