@@ -5,11 +5,20 @@
  * These environment variables are NOT exposed to the client.
  */
 
+import { isOIDCAuth } from '@/lib/config/auth-config';
+
 /**
- * Check if using OIDC authentication mode
+ * Read env from this alias so values are resolved at runtime. Next.js replaces
+ * `process.env.NEXT_PUBLIC_*` at build time when written as `process.env.NEXT_PUBLIC_*`,
+ * which breaks Docker/K8s env injected after `next build`.
+ */
+const env = process.env;
+
+/**
+ * Check if using OIDC authentication mode (aligned with client and auth-config)
  */
 function isOIDCMode(): boolean {
-  return process.env.NEXT_USE_CANFAR !== 'true';
+  return isOIDCAuth();
 }
 
 /**
@@ -20,12 +29,12 @@ function isOIDCMode(): boolean {
 function getSkahaBaseUrl(): string {
   if (isOIDCMode()) {
     // OIDC mode: Use SRC Skaha API that accepts SKA IAM tokens
-    const srcSkahaApi = process.env.NEXT_PUBLIC_SRC_SKAHA_API || process.env.SRC_SKAHA_API || 'https://src.canfar.net/skaha';
+    const srcSkahaApi = env.NEXT_PUBLIC_SRC_SKAHA_API || env.SRC_SKAHA_API || 'https://src.canfar.net/skaha';
     console.log('🔍 Server config - OIDC mode, using SRC Skaha API:', srcSkahaApi);
     return srcSkahaApi;
   } else {
     // CANFAR mode: Use standard CANFAR Skaha API
-    const canfarSkahaApi = process.env.SKAHA_API || process.env.NEXT_PUBLIC_SKAHA_API;
+    const canfarSkahaApi = env.SKAHA_API || env.NEXT_PUBLIC_SKAHA_API;
     console.log('🔍 Server config - CANFAR mode, using CANFAR Skaha API:', canfarSkahaApi);
     return canfarSkahaApi || '';
   }
@@ -39,56 +48,91 @@ function getSkahaBaseUrl(): string {
 function getStorageBaseUrl(): string {
   if (isOIDCMode()) {
     // OIDC mode: Use SRC Cavern API that accepts SKA IAM tokens
-    const srcCavernApi = process.env.NEXT_PUBLIC_SRC_CAVERN_API || process.env.SRC_CAVERN_API || 'https://src.canfar.net/cavern/nodes/home/';
+    const srcCavernApi = env.NEXT_PUBLIC_SRC_CAVERN_API || env.SRC_CAVERN_API || 'https://src.canfar.net/cavern/nodes/home/';
     console.log('🔍 Server config - OIDC mode, using SRC Cavern API:', srcCavernApi);
     return srcCavernApi;
   } else {
     // CANFAR mode: Use standard CANFAR storage API
-    const canfarStorageApi = process.env.SERVICE_STORAGE_API || process.env.NEXT_PUBLIC_SERVICE_STORAGE_API;
+    const canfarStorageApi = env.SERVICE_STORAGE_API || env.NEXT_PUBLIC_SERVICE_STORAGE_API;
     console.log('🔍 Server config - CANFAR mode, using CANFAR Storage API:', canfarStorageApi);
     return canfarStorageApi || '';
   }
 }
+
+function apiTimeout(): number {
+  return parseInt(env.API_TIMEOUT || env.NEXT_PUBLIC_API_TIMEOUT || '30000', 10);
+}
+
+export type ServerApiConfig = {
+  storage: { baseUrl: string; timeout: number };
+  login: { baseUrl: string; timeout: number };
+  ac: { baseUrl: string; timeout: number };
+  passwordReset: { url: string; timeout: number };
+  registration: {
+    url: string;
+    timeout: number;
+    proxyHeaders: {
+      resourceId: string;
+      standardId: string;
+      authType: string;
+      interfaceTypeId: string;
+    };
+  };
+  skaha: { baseUrl: string; timeout: number };
+};
 
 /**
  * Server-side API configuration
  * Uses server-only environment variables (without NEXT_PUBLIC_ prefix)
  * In OIDC mode, uses SRC endpoints (src.canfar.net)
  * In CANFAR mode, uses CANFAR endpoints (ws-*.canfar.net)
+ *
+ * Getters re-read env on each access so container runtime env is visible after `next build`.
  */
-export const serverApiConfig = {
-  storage: {
-    baseUrl: getStorageBaseUrl(),
-    timeout: parseInt(process.env.API_TIMEOUT || process.env.NEXT_PUBLIC_API_TIMEOUT || '30000', 10),
+export const serverApiConfig: ServerApiConfig = {
+  get storage() {
+    return {
+      baseUrl: getStorageBaseUrl(),
+      timeout: apiTimeout(),
+    };
   },
-  login: {
-    baseUrl: process.env.LOGIN_API || process.env.NEXT_PUBLIC_LOGIN_API || '',
-    timeout: parseInt(process.env.API_TIMEOUT || process.env.NEXT_PUBLIC_API_TIMEOUT || '30000', 10),
+  get login() {
+    return {
+      baseUrl: env.LOGIN_API || env.NEXT_PUBLIC_LOGIN_API || '',
+      timeout: apiTimeout(),
+    };
   },
-  ac: {
-    baseUrl: process.env.AC_API || process.env.NEXT_PUBLIC_AC_API || 'https://ws-uv.canfar.net/ac',
-    timeout: parseInt(process.env.API_TIMEOUT || process.env.NEXT_PUBLIC_API_TIMEOUT || '30000', 10),
+  get ac() {
+    return {
+      baseUrl: env.AC_API || env.NEXT_PUBLIC_AC_API || 'https://ws-uv.canfar.net/ac',
+      timeout: apiTimeout(),
+    };
   },
-  passwordReset: {
-    url: process.env.PASSWORD_RESET_URL || process.env.NEXT_PUBLIC_PASSWORD_RESET_URL || 'https://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/access/passwordResetRequest',
-    timeout: parseInt(process.env.API_TIMEOUT || process.env.NEXT_PUBLIC_API_TIMEOUT || '30000', 10),
+  get passwordReset() {
+    return {
+      url: env.PASSWORD_RESET_URL || env.NEXT_PUBLIC_PASSWORD_RESET_URL || 'https://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/access/passwordResetRequest',
+      timeout: apiTimeout(),
+    };
   },
-  registration: {
-    url: process.env.REGISTRATION_URL || process.env.NEXT_PUBLIC_REGISTRATION_URL || 'https://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/access/control/proxy',
-    timeout: parseInt(process.env.API_TIMEOUT || process.env.NEXT_PUBLIC_API_TIMEOUT || '30000', 10),
-    // CADC proxy servlet headers for user registration
-    proxyHeaders: {
-      resourceId: process.env.CADC_PROXY_RESOURCE_ID || 'ivo://cadc.nrc.ca/gms',
-      standardId: process.env.CADC_PROXY_STANDARD_ID || 'ivo://ivoa.net/std/UMS#reqs-0.1',
-      authType: process.env.CADC_PROXY_AUTH_TYPE || 'anon',
-      interfaceTypeId: process.env.CADC_PROXY_INTERFACE_TYPE_ID || 'http://www.ivoa.net/xml/VODataService/v1.1#ParamHTTP',
-    },
+  get registration() {
+    return {
+      url: env.REGISTRATION_URL || env.NEXT_PUBLIC_REGISTRATION_URL || 'https://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/access/control/proxy',
+      timeout: apiTimeout(),
+      proxyHeaders: {
+        resourceId: env.CADC_PROXY_RESOURCE_ID || 'ivo://cadc.nrc.ca/gms',
+        standardId: env.CADC_PROXY_STANDARD_ID || 'ivo://ivoa.net/std/UMS#reqs-0.1',
+        authType: env.CADC_PROXY_AUTH_TYPE || 'anon',
+        interfaceTypeId: env.CADC_PROXY_INTERFACE_TYPE_ID || 'http://www.ivoa.net/xml/VODataService/v1.1#ParamHTTP',
+      },
+    };
   },
-  skaha: {
-    baseUrl: getSkahaBaseUrl(),
-    timeout: parseInt(process.env.API_TIMEOUT || process.env.NEXT_PUBLIC_API_TIMEOUT || '30000', 10),
+  get skaha() {
+    return {
+      baseUrl: getSkahaBaseUrl(),
+      timeout: apiTimeout(),
+    };
   },
-} as const;
+};
 
 /**
  * Validates that all required server configuration is present

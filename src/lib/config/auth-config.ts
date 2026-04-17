@@ -6,6 +6,9 @@
  * - OIDC: OpenID Connect authentication via NextAuth
  */
 
+/** Runtime env reads; avoids Next.js inlining `process.env.NEXT_PUBLIC_*` at build time. */
+const env = process.env;
+
 export type AuthMode = 'CANFAR' | 'OIDC';
 
 export interface OIDCConfig {
@@ -26,8 +29,8 @@ export interface AuthConfig {
  * Get the current authentication mode from environment variables
  */
 export function getAuthMode(): AuthMode {
-  const useCanfar = process.env.NEXT_USE_CANFAR === 'true' ||
-                    process.env.NEXT_PUBLIC_USE_CANFAR === 'true';
+  const useCanfar = env.NEXT_USE_CANFAR === 'true' ||
+                    env.NEXT_PUBLIC_USE_CANFAR === 'true';
   return useCanfar ? 'CANFAR' : 'OIDC';
 }
 
@@ -50,14 +53,14 @@ export function isOIDCAuth(): boolean {
  * @param allowMissing - If true, returns dummy config when vars are missing (for build time)
  */
 export function getOIDCConfig(allowMissing = false): OIDCConfig {
-  const issuer = process.env.NEXT_OIDC_URI || process.env.NEXT_PUBLIC_OIDC_URI;
-  const clientId = process.env.NEXT_OIDC_CLIENT_ID || process.env.NEXT_PUBLIC_OIDC_CLIENT_ID;
-  const clientSecret = process.env.NEXT_OIDC_CLIENT_SECRET || '';
-  const callbackUrl = process.env.NEXT_OIDC_CALLBACK_URI || process.env.NEXT_PUBLIC_OIDC_CALLBACK_URI;
-  const redirectUrl = process.env.NEXT_OIDC_REDIRECT_URI || process.env.NEXT_PUBLIC_OIDC_REDIRECT_URI;
-  const scope = process.env.NEXT_OIDC_SCOPE || process.env.NEXT_PUBLIC_OIDC_SCOPE || 'openid profile email';
+  const issuer = env.NEXT_OIDC_URI || env.NEXT_PUBLIC_OIDC_URI;
+  const clientId = env.NEXT_OIDC_CLIENT_ID || env.NEXT_PUBLIC_OIDC_CLIENT_ID;
+  const clientSecret = env.NEXT_OIDC_CLIENT_SECRET || '';
+  const callbackUrl = env.NEXT_OIDC_CALLBACK_URI || env.NEXT_PUBLIC_OIDC_CALLBACK_URI;
+  const redirectUrl = env.NEXT_OIDC_REDIRECT_URI || env.NEXT_PUBLIC_OIDC_REDIRECT_URI;
+  const scope = env.NEXT_OIDC_SCOPE || env.NEXT_PUBLIC_OIDC_SCOPE || 'openid profile email';
 
-  const isBuildTime = process.env.NEXT_PHASE === 'phase-production-build';
+  const isBuildTime = env.NEXT_PHASE === 'phase-production-build';
 
   if (!issuer || !clientId || !callbackUrl || !redirectUrl) {
     // During build time or when explicitly allowed, return dummy config
@@ -123,7 +126,7 @@ export function validateAuthConfig(): { valid: boolean; errors: string[] } {
       errors.push(error instanceof Error ? error.message : 'Invalid OIDC configuration');
     }
   } else if (mode === 'CANFAR') {
-    const loginApi = process.env.LOGIN_API || process.env.NEXT_PUBLIC_LOGIN_API;
+    const loginApi = env.LOGIN_API || env.NEXT_PUBLIC_LOGIN_API;
     if (!loginApi) {
       errors.push('Missing LOGIN_API or NEXT_PUBLIC_LOGIN_API for CANFAR authentication');
     }
