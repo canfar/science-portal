@@ -190,6 +190,7 @@ function initializeAuth() {
           authorization: {
             params: {
               scope: oidcConfig.scope,
+              // Full redirect URI including Next.js basePath; must match IdP registration.
               redirect_uri: oidcConfig.redirectUrl,
             },
           },

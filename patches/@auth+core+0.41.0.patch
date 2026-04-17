@@ -1,0 +1,16 @@
+diff --git a/node_modules/@auth/core/lib/actions/callback/oauth/callback.js b/node_modules/@auth/core/lib/actions/callback/oauth/callback.js
+index bebeddb..7181407 100644
+--- a/node_modules/@auth/core/lib/actions/callback/oauth/callback.js
++++ b/node_modules/@auth/core/lib/actions/callback/oauth/callback.js
+@@ -104,7 +104,10 @@ export async function handleOAuth(params, cookies, options) {
+         throw err;
+     }
+     const codeVerifier = await checks.pkce.use(cookies, resCookies, options);
+-    let redirect_uri = provider.callbackUrl;
++    // Use the same redirect_uri as the authorization request when provided (e.g. app
++    // mounted under Next.js basePath: parseProviders sets callbackUrl from origin only).
++    const fromAuthzParams = provider.authorization?.url?.searchParams?.get("redirect_uri");
++    let redirect_uri = fromAuthzParams ?? provider.callbackUrl;
+     if (!options.isOnRedirectProxy && provider.redirectProxyUrl) {
+         redirect_uri = provider.redirectProxyUrl;
+     }
