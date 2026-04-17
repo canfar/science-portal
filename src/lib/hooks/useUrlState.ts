@@ -19,7 +19,6 @@ import {
   parseAsBoolean,
   parseAsArrayOf,
   parseAsStringEnum,
-  type ParserBuilder,
 } from 'nuqs';
 import type { SessionType } from '@/lib/api/skaha';
 
@@ -240,12 +239,12 @@ export function useViewMode() {
 export function useExpandedState() {
   const [expandedIds, setExpandedIds] = useQueryState(
     'expanded',
-    parseAsArrayOf(parseAsString).withDefault([])
+    parseAsArrayOf(parseAsString).withDefault([]),
   );
 
   const toggleExpanded = (id: string) => {
     setExpandedIds((current) =>
-      current.includes(id) ? current.filter((i) => i !== id) : [...current, id]
+      current.includes(id) ? current.filter((i) => i !== id) : [...current, id],
     );
   };
 
@@ -269,4 +268,12 @@ export function useExpandedState() {
  * const [dateRange, setDateRange] = useQueryState('range', parseAsDateRange);
  * ```
  */
-export { useQueryState, useQueryStates, parseAsString, parseAsInteger, parseAsBoolean, parseAsArrayOf, parseAsStringEnum };
+export {
+  useQueryState,
+  useQueryStates,
+  parseAsString,
+  parseAsInteger,
+  parseAsBoolean,
+  parseAsArrayOf,
+  parseAsStringEnum,
+};

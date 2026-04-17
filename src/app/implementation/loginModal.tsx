@@ -15,23 +15,14 @@ import {
   InputAdornment,
   Link,
 } from '@mui/material';
-import {
-  Close as CloseIcon,
-  Visibility,
-  VisibilityOff,
-} from '@mui/icons-material';
+import { Close as CloseIcon, Visibility, VisibilityOff } from '@mui/icons-material';
 import { TextField } from '@/app/components/TextField/TextField';
 import { Checkbox } from '@/app/components/Checkbox/Checkbox';
-import {
-  LoginModalProps,
-  LoginFormData,
-  LoginFormErrors,
-} from '@/app/types/LoginModalProps';
+import { LoginModalProps, LoginFormData, LoginFormErrors } from '@/app/types/LoginModalProps';
 
 const FORGOT_ACCOUNT_URL =
   'https://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/en/auth/resetPassword.html';
-const REQUEST_ACCOUNT_URL =
-  'https://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/en/auth/request.html';
+const REQUEST_ACCOUNT_URL = 'https://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/en/auth/request.html';
 
 export const LoginModalImpl = React.forwardRef<HTMLDivElement, LoginModalProps>(
   (
@@ -52,7 +43,7 @@ export const LoginModalImpl = React.forwardRef<HTMLDivElement, LoginModalProps>(
       title,
       ...dialogProps
     },
-    ref
+    ref,
   ) => {
     const [formData, setFormData] = useState<LoginFormData>({
       username: initialUsername,
@@ -104,28 +95,26 @@ export const LoginModalImpl = React.forwardRef<HTMLDivElement, LoginModalProps>(
     }, [formData]);
 
     const handleInputChange = useCallback(
-      (field: keyof LoginFormData) =>
-        (event: React.ChangeEvent<HTMLInputElement>) => {
-          const value =
-            field === 'rememberMe' ? event.target.checked : event.target.value;
+      (field: keyof LoginFormData) => (event: React.ChangeEvent<HTMLInputElement>) => {
+        const value = field === 'rememberMe' ? event.target.checked : event.target.value;
 
-          setFormData((prev) => ({
+        setFormData((prev) => ({
+          ...prev,
+          [field]: value,
+        }));
+
+        // Clear error for this field when user starts typing
+        if (formErrors[field as keyof LoginFormErrors]) {
+          setFormErrors((prev) => ({
             ...prev,
-            [field]: value,
+            [field]: undefined,
           }));
+        }
 
-          // Clear error for this field when user starts typing
-          if (formErrors[field as keyof LoginFormErrors]) {
-            setFormErrors((prev) => ({
-              ...prev,
-              [field]: undefined,
-            }));
-          }
-
-          // Clear any error messages
-          setInternalError(null);
-        },
-      [formErrors]
+        // Clear any error messages
+        setInternalError(null);
+      },
+      [formErrors],
     );
 
     const handleSubmit = useCallback(
@@ -153,8 +142,7 @@ export const LoginModalImpl = React.forwardRef<HTMLDivElement, LoginModalProps>(
             onLoginSuccess(formData.username.trim());
           }
         } catch (error) {
-          const errorMsg =
-            error instanceof Error ? error.message : 'Login failed';
+          const errorMsg = error instanceof Error ? error.message : 'Login failed';
           setInternalError(errorMsg);
           if (onLoginError) {
             onLoginError(errorMsg);
@@ -163,19 +151,16 @@ export const LoginModalImpl = React.forwardRef<HTMLDivElement, LoginModalProps>(
           setIsSubmitting(false);
         }
       },
-      [formData, validateForm, onSubmit, onLoginSuccess, onLoginError]
+      [formData, validateForm, onSubmit, onLoginSuccess, onLoginError],
     );
 
     const handleClose = useCallback(
-      (
-        event: React.SyntheticEvent | Event,
-        reason: 'backdropClick' | 'escapeKeyDown'
-      ) => {
+      (event: React.SyntheticEvent | Event, reason: 'backdropClick' | 'escapeKeyDown') => {
         if (!isSubmitting && !isLoading && onClose) {
           onClose(event, reason);
         }
       },
-      [isSubmitting, isLoading, onClose]
+      [isSubmitting, isLoading, onClose],
     );
 
     const handleCancelClick = useCallback(() => {
@@ -205,11 +190,7 @@ export const LoginModalImpl = React.forwardRef<HTMLDivElement, LoginModalProps>(
         {...dialogProps}
       >
         <DialogTitle id="login-dialog-title">
-          <Box
-            display="flex"
-            alignItems="center"
-            justifyContent="space-between"
-          >
+          <Box display="flex" alignItems="center" justifyContent="space-between">
             {title || 'Login'}
             <IconButton
               aria-label="Close login dialog"
@@ -251,9 +232,7 @@ export const LoginModalImpl = React.forwardRef<HTMLDivElement, LoginModalProps>(
                 aria-label="Username"
                 aria-required="true"
                 aria-invalid={!!formErrors.username}
-                aria-describedby={
-                  formErrors.username ? 'login-username-error' : undefined
-                }
+                aria-describedby={formErrors.username ? 'login-username-error' : undefined}
                 FormHelperTextProps={{
                   id: formErrors.username ? 'login-username-error' : undefined,
                 }}
@@ -273,9 +252,7 @@ export const LoginModalImpl = React.forwardRef<HTMLDivElement, LoginModalProps>(
                 aria-label="Password"
                 aria-required="true"
                 aria-invalid={!!formErrors.password}
-                aria-describedby={
-                  formErrors.password ? 'login-password-error' : undefined
-                }
+                aria-describedby={formErrors.password ? 'login-password-error' : undefined}
                 FormHelperTextProps={{
                   id: formErrors.password ? 'login-password-error' : undefined,
                 }}
@@ -309,9 +286,7 @@ export const LoginModalImpl = React.forwardRef<HTMLDivElement, LoginModalProps>(
                 label="Remember me"
               />
 
-              <Box
-                sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 1 }}
-              >
+              <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
                 {onForgotPassword ? (
                   <Link
                     component="button"
@@ -411,7 +386,7 @@ export const LoginModalImpl = React.forwardRef<HTMLDivElement, LoginModalProps>(
         </form>
       </Dialog>
     );
-  }
+  },
 );
 
 LoginModalImpl.displayName = 'LoginModalImpl';

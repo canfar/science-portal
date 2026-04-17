@@ -44,7 +44,7 @@ export const ButtonImpl = React.forwardRef<HTMLButtonElement, ButtonProps>(
       endIcon,
       ...props
     },
-    ref
+    ref,
   ) => {
     const theme = useTheme();
     const muiVariant = variantMapping[variant] || 'contained';
@@ -55,9 +55,7 @@ export const ButtonImpl = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const getLoadingIcon = () => {
       if (!loading) return null;
       const spinnerSize = size === 'sm' ? 14 : size === 'lg' ? 20 : 16;
-      return (
-        <CircularProgress size={spinnerSize} color="inherit" thickness={4.5} />
-      );
+      return <CircularProgress size={spinnerSize} color="inherit" thickness={4.5} />;
     };
 
     const renderStartIcon = () => {
@@ -86,14 +84,7 @@ export const ButtonImpl = React.forwardRef<HTMLButtonElement, ButtonProps>(
         startIcon={renderStartIcon()}
         endIcon={renderEndIcon()}
         color={
-          muiColor as
-            | 'inherit'
-            | 'primary'
-            | 'secondary'
-            | 'success'
-            | 'error'
-            | 'info'
-            | 'warning'
+          muiColor as 'inherit' | 'primary' | 'secondary' | 'success' | 'error' | 'info' | 'warning'
         }
         aria-busy={loading}
         sx={{
@@ -117,7 +108,7 @@ export const ButtonImpl = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {renderChildren()}
       </MuiButton>
     );
-  }
+  },
 );
 
 ButtonImpl.displayName = 'ButtonImpl';

@@ -20,10 +20,7 @@ import React from 'react';
 
 // Card Implementation
 export const CardImpl = React.forwardRef<HTMLDivElement, CardProps>(
-  (
-    { variant = 'elevated', loading = false, children, className, ...props },
-    ref
-  ) => {
+  ({ variant = 'elevated', loading = false, children, className, ...props }, ref) => {
     if (loading) {
       return (
         <Skeleton
@@ -49,50 +46,63 @@ export const CardImpl = React.forwardRef<HTMLDivElement, CardProps>(
         {children}
       </MuiCard>
     );
-  }
+  },
 );
 
 CardImpl.displayName = 'CardImpl';
 
 // CardContent Implementation
-export const CardContentImpl = React.forwardRef<
-  HTMLDivElement,
-  CardContentProps
->(({ loading = false, children, className, ...props }, ref) => {
-  if (loading) {
+export const CardContentImpl = React.forwardRef<HTMLDivElement, CardContentProps>(
+  ({ loading = false, children, className, ...props }, ref) => {
+    if (loading) {
+      return (
+        <MuiCardContent ref={ref} className={className} {...props}>
+          <Skeleton variant="text" width="60%" height={32} />
+          <Skeleton variant="text" width="100%" />
+          <Skeleton variant="text" width="100%" />
+          <Skeleton variant="text" width="80%" />
+        </MuiCardContent>
+      );
+    }
+
     return (
       <MuiCardContent ref={ref} className={className} {...props}>
-        <Skeleton variant="text" width="60%" height={32} />
-        <Skeleton variant="text" width="100%" />
-        <Skeleton variant="text" width="100%" />
-        <Skeleton variant="text" width="80%" />
+        {children}
       </MuiCardContent>
     );
-  }
-
-  return (
-    <MuiCardContent ref={ref} className={className} {...props}>
-      {children}
-    </MuiCardContent>
-  );
-});
+  },
+);
 
 CardContentImpl.displayName = 'CardContentImpl';
 
 // CardActions Implementation
-export const CardActionsImpl = React.forwardRef<
-  HTMLDivElement,
-  CardActionsProps
->(({ align = 'left', loading = false, children, className, ...props }, ref) => {
-  const theme = useTheme();
-  const alignmentStyles = {
-    left: { justifyContent: 'flex-start' },
-    right: { justifyContent: 'flex-end' },
-    center: { justifyContent: 'center' },
-    'space-between': { justifyContent: 'space-between' },
-  };
+export const CardActionsImpl = React.forwardRef<HTMLDivElement, CardActionsProps>(
+  ({ align = 'left', loading = false, children, className, ...props }, ref) => {
+    const theme = useTheme();
+    const alignmentStyles = {
+      left: { justifyContent: 'flex-start' },
+      right: { justifyContent: 'flex-end' },
+      center: { justifyContent: 'center' },
+      'space-between': { justifyContent: 'space-between' },
+    };
 
-  if (loading) {
+    if (loading) {
+      return (
+        <MuiCardActions
+          ref={ref}
+          className={className}
+          sx={{
+            padding: theme.spacing(2),
+            ...alignmentStyles[align],
+          }}
+          {...props}
+        >
+          <Skeleton variant="rectangular" width={100} height={36} />
+          <Skeleton variant="rectangular" width={100} height={36} />
+        </MuiCardActions>
+      );
+    }
+
     return (
       <MuiCardActions
         ref={ref}
@@ -103,35 +113,17 @@ export const CardActionsImpl = React.forwardRef<
         }}
         {...props}
       >
-        <Skeleton variant="rectangular" width={100} height={36} />
-        <Skeleton variant="rectangular" width={100} height={36} />
+        {children}
       </MuiCardActions>
     );
-  }
-
-  return (
-    <MuiCardActions
-      ref={ref}
-      className={className}
-      sx={{
-        padding: theme.spacing(2),
-        ...alignmentStyles[align],
-      }}
-      {...props}
-    >
-      {children}
-    </MuiCardActions>
-  );
-});
+  },
+);
 
 CardActionsImpl.displayName = 'CardActionsImpl';
 
 // CardHeader Implementation
 export const CardHeaderImpl = React.forwardRef<HTMLDivElement, CardHeaderProps>(
-  (
-    { title, subheader, loading = false, className, avatar, action, ...props },
-    ref
-  ) => {
+  ({ title, subheader, loading = false, className, avatar, action, ...props }, ref) => {
     const theme = useTheme();
 
     if (loading) {
@@ -139,14 +131,10 @@ export const CardHeaderImpl = React.forwardRef<HTMLDivElement, CardHeaderProps>(
         <MuiCardHeader
           ref={ref}
           className={className}
-          avatar={
-            avatar || <Skeleton variant="circular" width={40} height={40} />
-          }
+          avatar={avatar || <Skeleton variant="circular" width={40} height={40} />}
           title={<Skeleton variant="text" width="60%" />}
           subheader={<Skeleton variant="text" width="40%" />}
-          action={
-            action || <Skeleton variant="circular" width={24} height={24} />
-          }
+          action={action || <Skeleton variant="circular" width={24} height={24} />}
           {...props}
         />
       );
@@ -171,7 +159,7 @@ export const CardHeaderImpl = React.forwardRef<HTMLDivElement, CardHeaderProps>(
         {...props}
       />
     );
-  }
+  },
 );
 
 CardHeaderImpl.displayName = 'CardHeaderImpl';
@@ -194,7 +182,7 @@ export const CardMediaImpl = React.forwardRef<HTMLDivElement, CardMediaProps>(
       playsInline,
       ...props
     },
-    ref
+    ref,
   ) => {
     if (loading) {
       return (
@@ -240,7 +228,7 @@ export const CardMediaImpl = React.forwardRef<HTMLDivElement, CardMediaProps>(
         {...props}
       />
     );
-  }
+  },
 );
 
 CardMediaImpl.displayName = 'CardMediaImpl';

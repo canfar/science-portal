@@ -39,9 +39,7 @@ export const MenuItemImpl: React.FC<MenuItemProps> = ({
     <MuiMenuItem
       sx={{
         fontFamily: theme.typography.fontFamily,
-        fontSize:
-          theme.customTypography?.fontSize?.md ||
-          theme.typography.body1.fontSize,
+        fontSize: theme.customTypography?.fontSize?.md || theme.typography.body1.fontSize,
         gap: 1,
         minHeight: 40,
         ...styles,

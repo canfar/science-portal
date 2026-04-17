@@ -3,11 +3,7 @@
 import React from 'react';
 import { ErrorBoundary } from '@/app/components/ErrorBoundary/ErrorBoundary';
 
-export function ClientErrorBoundary({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export function ClientErrorBoundary({ children }: { children: React.ReactNode }) {
   return (
     <ErrorBoundary
       showReset={true}

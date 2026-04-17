@@ -13,7 +13,7 @@ import {
   errorResponse,
   successResponse,
   fetchExternalApi,
-  forwardAuthHeader
+  forwardAuthHeader,
 } from '@/app/api/lib/api-utils';
 import { HTTP_STATUS } from '@/app/api/lib/http-constants';
 import { serverApiConfig } from '@/app/api/lib/server-config';
@@ -46,30 +46,27 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
       method: 'GET',
       headers: {
         ...authHeaders,
-        'Accept': 'application/json',
+        Accept: 'application/json',
       },
     },
-    serverApiConfig.skaha.timeout
+    serverApiConfig.skaha.timeout,
   );
 
   if (!response.ok) {
     logger.logError(response.status, `Failed to fetch context: ${response.statusText}`);
-    return errorResponse(
-      'Failed to fetch context',
-      response.status
-    );
+    return errorResponse('Failed to fetch context', response.status);
   }
 
   const context = await response.json();
   logger.info('Successfully retrieved context information');
   logger.logSuccess(HTTP_STATUS.OK, context);
-    // Log the fetched GPU options
-    console.log('🎮 Fetched GPU options from API:', context?.gpus);
+  // Log the fetched GPU options
+  console.log('🎮 Fetched GPU options from API:', context?.gpus);
 
-    // Temporarily override GPU options to [0, 1] for testing
-    if (context && context.gpus) {
-        context.gpus.options = [0, 1];
-        console.log('🎮 Override GPU options to:', context.gpus.options);
-    }
+  // Temporarily override GPU options to [0, 1] for testing
+  if (context && context.gpus) {
+    context.gpus.options = [0, 1];
+    console.log('🎮 Override GPU options to:', context.gpus.options);
+  }
   return successResponse(context);
 });

@@ -4,10 +4,7 @@ import { Grid } from '@/app/components/Grid/Grid';
 import { Typography } from '@/app/components/Typography/Typography';
 import { Link } from '@/app/components/Link/Link';
 import { Divider } from '@/app/components/Divider/Divider';
-import {
-  SocialLink,
-  SocialLinkProps,
-} from '@/app/components/SocialLink/SocialLink';
+import { SocialLink, SocialLinkProps } from '@/app/components/SocialLink/SocialLink';
 import { Container } from '@mui/material';
 
 export interface FooterLink {

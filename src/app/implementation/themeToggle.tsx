@@ -11,12 +11,7 @@ import { TypographyImpl } from './typography';
 // Memoized to prevent re-renders when parent re-renders
 // ThemeToggle only needs to re-render when its props or theme mode change
 export const ThemeToggleImpl: React.FC<ThemeToggleProps> = React.memo(
-  ({
-    size = 'md',
-    showLabel = false,
-    lightLabel = 'Light',
-    darkLabel = 'Dark',
-  }) => {
+  ({ size = 'md', showLabel = false, lightLabel = 'Light', darkLabel = 'Dark' }) => {
     const { mode, toggleTheme } = useSafeTheme();
 
     // Memoized constant values to prevent recreation on each render
@@ -27,7 +22,7 @@ export const ThemeToggleImpl: React.FC<ThemeToggleProps> = React.memo(
           md: 'medium',
           lg: 'large',
         }) as const,
-      []
+      [],
     );
 
     const iconSize = useMemo(
@@ -36,7 +31,7 @@ export const ThemeToggleImpl: React.FC<ThemeToggleProps> = React.memo(
         md: '1.25rem',
         lg: '1.5rem',
       }),
-      []
+      [],
     );
 
     // Memoized computed values that depend on mode
@@ -71,8 +66,7 @@ export const ThemeToggleImpl: React.FC<ThemeToggleProps> = React.memo(
           <TypographyImpl
             variant="body2"
             sx={{
-              fontSize:
-                size === 'sm' ? '0.75rem' : size === 'lg' ? '1rem' : '0.875rem',
+              fontSize: size === 'sm' ? '0.75rem' : size === 'lg' ? '1rem' : '0.875rem',
               fontWeight: 'medium',
               userSelect: 'none',
             }}
@@ -101,7 +95,7 @@ export const ThemeToggleImpl: React.FC<ThemeToggleProps> = React.memo(
         </IconButton>
       </Tooltip>
     );
-  }
+  },
 );
 
 ThemeToggleImpl.displayName = 'ThemeToggleImpl';

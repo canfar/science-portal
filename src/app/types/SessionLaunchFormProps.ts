@@ -1,9 +1,4 @@
-export type SessionType =
-  | 'notebook'
-  | 'desktop'
-  | 'carta'
-  | 'contributed'
-  | 'firefly';
+export type SessionType = 'notebook' | 'desktop' | 'carta' | 'contributed' | 'firefly';
 
 export interface SessionFormData {
   type: SessionType;

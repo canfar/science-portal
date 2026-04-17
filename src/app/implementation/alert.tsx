@@ -20,12 +20,7 @@ export const AlertImplementation: React.FC<AlertProps> = ({
       action={
         action ||
         (onClose && (
-          <IconButton
-            aria-label="close"
-            color="inherit"
-            size="small"
-            onClick={onClose}
-          >
+          <IconButton aria-label="close" color="inherit" size="small" onClick={onClose}>
             <CloseIcon fontSize="inherit" />
           </IconButton>
         ))

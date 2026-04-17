@@ -119,11 +119,7 @@ export const ListItemImplementation: React.FC<ExtendedListItemProps> = ({
     return (
       <>
         <MuiListItem disablePadding sx={listItemSx} {...props}>
-          <ListItemButton
-            onClick={onClick}
-            selected={selected}
-            alignItems={alignItems}
-          >
+          <ListItemButton onClick={onClick} selected={selected} alignItems={alignItems}>
             {content}
           </ListItemButton>
         </MuiListItem>

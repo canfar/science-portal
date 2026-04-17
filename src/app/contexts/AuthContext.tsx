@@ -19,11 +19,7 @@ export interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
-export function AuthContextProvider({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export function AuthContextProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -54,8 +50,7 @@ export function AuthContextProvider({
         throw new Error('Invalid credentials');
       }
     } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : 'Login failed';
+      const errorMessage = err instanceof Error ? err.message : 'Login failed';
       setError(errorMessage);
       throw err;
     } finally {

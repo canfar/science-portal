@@ -13,16 +13,14 @@ import {
   Popover,
   Tooltip,
 } from '@mui/material';
-import {
-  Refresh as RefreshIcon,
-  HelpOutline as HelpOutlineIcon,
-} from '@mui/icons-material';
+import { Refresh as RefreshIcon, HelpOutline as HelpOutlineIcon } from '@mui/icons-material';
 import { useTheme } from '@mui/material/styles';
 import {
   UserStorageWidgetProps,
   StorageData,
   StorageCardData,
 } from '@/app/types/UserStorageWidgetProps';
+import { apiRoutes } from '@/lib/config/api';
 
 // Test data for development
 const TEST_DATA: StorageData = {
@@ -71,12 +69,7 @@ interface StorageCardProps {
   isWarning?: boolean;
 }
 
-const StorageCard: React.FC<StorageCardProps> = ({
-  label,
-  value,
-  isLoading,
-  isWarning,
-}) => {
+const StorageCard: React.FC<StorageCardProps> = ({ label, value, isLoading, isWarning }) => {
   const theme = useTheme();
 
   return (
@@ -128,10 +121,7 @@ const StorageCard: React.FC<StorageCardProps> = ({
   );
 };
 
-export const UserStorageWidgetImpl = React.forwardRef<
-  HTMLDivElement,
-  UserStorageWidgetProps
->(
+export const UserStorageWidgetImpl = React.forwardRef<HTMLDivElement, UserStorageWidgetProps>(
   (
     {
       title = 'User Home Storage',
@@ -152,7 +142,7 @@ export const UserStorageWidgetImpl = React.forwardRef<
       fileSizeFormatter = convertToFileSize,
       testMode = false,
     },
-    ref
+    ref,
   ) => {
     const theme = useTheme();
     const [internalData, setInternalData] = useState<StorageData | null>(null);
@@ -174,8 +164,7 @@ export const UserStorageWidgetImpl = React.forwardRef<
 
     // When loading, don't show data - override currentData
     const displayData = currentLoading ? null : currentData;
-    const currentError =
-      externalData !== undefined ? errorMessage : internalError;
+    const currentError = externalData !== undefined ? errorMessage : internalError;
 
     // Card configuration
     const cardConfigs = useMemo(
@@ -196,7 +185,7 @@ export const UserStorageWidgetImpl = React.forwardRef<
           formatter: (val: number) => `${(val || 0).toFixed(1)}%`,
         },
       ],
-      [fileSizeFormatter]
+      [fileSizeFormatter],
     );
 
     // Memoized card data
@@ -224,7 +213,7 @@ export const UserStorageWidgetImpl = React.forwardRef<
 
       try {
         // Use server-side API route to avoid CORS issues
-        const url = `/api/storage/raw/${name}`;
+        const url = apiRoutes.storage.raw(name);
 
         console.log('[UserStorageWidget] Fetching storage data:', {
           username: name,
@@ -284,7 +273,7 @@ export const UserStorageWidgetImpl = React.forwardRef<
           setHelpAnchorEl(event.currentTarget);
         }
       },
-      [helpUrl, helpContent]
+      [helpUrl, helpContent],
     );
 
     const handleHelpClose = useCallback(() => {
@@ -293,13 +282,7 @@ export const UserStorageWidgetImpl = React.forwardRef<
 
     // Auto-fetch on mount if authenticated
     useEffect(() => {
-      if (
-        externalData === undefined &&
-        !testMode &&
-        isAuthenticated &&
-        name &&
-        name !== 'Login'
-      ) {
+      if (externalData === undefined && !testMode && isAuthenticated && name && name !== 'Login') {
         fetchStorageData();
       }
     }, [externalData, testMode, isAuthenticated, name, fetchStorageData]);
@@ -377,11 +360,7 @@ export const UserStorageWidgetImpl = React.forwardRef<
             </Typography>
             {(helpUrl || helpContent) && (
               <Tooltip title="More information">
-                <IconButton
-                  size="small"
-                  onClick={handleHelpClick}
-                  sx={{ p: 0.5 }}
-                >
+                <IconButton size="small" onClick={handleHelpClick} sx={{ p: 0.5 }}>
                   <HelpOutlineIcon sx={{ fontSize: theme.spacing(2.5) }} />
                 </IconButton>
               </Tooltip>
@@ -412,13 +391,7 @@ export const UserStorageWidgetImpl = React.forwardRef<
           <LinearProgress
             color={currentLoading ? 'primary' : 'success'}
             variant={currentLoading ? 'indeterminate' : 'determinate'}
-            value={
-              currentLoading
-                ? undefined
-                : progressPercentage > 0
-                  ? progressPercentage
-                  : 100
-            }
+            value={currentLoading ? undefined : progressPercentage > 0 ? progressPercentage : 100}
             sx={{
               width: '100%',
               height: 4,
@@ -511,7 +484,7 @@ export const UserStorageWidgetImpl = React.forwardRef<
         )}
       </Paper>
     );
-  }
+  },
 );
 
 UserStorageWidgetImpl.displayName = 'UserStorageWidgetImpl';

@@ -19,7 +19,7 @@ export const GridImpl = React.forwardRef<HTMLDivElement, GridProps>(
         {children}
       </MuiGrid>
     );
-  }
+  },
 );
 
 GridImpl.displayName = 'GridImpl';

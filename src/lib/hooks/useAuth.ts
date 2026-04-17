@@ -61,9 +61,7 @@ export const authKeys = {
  * Get current authentication status
  * Works with both CANFAR and OIDC auth
  */
-export function useAuthStatus(
-  options?: Omit<UseQueryOptions<AuthStatus>, 'queryKey' | 'queryFn'>
-) {
+export function useAuthStatus(options?: Omit<UseQueryOptions<AuthStatus>, 'queryKey' | 'queryFn'>) {
   const { data: session, status } = useSession();
   const isCanfar = isCanfarMode();
 
@@ -89,8 +87,10 @@ export function useAuthStatus(
   useEffect(() => {
     if (!isCanfar && status === 'authenticated' && session?.accessToken) {
       // Store the access token in localStorage for API calls
-      const { saveToken } = require('@/lib/auth/token-storage');
-      saveToken(session.accessToken);
+      // Using dynamic import to avoid circular dependency issues
+      import('@/lib/auth/token-storage').then(({ saveToken }) => {
+        saveToken(session.accessToken as string);
+      });
     }
   }, [isCanfar, status, session?.accessToken]);
 
@@ -122,8 +122,8 @@ export function useAuthStatus(
       isLoading: status === 'loading',
       isError: false,
       error: null,
-      refetch: () => Promise.resolve({ data: oidcAuthStatus } as any),
-    } as any;
+      refetch: () => Promise.resolve({ data: oidcAuthStatus }),
+    } as ReturnType<typeof useQuery<AuthStatus>>;
   }
 
   // CANFAR mode uses React Query
@@ -140,7 +140,7 @@ export function useAuthStatus(
  */
 export function useUserDetails(
   username: string,
-  options?: Omit<UseQueryOptions<User>, 'queryKey' | 'queryFn'>
+  options?: Omit<UseQueryOptions<User>, 'queryKey' | 'queryFn'>,
 ) {
   return useQuery({
     queryKey: authKeys.user(username),
@@ -157,7 +157,7 @@ export function usePermission(
   username: string,
   resource: string,
   permission: 'read' | 'write' | 'execute',
-  options?: Omit<UseQueryOptions<boolean>, 'queryKey' | 'queryFn'>
+  options?: Omit<UseQueryOptions<boolean>, 'queryKey' | 'queryFn'>,
 ) {
   return useQuery({
     queryKey: authKeys.permission(username, resource, permission),

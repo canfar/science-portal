@@ -150,7 +150,7 @@ export function validateServerConfig(): void {
     const missingNames = missing.map(({ name }) => name).join(', ');
     console.warn(
       `Missing server environment variables: ${missingNames}. ` +
-      `Falling back to NEXT_PUBLIC_ versions.`
+        `Falling back to NEXT_PUBLIC_ versions.`,
     );
   }
 }

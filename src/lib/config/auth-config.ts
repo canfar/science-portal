@@ -59,7 +59,6 @@ export function getOIDCConfig(allowMissing = false): OIDCConfig {
   const callbackUrl = env.NEXT_OIDC_CALLBACK_URI || env.NEXT_PUBLIC_OIDC_CALLBACK_URI;
   const redirectUrl = env.NEXT_OIDC_REDIRECT_URI || env.NEXT_PUBLIC_OIDC_REDIRECT_URI;
   const scope = env.NEXT_OIDC_SCOPE || env.NEXT_PUBLIC_OIDC_SCOPE || 'openid profile email';
-
   const isBuildTime = env.NEXT_PHASE === 'phase-production-build';
 
   if (!issuer || !clientId || !callbackUrl || !redirectUrl) {
@@ -70,19 +69,19 @@ export function getOIDCConfig(allowMissing = false): OIDCConfig {
         issuer: issuer || 'https://example.com/',
         clientId: clientId || 'dummy-client-id',
         clientSecret: clientSecret || 'dummy-secret',
-        callbackUrl: callbackUrl || 'http://localhost:3000/science-portal',
-        redirectUrl: redirectUrl || 'http://localhost:3000/api/auth/callback/oidc',
+        callbackUrl: callbackUrl || 'http://localhost:3000/',
+        redirectUrl: redirectUrl || 'http://localhost:3000/oidc-callback',
         scope,
       };
     }
 
     throw new Error(
       'Missing required OIDC configuration. Please check your environment variables:\n' +
-      `- NEXT_OIDC_URI: ${issuer ? '✓' : '✗'}\n` +
-      `- NEXT_OIDC_CLIENT_ID: ${clientId ? '✓' : '✗'}\n` +
-      `- NEXT_OIDC_CLIENT_SECRET: ${clientSecret ? '✓' : '✗'}\n` +
-      `- NEXT_OIDC_CALLBACK_URI: ${callbackUrl ? '✓' : '✗'}\n` +
-      `- NEXT_OIDC_REDIRECT_URI: ${redirectUrl ? '✓' : '✗'}`
+        `- NEXT_OIDC_URI: ${issuer ? '✓' : '✗'}\n` +
+        `- NEXT_OIDC_CLIENT_ID: ${clientId ? '✓' : '✗'}\n` +
+        `- NEXT_OIDC_CLIENT_SECRET: ${clientSecret ? '✓' : '✗'}\n` +
+        `- NEXT_OIDC_CALLBACK_URI: ${callbackUrl ? '✓' : '✗'}\n` +
+        `- NEXT_OIDC_REDIRECT_URI: ${redirectUrl ? '✓' : '✗'}`,
     );
   }
 

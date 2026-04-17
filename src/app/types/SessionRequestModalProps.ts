@@ -1,11 +1,7 @@
 /**
  * Status of the session request
  */
-export type SessionRequestStatus =
-  | 'requesting'
-  | 'provisioning'
-  | 'success'
-  | 'error';
+export type SessionRequestStatus = 'requesting' | 'provisioning' | 'success' | 'error';
 
 /**
  * Props for the SessionRequestModal component

@@ -4,10 +4,7 @@
  * Provides hooks for fetching container images and image repositories.
  */
 
-import {
-  useQuery,
-  type UseQueryOptions,
-} from '@tanstack/react-query';
+import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
 import {
   getContainerImages,
   getImageRepositories,
@@ -48,7 +45,7 @@ export const imageKeys = {
  */
 export function useContainerImages(
   isAuthenticated?: boolean,
-  options?: Omit<UseQueryOptions<ImagesByTypeAndProject>, 'queryKey' | 'queryFn'>
+  options?: Omit<UseQueryOptions<ImagesByTypeAndProject>, 'queryKey' | 'queryFn'>,
 ) {
   return useQuery({
     queryKey: imageKeys.list(),
@@ -73,7 +70,7 @@ export function useContainerImages(
  */
 export function useImageRepositories(
   isAuthenticated?: boolean,
-  options?: Omit<UseQueryOptions<ImageRepository[]>, 'queryKey' | 'queryFn'>
+  options?: Omit<UseQueryOptions<ImageRepository[]>, 'queryKey' | 'queryFn'>,
 ) {
   return useQuery({
     queryKey: imageKeys.repositories(),
@@ -99,7 +96,7 @@ export function useImageRepositories(
  */
 export function useContext(
   isAuthenticated?: boolean,
-  options?: Omit<UseQueryOptions<ContextResponse>, 'queryKey' | 'queryFn'>
+  options?: Omit<UseQueryOptions<ContextResponse>, 'queryKey' | 'queryFn'>,
 ) {
   return useQuery({
     queryKey: imageKeys.context(),

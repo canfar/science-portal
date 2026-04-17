@@ -26,7 +26,7 @@ export class ApiLogger {
   /**
    * Log incoming request with headers and body
    */
-  logRequest(request: NextRequest, body?: any) {
+  logRequest(request: NextRequest, body?: unknown) {
     console.log('\n' + '='.repeat(80));
     console.log(`📥 INCOMING REQUEST: ${this.context.method} ${this.context.route}`);
     console.log('='.repeat(80));
@@ -49,8 +49,8 @@ export class ApiLogger {
     const cookieHeader = request.headers.get('cookie');
     if (cookieHeader) {
       console.log('\n🍪 Cookies:');
-      const cookies = cookieHeader.split(';').map(c => c.trim());
-      cookies.forEach(cookie => {
+      const cookies = cookieHeader.split(';').map((c) => c.trim());
+      cookies.forEach((cookie) => {
         const [name, ...valueParts] = cookie.split('=');
         const value = valueParts.join('=');
         console.log(`  - ${name}: ${value.substring(0, 30)}${value.length > 30 ? '...' : ''}`);
@@ -60,10 +60,10 @@ export class ApiLogger {
     // Log body if provided
     if (body !== undefined) {
       console.log('\n📦 Request Body:');
-      if (typeof body === 'object') {
+      if (typeof body === 'object' && body !== null) {
         // Mask password fields
-        const sanitized = { ...body };
-        if (sanitized.password) {
+        const sanitized = { ...(body as Record<string, unknown>) };
+        if ('password' in sanitized) {
           sanitized.password = '***REDACTED***';
         }
         console.log(JSON.stringify(sanitized, null, 2));
@@ -77,7 +77,7 @@ export class ApiLogger {
   /**
    * Log external API call
    */
-  logExternalCall(url: string, method: string, headers?: Record<string, any>) {
+  logExternalCall(url: string, method: string, headers?: Record<string, unknown>) {
     console.log('\n' + '-'.repeat(80));
     console.log(`🌐 EXTERNAL API CALL: ${method} ${url}`);
     console.log('-'.repeat(80));
@@ -85,7 +85,7 @@ export class ApiLogger {
     if (headers) {
       console.log('\n📋 Headers being sent:');
       const sanitized = { ...headers };
-      if (sanitized.Cookie) {
+      if (sanitized.Cookie && typeof sanitized.Cookie === 'string') {
         sanitized.Cookie = `${sanitized.Cookie.substring(0, 30)}...`;
       }
       console.log(JSON.stringify(sanitized, null, 2));
@@ -96,7 +96,7 @@ export class ApiLogger {
   /**
    * Log external API response
    */
-  logExternalResponse(status: number, statusText: string, data?: any) {
+  logExternalResponse(status: number, statusText: string, data?: unknown) {
     console.log('\n' + '-'.repeat(80));
     console.log(`📡 EXTERNAL API RESPONSE`);
     console.log('-'.repeat(80));
@@ -122,7 +122,7 @@ export class ApiLogger {
   /**
    * Log successful response
    */
-  logSuccess(statusCode: number, data?: any) {
+  logSuccess(statusCode: number, data?: unknown) {
     console.log('\n' + '='.repeat(80));
     console.log(`✅ SUCCESS RESPONSE: ${this.context.method} ${this.context.route}`);
     console.log('='.repeat(80));
@@ -151,7 +151,7 @@ export class ApiLogger {
   /**
    * Log error response
    */
-  logError(statusCode: number, error: string | Error, details?: any) {
+  logError(statusCode: number, error: string | Error, details?: unknown) {
     console.log('\n' + '='.repeat(80));
     console.log(`❌ ERROR RESPONSE: ${this.context.method} ${this.context.route}`);
     console.log('='.repeat(80));
@@ -176,7 +176,7 @@ export class ApiLogger {
   /**
    * Log a general info message
    */
-  info(message: string, data?: any) {
+  info(message: string, data?: unknown) {
     console.log(`ℹ️  [${this.context.route}] ${message}`);
     if (data !== undefined) {
       console.log(JSON.stringify(data, null, 2));
@@ -186,7 +186,7 @@ export class ApiLogger {
   /**
    * Log a warning message
    */
-  warn(message: string, data?: any) {
+  warn(message: string, data?: unknown) {
     console.warn(`⚠️  [${this.context.route}] ${message}`);
     if (data !== undefined) {
       console.warn(JSON.stringify(data, null, 2));

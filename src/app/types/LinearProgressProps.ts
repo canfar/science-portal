@@ -15,12 +15,5 @@ export interface LinearProgressProps extends MuiLinearProgressProps {
    * The color of the progress indicator
    * @default 'primary'
    */
-  color?:
-    | 'primary'
-    | 'secondary'
-    | 'error'
-    | 'info'
-    | 'success'
-    | 'warning'
-    | 'inherit';
+  color?: 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning' | 'inherit';
 }

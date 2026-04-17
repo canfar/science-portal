@@ -13,17 +13,11 @@ export async function POST(request: NextRequest) {
     const { code, redirectUri, codeVerifier } = await request.json();
 
     if (!code) {
-      return NextResponse.json(
-        { error: 'Authorization code is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Authorization code is required' }, { status: 400 });
     }
 
     if (!codeVerifier) {
-      return NextResponse.json(
-        { error: 'PKCE code verifier is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'PKCE code verifier is required' }, { status: 400 });
     }
 
     const oidcConfig = getOIDCConfig();
@@ -33,10 +27,7 @@ export async function POST(request: NextRequest) {
     const discoveryResponse = await fetch(discoveryUrl);
 
     if (!discoveryResponse.ok) {
-      return NextResponse.json(
-        { error: 'Failed to discover OIDC endpoints' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Failed to discover OIDC endpoints' }, { status: 500 });
     }
 
     const discoveryDoc = await discoveryResponse.json();
@@ -64,7 +55,7 @@ export async function POST(request: NextRequest) {
       console.error('Token exchange failed:', errorText);
       return NextResponse.json(
         { error: 'Token exchange failed', details: errorText },
-        { status: response.status }
+        { status: response.status },
       );
     }
 
@@ -99,7 +90,7 @@ export async function POST(request: NextRequest) {
     console.error('Error in token exchange:', error);
     return NextResponse.json(
       { error: 'Internal server error', details: String(error) },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

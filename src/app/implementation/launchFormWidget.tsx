@@ -1,24 +1,15 @@
 'use client';
 
-import React, { useState, useCallback, useMemo } from 'react';
-import {
-  Paper,
-  Typography,
-  IconButton,
-  Box,
-  LinearProgress,
-  Link,
-} from '@mui/material';
-import {
-  Refresh as RefreshIcon,
-  HelpOutline as HelpOutlineIcon,
-} from '@mui/icons-material';
+import React, { useState, useCallback } from 'react';
+import { Paper, Typography, IconButton, Box, LinearProgress, Link } from '@mui/material';
+import { Refresh as RefreshIcon, HelpOutline as HelpOutlineIcon } from '@mui/icons-material';
 import { useTheme } from '@mui/material/styles';
 import { LaunchFormWidgetProps } from '@/app/types/LaunchFormWidgetProps';
 import { SessionLaunchForm } from '@/app/components/SessionLaunchForm/SessionLaunchForm';
 import { SessionRequestModal } from '@/app/components/SessionRequestModal/SessionRequestModal';
 import { SessionFormData } from '@/app/types/SessionLaunchFormProps';
 import { SessionRequestStatus } from '@/app/types/SessionRequestModalProps';
+import type { Session } from '@/lib/api/skaha';
 
 export function LaunchFormWidgetImpl({
   isLoading = false,
@@ -31,17 +22,16 @@ export function LaunchFormWidgetImpl({
   repositoryHosts = [],
   activeSessions = [],
   launchSessionFn,
+  onLaunch,
   ...sessionLaunchFormProps
 }: LaunchFormWidgetProps) {
   const theme = useTheme();
 
   const [modalOpen, setModalOpen] = useState(false);
-  const [requestStatus, setRequestStatus] =
-    useState<SessionRequestStatus>('requesting');
+  const [requestStatus, setRequestStatus] = useState<SessionRequestStatus>('requesting');
   const [requestError, setRequestError] = useState<string | undefined>();
   const [sessionData, setSessionData] = useState<SessionFormData | null>(null);
-  const [selectedSessionType, setSelectedSessionType] = useState<string>('notebook');
-  const [launchedSession, setLaunchedSession] = useState<any>(null);
+  const [launchedSession, setLaunchedSession] = useState<Session | null>(null);
 
   const handleLaunch = useCallback(
     async (formData: SessionFormData) => {
@@ -71,10 +61,11 @@ export function LaunchFormWidgetImpl({
             ...(formData.gpus && formData.gpus > 0 && { gpus: formData.gpus }),
           }),
           // Include registry auth if provided (for Advanced tab with custom images)
-          ...(formData.repositoryAuthUsername && formData.repositoryAuthSecret && {
-            registryUsername: formData.repositoryAuthUsername,
-            registrySecret: formData.repositoryAuthSecret,
-          }),
+          ...(formData.repositoryAuthUsername &&
+            formData.repositoryAuthSecret && {
+              registryUsername: formData.repositoryAuthUsername,
+              registrySecret: formData.repositoryAuthSecret,
+            }),
         };
 
         // Launch the session using custom function if provided, otherwise use default API
@@ -88,8 +79,8 @@ export function LaunchFormWidgetImpl({
         }
 
         // Call the original onLaunch if provided
-        if (sessionLaunchFormProps.onLaunch) {
-          await sessionLaunchFormProps.onLaunch(formData);
+        if (onLaunch) {
+          await onLaunch(formData);
         }
 
         // Session created successfully - modal will show success
@@ -98,12 +89,10 @@ export function LaunchFormWidgetImpl({
         setRequestStatus('success');
       } catch (error) {
         setRequestStatus('error');
-        setRequestError(
-          error instanceof Error ? error.message : 'An unknown error occurred'
-        );
+        setRequestError(error instanceof Error ? error.message : 'An unknown error occurred');
       }
     },
-    [sessionLaunchFormProps]
+    [launchSessionFn, onLaunch],
   );
 
   const handleModalClose = useCallback(() => {
@@ -223,13 +212,7 @@ export function LaunchFormWidgetImpl({
       <LinearProgress
         color={isLoading ? 'primary' : 'success'}
         variant={isLoading ? 'indeterminate' : 'determinate'}
-        value={
-          isLoading
-            ? undefined
-            : showProgressIndicator
-              ? progressPercentage
-              : 100
-        }
+        value={isLoading ? undefined : showProgressIndicator ? progressPercentage : 100}
         sx={{
           width: '100%',
           height: 4,
@@ -248,7 +231,6 @@ export function LaunchFormWidgetImpl({
           imagesByType={imagesByType}
           onLaunch={handleLaunch}
           isLoading={isLoading}
-          onSessionTypeChange={setSelectedSessionType}
           repositoryHosts={repositoryHosts}
           activeSessions={activeSessions}
         />

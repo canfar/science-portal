@@ -12,7 +12,15 @@ import type { ImagesByTypeAndProject } from '@/lib/utils/image-parser';
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
 const sessionsAPIEndpoint = `${basePath}/api/sessions`;
 
-export type SessionType = 'notebook' | 'desktop' | 'headless' | 'carta' | 'contributed' | 'firefly' | 'contributednotebook' | 'contributeddesktop';
+export type SessionType =
+  | 'notebook'
+  | 'desktop'
+  | 'headless'
+  | 'carta'
+  | 'contributed'
+  | 'firefly'
+  | 'contributednotebook'
+  | 'contributeddesktop';
 export type SessionStatus = 'Running' | 'Pending' | 'Terminating' | 'Error' | 'Failed' | 'Unknown';
 
 // SKAHA API raw response format
@@ -108,7 +116,7 @@ export type {
   ParsedImage,
   ImagesByProject,
   ImagesByTypeAndProject,
-  RawImage
+  RawImage,
 } from '@/lib/utils/image-parser';
 
 export interface ImageRepository {
@@ -184,7 +192,7 @@ export async function getSessions(): Promise<Session[]> {
   const authHeaders = getAuthHeader();
   const response = await fetch(sessionsAPIEndpoint, {
     method: 'GET',
-    headers: { 'Accept': 'application/json', ...authHeaders },
+    headers: { Accept: 'application/json', ...authHeaders },
     credentials: 'include',
   });
 
@@ -203,7 +211,7 @@ export async function getSession(sessionId: string): Promise<Session> {
   const authHeaders = getAuthHeader();
   const response = await fetch(`${sessionsAPIEndpoint}/${sessionId}`, {
     method: 'GET',
-    headers: { 'Accept': 'application/json', ...authHeaders },
+    headers: { Accept: 'application/json', ...authHeaders },
     credentials: 'include',
   });
 
@@ -224,7 +232,7 @@ export async function launchSession(params: SessionLaunchParams): Promise<Sessio
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Accept': 'application/json',
+      Accept: 'application/json',
       ...authHeaders,
     },
     credentials: 'include',
@@ -238,7 +246,8 @@ export async function launchSession(params: SessionLaunchParams): Promise<Sessio
     try {
       const errorJson = JSON.parse(errorText);
       // Prefer details, then message, then error field
-      const errorMessage = errorJson.details?.trim() || errorJson.message || errorJson.error || errorText;
+      const errorMessage =
+        errorJson.details?.trim() || errorJson.message || errorJson.error || errorText;
       throw new Error(errorMessage);
     } catch (parseError) {
       // If JSON parsing fails (and it's not our thrown Error), use the raw text
@@ -282,7 +291,7 @@ export async function deleteSession(sessionId: string): Promise<void> {
   const authHeaders = getAuthHeader();
   const response = await fetch(`${sessionsAPIEndpoint}/${sessionId}`, {
     method: 'DELETE',
-    headers: { 'Accept': 'application/json', ...authHeaders },
+    headers: { Accept: 'application/json', ...authHeaders },
     credentials: 'include',
   });
 
@@ -298,7 +307,7 @@ export async function getPlatformLoad(): Promise<PlatformLoad> {
   const authHeaders = getAuthHeader();
   const response = await fetch(`${sessionsAPIEndpoint}/platform-load`, {
     method: 'GET',
-    headers: { 'Accept': 'application/json', ...authHeaders },
+    headers: { Accept: 'application/json', ...authHeaders },
     credentials: 'include',
   });
 
@@ -316,7 +325,7 @@ export async function getContainerImages(): Promise<ImagesByTypeAndProject> {
   const authHeaders = getAuthHeader();
   const response = await fetch(`${sessionsAPIEndpoint}/images`, {
     method: 'GET',
-    headers: { 'Accept': 'application/json', ...authHeaders },
+    headers: { Accept: 'application/json', ...authHeaders },
     credentials: 'include',
   });
 
@@ -334,7 +343,7 @@ export async function getImageRepositories(): Promise<ImageRepository[]> {
   const authHeaders = getAuthHeader();
   const response = await fetch(`${sessionsAPIEndpoint}/repository`, {
     method: 'GET',
-    headers: { 'Accept': 'application/json', ...authHeaders },
+    headers: { Accept: 'application/json', ...authHeaders },
     credentials: 'include',
   });
 
@@ -352,7 +361,7 @@ export async function getContext(): Promise<ContextResponse> {
   const authHeaders = getAuthHeader();
   const response = await fetch(`${sessionsAPIEndpoint}/context`, {
     method: 'GET',
-    headers: { 'Accept': 'application/json', ...authHeaders },
+    headers: { Accept: 'application/json', ...authHeaders },
     credentials: 'include',
   });
 
@@ -370,7 +379,7 @@ export async function getSessionLogs(sessionId: string): Promise<string> {
   const authHeaders = getAuthHeader();
   const response = await fetch(`${sessionsAPIEndpoint}/${sessionId}/logs`, {
     method: 'GET',
-    headers: { 'Accept': 'text/plain', ...authHeaders },
+    headers: { Accept: 'text/plain', ...authHeaders },
     credentials: 'include',
   });
 
@@ -381,14 +390,25 @@ export async function getSessionLogs(sessionId: string): Promise<string> {
   return response.text();
 }
 
+// Session event type
+export interface SessionEvent {
+  type?: string;
+  reason?: string;
+  message?: string;
+  count?: number;
+  firstTimestamp?: string;
+  lastTimestamp?: string;
+  [key: string]: unknown;
+}
+
 /**
  * Get session events
  */
-export async function getSessionEvents(sessionId: string): Promise<any[]> {
+export async function getSessionEvents(sessionId: string): Promise<SessionEvent[]> {
   const authHeaders = getAuthHeader();
   const response = await fetch(`${sessionsAPIEndpoint}/${sessionId}/events`, {
     method: 'GET',
-    headers: { 'Accept': 'application/json', ...authHeaders },
+    headers: { Accept: 'application/json', ...authHeaders },
     credentials: 'include',
   });
 
@@ -405,16 +425,13 @@ export async function getSessionEvents(sessionId: string): Promise<any[]> {
  * Note: SKAHA API uses the configured expiry time in skaha.sessionexpiry
  * The hours parameter is optional and currently not used by SKAHA
  */
-export async function renewSession(
-  sessionId: string,
-  additionalHours?: number
-): Promise<Session> {
+export async function renewSession(sessionId: string, additionalHours?: number): Promise<Session> {
   const authHeaders = getAuthHeader();
   const response = await fetch(`${sessionsAPIEndpoint}/${sessionId}/renew`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Accept': 'application/json',
+      Accept: 'application/json',
       ...authHeaders,
     },
     credentials: 'include',

@@ -124,7 +124,7 @@ export const userMenuItems: NavigationItem[] = [
     label: 'Reset Password',
     icon: <SettingsIcon />,
     href: RESET_PASSWORD_URL,
-    type: 'link'
+    type: 'link',
   },
   {
     label: 'Obtain Certificate',
@@ -148,13 +148,13 @@ export const getServicesMenuItems = () =>
 export const getSupportMenuItems = () =>
   navigationItems.find((item) => item.label === 'Support')?.menuItems || [];
 
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+
 // CANFAR logo component
 export const CanfarLogo = ({ height = 40 }: { height?: number }) => (
   /* eslint-disable-next-line @next/next/no-img-element */
-  <img src="/logo.png" alt="CANFAR Logo" style={{ height }} />
+  <img src={`${basePath}/logo.png`} alt="CANFAR Logo" style={{ height }} />
 );
-
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
 
 // SRCNet logo component (for OIDC mode)
 export const SRCNetLogo = ({ height = 40 }: { height?: number }) => (

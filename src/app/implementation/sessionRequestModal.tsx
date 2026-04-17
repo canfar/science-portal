@@ -41,7 +41,7 @@ const parseErrorMessage = (error: string | undefined): string => {
     } else if (errorObj.error) {
       errorText = errorObj.error;
     }
-  } catch (e) {
+  } catch {
     // Not JSON, continue with string parsing
   }
 
@@ -87,22 +87,11 @@ export const SessionRequestModalImpl: React.FC<SessionRequestModalProps> = ({
     switch (status) {
       case 'requesting':
       case 'provisioning':
-        return (
-          <CircularProgress
-            size={48}
-            sx={{ color: theme.palette.primary.main }}
-          />
-        );
+        return <CircularProgress size={48} sx={{ color: theme.palette.primary.main }} />;
       case 'success':
-        return (
-          <CheckCircleIcon
-            sx={{ fontSize: 48, color: theme.palette.success.main }}
-          />
-        );
+        return <CheckCircleIcon sx={{ fontSize: 48, color: theme.palette.success.main }} />;
       case 'error':
-        return (
-          <ErrorIcon sx={{ fontSize: 48, color: theme.palette.error.main }} />
-        );
+        return <ErrorIcon sx={{ fontSize: 48, color: theme.palette.error.main }} />;
     }
   };
 
@@ -138,9 +127,7 @@ export const SessionRequestModalImpl: React.FC<SessionRequestModalProps> = ({
       onClose={status === 'success' || status === 'error' ? onClose : undefined}
       maxWidth="sm"
       fullWidth
-      disableEscapeKeyDown={
-        status === 'requesting' || status === 'provisioning'
-      }
+      disableEscapeKeyDown={status === 'requesting' || status === 'provisioning'}
       PaperProps={{
         sx: (theme) => ({
           // Better mobile dialog handling

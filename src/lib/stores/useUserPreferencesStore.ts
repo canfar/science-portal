@@ -91,7 +91,7 @@ const defaultPreferences = {
 export const useUserPreferencesStore = create<UserPreferences>()(
   devtools(
     persist(
-      (set, get) => ({
+      (set) => ({
         ...defaultPreferences,
 
         // Theme
@@ -117,14 +117,12 @@ export const useUserPreferencesStore = create<UserPreferences>()(
         // Display preferences
         setSessionsPerPage: (count) => set({ sessionsPerPage: count }),
         setShowTerminatedSessions: (show) => set({ showTerminatedSessions: show }),
-        setDefaultSessionSort: (field, order) =>
-          set({ defaultSessionSort: { field, order } }),
+        setDefaultSessionSort: (field, order) => set({ defaultSessionSort: { field, order } }),
 
         // Notifications
         setEnableNotifications: (enabled) => set({ enableNotifications: enabled }),
         setNotifyOnSessionStart: (enabled) => set({ notifyOnSessionStart: enabled }),
-        setNotifyOnSessionExpiring: (enabled) =>
-          set({ notifyOnSessionExpiring: enabled }),
+        setNotifyOnSessionExpiring: (enabled) => set({ notifyOnSessionExpiring: enabled }),
         setExpiryWarningMinutes: (minutes) => set({ expiryWarningMinutes: minutes }),
 
         // Advanced
@@ -136,10 +134,10 @@ export const useUserPreferencesStore = create<UserPreferences>()(
       }),
       {
         name: 'user-preferences',
-      }
+      },
     ),
     {
       name: 'UserPreferencesStore',
-    }
-  )
+    },
+  ),
 );

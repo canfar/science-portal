@@ -38,17 +38,13 @@ export function ActiveSessionsWidgetImpl({
   const [isChecking, setIsChecking] = useState(false);
 
   // Determine effective layout based on responsive mode with better breakpoints
-  const effectiveLayout =
-    layout === 'responsive' ? (isMobile ? 'column' : 'row') : layout;
+  const effectiveLayout = layout === 'responsive' ? (isMobile ? 'column' : 'row') : layout;
 
   // Responsive card width based on viewport
   const responsiveCardMaxWidth = isMobile
     ? '100%' // Full width on mobile
     : isTablet
-      ? Math.min(
-          typeof sessionCardMaxWidth === 'number' ? sessionCardMaxWidth : 400,
-          350
-        ) // Smaller max width on tablet
+      ? Math.min(typeof sessionCardMaxWidth === 'number' ? sessionCardMaxWidth : 400, 350) // Smaller max width on tablet
       : sessionCardMaxWidth;
 
   // Ensure numeric values for minWidth in row layout
@@ -59,16 +55,11 @@ export function ActiveSessionsWidgetImpl({
       : 400;
 
   const displayTitle =
-    showSessionCount && sessions.length > 0
-      ? `${title} (${sessions.length})`
-      : title;
+    showSessionCount && sessions.length > 0 ? `${title} (${sessions.length})` : title;
 
-  const sessionsToDisplay = maxSessionsToShow
-    ? sessions.slice(0, maxSessionsToShow)
-    : sessions;
+  const sessionsToDisplay = maxSessionsToShow ? sessions.slice(0, maxSessionsToShow) : sessions;
 
-  const hasMoreSessions =
-    maxSessionsToShow && sessions.length > maxSessionsToShow;
+  const hasMoreSessions = maxSessionsToShow && sessions.length > maxSessionsToShow;
 
   const handleRefreshClick = () => {
     setShowCheckModal(true);
@@ -212,9 +203,10 @@ export function ActiveSessionsWidgetImpl({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                background: theme.palette.mode === 'dark'
-                  ? 'linear-gradient(135deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.05) 100%)'
-                  : 'linear-gradient(135deg, rgba(0,0,0,0.02) 0%, rgba(0,0,0,0.05) 100%)',
+                background:
+                  theme.palette.mode === 'dark'
+                    ? 'linear-gradient(135deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.05) 100%)'
+                    : 'linear-gradient(135deg, rgba(0,0,0,0.02) 0%, rgba(0,0,0,0.05) 100%)',
                 [theme.breakpoints.down('sm')]: {
                   padding: theme.spacing(2),
                   '&:last-child': {
@@ -226,9 +218,8 @@ export function ActiveSessionsWidgetImpl({
               <Typography
                 variant="body1"
                 sx={{
-                  color: theme.palette.mode === 'dark'
-                    ? 'rgba(255,255,255,0.3)'
-                    : 'rgba(0,0,0,0.3)',
+                  color:
+                    theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)',
                   fontWeight: 400,
                 }}
               >
@@ -244,7 +235,12 @@ export function ActiveSessionsWidgetImpl({
                 {...session}
                 isOperating={
                   !!(session.id && operatingSessionIds.has(session.id)) ||
-                  !!(session.id && pollingSessionId === session.id && session.status === 'Pending' && !session.connectUrl)
+                  !!(
+                    session.id &&
+                    pollingSessionId === session.id &&
+                    session.status === 'Pending' &&
+                    !session.connectUrl
+                  )
                 }
                 disableHover={true}
                 sx={{
@@ -254,12 +250,7 @@ export function ActiveSessionsWidgetImpl({
               />
             ))}
             {hasMoreSessions && (
-              <Typography
-                variant="body2"
-                color="text.secondary"
-                align="center"
-                sx={{ py: 1 }}
-              >
+              <Typography variant="body2" color="text.secondary" align="center" sx={{ py: 1 }}>
                 And {sessions.length - maxSessionsToShow} more...
               </Typography>
             )}
@@ -299,7 +290,12 @@ export function ActiveSessionsWidgetImpl({
                   {...session}
                   isOperating={
                     !!(session.id && operatingSessionIds.has(session.id)) ||
-                    !!(session.id && pollingSessionId === session.id && session.status === 'Pending' && !session.connectUrl)
+                    !!(
+                      session.id &&
+                      pollingSessionId === session.id &&
+                      session.status === 'Pending' &&
+                      !session.connectUrl
+                    )
                   }
                   disableHover={true}
                   sx={{
@@ -311,12 +307,7 @@ export function ActiveSessionsWidgetImpl({
               ))}
             </Box>
             {hasMoreSessions && (
-              <Typography
-                variant="body2"
-                color="text.secondary"
-                align="center"
-                sx={{ pt: 2 }}
-              >
+              <Typography variant="body2" color="text.secondary" align="center" sx={{ pt: 2 }}>
                 And {sessions.length - maxSessionsToShow} more...
               </Typography>
             )}

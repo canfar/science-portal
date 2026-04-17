@@ -30,7 +30,7 @@ export const HTTP_STATUS = {
   GATEWAY_TIMEOUT: 504,
 } as const;
 
-export type HttpStatusCode = typeof HTTP_STATUS[keyof typeof HTTP_STATUS];
+export type HttpStatusCode = (typeof HTTP_STATUS)[keyof typeof HTTP_STATUS];
 
 /**
  * HTTP Status Code Names
@@ -60,8 +60,8 @@ export const HTTP_STATUS_NAMES: Record<number, string> = {
  * API Timeout Constants (in milliseconds)
  */
 export const API_TIMEOUTS = {
-  DEFAULT: 30000,      // 30 seconds
-  SHORT: 10000,        // 10 seconds
-  LONG: 60000,         // 60 seconds
-  VERY_LONG: 120000,   // 2 minutes
+  DEFAULT: 30000, // 30 seconds
+  SHORT: 10000, // 10 seconds
+  LONG: 60000, // 60 seconds
+  VERY_LONG: 120000, // 2 minutes
 } as const;

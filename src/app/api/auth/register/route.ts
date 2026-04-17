@@ -145,7 +145,7 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
         headers: proxyHeaders,
         body: formData.toString(),
       },
-      serverApiConfig.registration.timeout
+      serverApiConfig.registration.timeout,
     );
 
     if (!response.ok) {
@@ -198,19 +198,16 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
     return NextResponse.json(
       {
         success: true,
-        message: responseText || 'Account created successfully! You can now log in with your credentials.',
+        message:
+          responseText || 'Account created successfully! You can now log in with your credentials.',
       },
-      { status: response.status }
+      { status: response.status },
     );
   } catch (error) {
-    logger.logError(
-      HTTP_STATUS.INTERNAL_SERVER_ERROR,
-      'Failed to create account',
-      error
-    );
+    logger.logError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to create account', error);
     return errorResponse(
       'Failed to create account. Please try again later.',
-      HTTP_STATUS.INTERNAL_SERVER_ERROR
+      HTTP_STATUS.INTERNAL_SERVER_ERROR,
     );
   }
 });

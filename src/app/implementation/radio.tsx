@@ -12,10 +12,7 @@ const sizeMapping = {
 } as const;
 
 export const RadioImpl = React.forwardRef<HTMLButtonElement, RadioProps>(
-  (
-    { label, size = 'md', error = false, formControlLabelProps, sx, ...props },
-    ref
-  ) => {
+  ({ label, size = 'md', error = false, formControlLabelProps, sx, ...props }, ref) => {
     const muiSize = sizeMapping[size];
 
     const radioSx = {
@@ -53,7 +50,7 @@ export const RadioImpl = React.forwardRef<HTMLButtonElement, RadioProps>(
         {...formControlLabelProps}
       />
     );
-  }
+  },
 );
 
 RadioImpl.displayName = 'RadioImpl';

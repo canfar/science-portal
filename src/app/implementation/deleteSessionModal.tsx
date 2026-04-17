@@ -13,14 +13,8 @@ import {
 } from '@mui/material';
 import { DeleteSessionModalProps } from '@/app/types/DeleteSessionModalProps';
 
-export const DeleteSessionModalImpl = React.forwardRef<
-  HTMLDivElement,
-  DeleteSessionModalProps
->(
-  (
-    { open, sessionName, sessionId, onClose, onConfirm, isDeleting = false },
-    ref
-  ) => {
+export const DeleteSessionModalImpl = React.forwardRef<HTMLDivElement, DeleteSessionModalProps>(
+  ({ open, sessionName, sessionId, onClose, onConfirm, isDeleting = false }, ref) => {
     const theme = useTheme();
 
     const handleConfirm = async () => {
@@ -37,13 +31,10 @@ export const DeleteSessionModalImpl = React.forwardRef<
         aria-labelledby="delete-session-dialog-title"
         aria-describedby="delete-session-dialog-description"
       >
-        <DialogTitle id="delete-session-dialog-title">
-          Are you sure?
-        </DialogTitle>
+        <DialogTitle id="delete-session-dialog-title">Are you sure?</DialogTitle>
         <DialogContent>
           <Typography id="delete-session-dialog-description" gutterBottom>
-            Do you really want to delete this session? This process cannot be
-            undone.
+            Do you really want to delete this session? This process cannot be undone.
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
             Session name {sessionName}, id {sessionId}
@@ -71,18 +62,14 @@ export const DeleteSessionModalImpl = React.forwardRef<
             variant="contained"
             color="error"
             disabled={isDeleting}
-            startIcon={
-              isDeleting ? (
-                <CircularProgress size={16} color="inherit" />
-              ) : undefined
-            }
+            startIcon={isDeleting ? <CircularProgress size={16} color="inherit" /> : undefined}
           >
             {isDeleting ? 'Deleting...' : 'Delete'}
           </Button>
         </DialogActions>
       </Dialog>
     );
-  }
+  },
 );
 
 DeleteSessionModalImpl.displayName = 'DeleteSessionModalImpl';

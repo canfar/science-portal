@@ -4,10 +4,7 @@ import { Divider as MuiDivider } from '@mui/material';
 import { DividerProps } from '@/app/types/DividerProps';
 import React from 'react';
 
-export const DividerImpl: React.FC<DividerProps> = ({
-  variant = 'default',
-  ...props
-}) => {
+export const DividerImpl: React.FC<DividerProps> = ({ variant = 'default', ...props }) => {
   return (
     <MuiDivider
       sx={(theme) => {

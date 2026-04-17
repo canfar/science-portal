@@ -14,11 +14,7 @@ import {
   Typography,
   InputAdornment,
 } from '@mui/material';
-import {
-  Close as CloseIcon,
-  Visibility,
-  VisibilityOff,
-} from '@mui/icons-material';
+import { Close as CloseIcon, Visibility, VisibilityOff } from '@mui/icons-material';
 import { TextField } from '@/app/components/TextField/TextField';
 import {
   RegistrationModalProps,
@@ -26,21 +22,8 @@ import {
   RegistrationFormErrors,
 } from '@/app/types/RegistrationModalProps';
 
-export const RegistrationModalImpl = React.forwardRef<
-  HTMLDivElement,
-  RegistrationModalProps
->(
-  (
-    {
-      open,
-      onClose,
-      isLoading = false,
-      errorMessage,
-      successMessage,
-      ...dialogProps
-    },
-    ref
-  ) => {
+export const RegistrationModalImpl = React.forwardRef<HTMLDivElement, RegistrationModalProps>(
+  ({ open, onClose, isLoading = false, errorMessage, successMessage, ...dialogProps }, ref) => {
     const [formData, setFormData] = useState<RegistrationFormData>({
       username: '',
       password: '',
@@ -146,28 +129,27 @@ export const RegistrationModalImpl = React.forwardRef<
     }, [formData]);
 
     const handleInputChange = useCallback(
-      (field: keyof RegistrationFormData) =>
-        (event: React.ChangeEvent<HTMLInputElement>) => {
-          const value = event.target.value;
+      (field: keyof RegistrationFormData) => (event: React.ChangeEvent<HTMLInputElement>) => {
+        const value = event.target.value;
 
-          setFormData((prev) => ({
+        setFormData((prev) => ({
+          ...prev,
+          [field]: value,
+        }));
+
+        // Clear error for this field when user starts typing
+        if (formErrors[field]) {
+          setFormErrors((prev) => ({
             ...prev,
-            [field]: value,
+            [field]: undefined,
           }));
+        }
 
-          // Clear error for this field when user starts typing
-          if (formErrors[field]) {
-            setFormErrors((prev) => ({
-              ...prev,
-              [field]: undefined,
-            }));
-          }
-
-          // Clear any error/success messages
-          setInternalError(null);
-          setInternalSuccess(null);
-        },
-      [formErrors]
+        // Clear any error/success messages
+        setInternalError(null);
+        setInternalSuccess(null);
+      },
+      [formErrors],
     );
 
     const handleTogglePasswordVisibility = useCallback(() => {
@@ -216,7 +198,7 @@ export const RegistrationModalImpl = React.forwardRef<
 
           setInternalSuccess(
             data.message ||
-              'Account created successfully! You can now log in with your credentials.'
+              'Account created successfully! You can now log in with your credentials.',
           );
 
           // Clear the form after successful submission
@@ -230,16 +212,13 @@ export const RegistrationModalImpl = React.forwardRef<
             institute: '',
           });
         } catch (error) {
-          const errorMsg =
-            error instanceof Error
-              ? error.message
-              : 'Failed to create account';
+          const errorMsg = error instanceof Error ? error.message : 'Failed to create account';
           setInternalError(errorMsg);
         } finally {
           setIsSubmitting(false);
         }
       },
-      [formData, validateForm]
+      [formData, validateForm],
     );
 
     const handleClose = useCallback(() => {
@@ -264,11 +243,7 @@ export const RegistrationModalImpl = React.forwardRef<
         {...dialogProps}
       >
         <DialogTitle id="registration-dialog-title">
-          <Box
-            display="flex"
-            alignItems="center"
-            justifyContent="space-between"
-          >
+          <Box display="flex" alignItems="center" justifyContent="space-between">
             Create CADC Account
             <IconButton
               aria-label="Close registration dialog"
@@ -296,11 +271,7 @@ export const RegistrationModalImpl = React.forwardRef<
             )}
 
             {displaySuccess && (
-              <Alert
-                severity="success"
-                sx={{ mb: 2 }}
-                onClose={() => setInternalSuccess(null)}
-              >
+              <Alert severity="success" sx={{ mb: 2 }} onClose={() => setInternalSuccess(null)}>
                 {displaySuccess}
               </Alert>
             )}
@@ -482,7 +453,7 @@ export const RegistrationModalImpl = React.forwardRef<
         </form>
       </Dialog>
     );
-  }
+  },
 );
 
 RegistrationModalImpl.displayName = 'RegistrationModalImpl';

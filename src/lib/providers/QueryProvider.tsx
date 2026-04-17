@@ -78,11 +78,7 @@ export function QueryProvider({ children }: QueryProviderProps) {
     <QueryClientProvider client={queryClient}>
       {children}
       {apiConfig.devtools.enabled && (
-        <ReactQueryDevtools
-          initialIsOpen={false}
-          buttonPosition="bottom-right"
-          position="bottom"
-        />
+        <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-right" position="bottom" />
       )}
     </QueryClientProvider>
   );

@@ -31,8 +31,7 @@ export const TextFieldImpl = React.forwardRef<HTMLDivElement, TextFieldProps>(
           'aria-describedby':
             props.error && helperTextId
               ? helperTextId
-              : props['aria-describedby'] ||
-                props.inputProps?.['aria-describedby'],
+              : props['aria-describedby'] || props.inputProps?.['aria-describedby'],
           ...props.inputProps,
         }}
         sx={(theme) => ({
@@ -40,9 +39,7 @@ export const TextFieldImpl = React.forwardRef<HTMLDivElement, TextFieldProps>(
           '& .MuiInputLabel-root': {
             fontFamily: theme.typography.fontFamily,
             fontSize:
-              size === 'sm'
-                ? theme.typography.body2.fontSize
-                : theme.typography.body1.fontSize,
+              size === 'sm' ? theme.typography.body2.fontSize : theme.typography.body1.fontSize,
             fontWeight: theme.typography.fontWeightMedium,
             color: theme.palette.text.secondary,
             '&.Mui-focused': {
@@ -56,9 +53,7 @@ export const TextFieldImpl = React.forwardRef<HTMLDivElement, TextFieldProps>(
             borderRadius: `${theme.shape.borderRadius}px`,
             fontFamily: theme.typography.fontFamily,
             fontSize:
-              size === 'sm'
-                ? theme.typography.body2.fontSize
-                : theme.typography.body1.fontSize,
+              size === 'sm' ? theme.typography.body2.fontSize : theme.typography.body1.fontSize,
             backgroundColor: theme.palette.background.default,
             transition: 'none', // Remove transition for cleaner interaction
             '& .MuiOutlinedInput-notchedOutline': {
@@ -89,9 +84,7 @@ export const TextFieldImpl = React.forwardRef<HTMLDivElement, TextFieldProps>(
             borderRadius: `${theme.shape.borderRadius}px ${theme.shape.borderRadius}px 0 0`,
             fontFamily: theme.typography.fontFamily,
             fontSize:
-              size === 'sm'
-                ? theme.typography.body2.fontSize
-                : theme.typography.body1.fontSize,
+              size === 'sm' ? theme.typography.body2.fontSize : theme.typography.body1.fontSize,
             backgroundColor: theme.palette.action.hover,
             transition: 'none', // Remove transition for cleaner interaction
             // Hover effect removed for cleaner look
@@ -102,9 +95,7 @@ export const TextFieldImpl = React.forwardRef<HTMLDivElement, TextFieldProps>(
           '& .MuiInput-root': {
             fontFamily: theme.typography.fontFamily,
             fontSize:
-              size === 'sm'
-                ? theme.typography.body2.fontSize
-                : theme.typography.body1.fontSize,
+              size === 'sm' ? theme.typography.body2.fontSize : theme.typography.body1.fontSize,
             '&:before': {
               borderBottomColor: theme.palette.divider,
               transition: 'none', // Remove transition for cleaner interaction
@@ -124,8 +115,7 @@ export const TextFieldImpl = React.forwardRef<HTMLDivElement, TextFieldProps>(
             },
           },
           '& .MuiInputBase-input': {
-            padding:
-              size === 'sm' ? theme.spacing(1, 1.5) : theme.spacing(1.5, 2),
+            padding: size === 'sm' ? theme.spacing(1, 1.5) : theme.spacing(1.5, 2),
             color: theme.palette.text.primary,
             '&::placeholder': {
               color: theme.palette.text.secondary,
@@ -139,7 +129,7 @@ export const TextFieldImpl = React.forwardRef<HTMLDivElement, TextFieldProps>(
         {...props}
       />
     );
-  }
+  },
 );
 
 TextFieldImpl.displayName = 'TextFieldImpl';

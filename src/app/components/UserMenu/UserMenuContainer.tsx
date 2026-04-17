@@ -8,14 +8,13 @@ import type { LoginCredentials } from '@/lib/api/login';
 
 const RESET_PASSWORD_URL =
   'https://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/en/auth/resetPassword.html';
-const UPDATE_PROFILE_URL =
-  'https://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/en/auth/profile.html';
+const UPDATE_PROFILE_URL = 'https://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/en/auth/profile.html';
 const OBTAIN_CERTIFICATE_URL =
   'https://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/en/auth/certificate.html';
 
 export function UserMenuContainer() {
   const [loginModalOpen, setLoginModalOpen] = useState(false);
-  const { data: authStatus, isLoading: isCheckingAuth } = useAuthStatus();
+  const { data: authStatus } = useAuthStatus();
   const { mutate: login, isPending: isLoggingIn, error: loginError } = useLogin();
   const { mutate: logout } = useLogout();
 
@@ -38,10 +37,10 @@ export function UserMenuContainer() {
           onSuccess: () => {
             handleCloseLogin();
           },
-        }
+        },
       );
     },
-    [login, handleCloseLogin]
+    [login, handleCloseLogin],
   );
 
   const handleLogout = useCallback(() => {
