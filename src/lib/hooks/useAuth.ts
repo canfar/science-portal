@@ -27,23 +27,11 @@ import {
   type LoginCredentials,
   type AuthStatus,
 } from '@/lib/api/login';
+import { usePublicRuntimeConfig } from '@/lib/providers/PublicRuntimeConfigProvider';
 
-// Client-side auth mode detection
-function isCanfarMode(): boolean {
-  if (typeof window === 'undefined') {
-    return false;
-  }
-
-  // IMPORTANT: Always use environment variable as source of truth
-  const envMode = process.env.NEXT_PUBLIC_USE_CANFAR === 'true';
-  const storageMode = localStorage.getItem('AUTH_MODE');
-  // Sync localStorage to match environment
-  const correctMode = envMode ? 'CANFAR' : 'OIDC';
-  if (storageMode !== correctMode) {
-    localStorage.setItem('AUTH_MODE', correctMode);
-  }
-
-  return envMode;
+function useAuthBasePath(): string {
+  const { basePath } = usePublicRuntimeConfig();
+  return basePath || '/';
 }
 
 /**
@@ -63,7 +51,18 @@ export const authKeys = {
  */
 export function useAuthStatus(options?: Omit<UseQueryOptions<AuthStatus>, 'queryKey' | 'queryFn'>) {
   const { data: session, status } = useSession();
-  const isCanfar = isCanfarMode();
+  const { useCanfar: isCanfar } = usePublicRuntimeConfig();
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    const correctMode = isCanfar ? 'CANFAR' : 'OIDC';
+    const storageMode = localStorage.getItem('AUTH_MODE');
+    if (storageMode !== correctMode) {
+      localStorage.setItem('AUTH_MODE', correctMode);
+    }
+  }, [isCanfar]);
 
   console.log('🔍 useAuthStatus called:', { isCanfar, sessionStatus: status });
 
@@ -173,7 +172,8 @@ export function usePermission(
  */
 export function useLogin(options?: UseMutationOptions<User, Error, LoginCredentials>) {
   const queryClient = useQueryClient();
-  const isCanfar = isCanfarMode();
+  const { useCanfar: isCanfar } = usePublicRuntimeConfig();
+  const callbackBase = useAuthBasePath();
 
   return useMutation({
     mutationFn: async (credentials: LoginCredentials) => {
@@ -183,7 +183,7 @@ export function useLogin(options?: UseMutationOptions<User, Error, LoginCredenti
       } else {
         // OIDC auth - redirect to NextAuth signin
         // Note: OIDC doesn't use username/password, but we'll trigger the flow
-        await nextAuthSignIn('oidc', { callbackUrl: '/science-portal' });
+        await nextAuthSignIn('oidc', { callbackUrl: callbackBase });
         // Return a placeholder user as the actual auth happens via redirect
         return {
           username: credentials.username,
@@ -203,7 +203,8 @@ export function useLogin(options?: UseMutationOptions<User, Error, LoginCredenti
  */
 export function useLogout(options?: UseMutationOptions<void, Error, void>) {
   const queryClient = useQueryClient();
-  const isCanfar = isCanfarMode();
+  const { useCanfar: isCanfar } = usePublicRuntimeConfig();
+  const callbackBase = useAuthBasePath();
 
   return useMutation({
     mutationFn: async () => {
@@ -212,7 +213,7 @@ export function useLogout(options?: UseMutationOptions<void, Error, void>) {
         await canfarLogout();
       } else {
         // OIDC logout - use NextAuth signOut
-        await nextAuthSignOut({ callbackUrl: '/science-portal' });
+        await nextAuthSignOut({ callbackUrl: callbackBase });
       }
     },
     onSuccess: () => {
@@ -227,13 +228,14 @@ export function useLogout(options?: UseMutationOptions<void, Error, void>) {
  * Only works in OIDC mode
  */
 export function useOIDCLogin() {
-  const isCanfar = isCanfarMode();
+  const { useCanfar: isCanfar } = usePublicRuntimeConfig();
+  const callbackBase = useAuthBasePath();
 
   return {
     login: async () => {
       if (!isCanfar) {
         try {
-          await nextAuthSignIn('oidc', { callbackUrl: '/science-portal' });
+          await nextAuthSignIn('oidc', { callbackUrl: callbackBase });
         } catch (error) {
           console.error('Failed to initiate OIDC login:', error);
           throw error;
@@ -248,10 +250,10 @@ export function useOIDCLogin() {
  * Sync auth mode from environment to localStorage on mount
  */
 export function useAuthModeSync() {
+  const { useCanfar } = usePublicRuntimeConfig();
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const envMode = process.env.NEXT_PUBLIC_USE_CANFAR === 'true' ? 'CANFAR' : 'OIDC';
-      localStorage.setItem('AUTH_MODE', envMode);
+      localStorage.setItem('AUTH_MODE', useCanfar ? 'CANFAR' : 'OIDC');
     }
-  }, []);
+  }, [useCanfar]);
 }

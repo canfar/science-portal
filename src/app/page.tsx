@@ -15,6 +15,7 @@ import { appBarWithUserMenu, CanfarLogo, SRCNetLogo } from '@/stories/shared/nav
 import type { SessionCardProps } from '@/app/types/SessionCardProps';
 import type { PlatformLoadData } from '@/app/types/PlatformLoadProps';
 import { useAuthStatus } from '@/lib/hooks/useAuth';
+import { usePublicRuntimeConfig } from '@/lib/providers/PublicRuntimeConfigProvider';
 import {
   useSessions,
   useDeleteSession,
@@ -42,9 +43,8 @@ import {
 } from '@/lib/config/site-config';
 
 export default function SciencePortalPage() {
-  // Check if in OIDC mode (CANFAR mode when NEXT_PUBLIC_USE_CANFAR=true)
-  // Environment variables are available at build time, so no need to check window
-  const isOIDCMode = process.env.NEXT_PUBLIC_USE_CANFAR !== 'true';
+  const { useCanfar } = usePublicRuntimeConfig();
+  const isOIDCMode = !useCanfar;
 
   // Get NextAuth session to extract and save token
   const { data: session, status: sessionStatus } = useSession();

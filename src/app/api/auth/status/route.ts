@@ -22,6 +22,7 @@ import {
 import { serverApiConfig } from '@/app/api/lib/server-config';
 import { createLogger } from '@/app/api/lib/logger';
 import { HTTP_STATUS } from '@/app/api/lib/http-constants';
+import { getPublicRuntimeConfigFromEnv } from '@/lib/config/public-runtime-config';
 
 export interface User {
   username: string;
@@ -93,7 +94,7 @@ interface CADCPersonalDetails {
 }
 
 export const GET = withErrorHandling(async (request: NextRequest) => {
-  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+  const { basePath } = getPublicRuntimeConfigFromEnv();
   const authAPIEndpoint = `${basePath}/api/auth`;
   const logger = createLogger(`${authAPIEndpoint}/status`, 'GET');
 

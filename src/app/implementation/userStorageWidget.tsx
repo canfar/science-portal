@@ -20,7 +20,7 @@ import {
   StorageData,
   StorageCardData,
 } from '@/app/types/UserStorageWidgetProps';
-import { apiRoutes } from '@/lib/config/api';
+import { useApiRoutes } from '@/lib/hooks/useApiRoutes';
 
 // Test data for development
 const TEST_DATA: StorageData = {
@@ -144,6 +144,7 @@ export const UserStorageWidgetImpl = React.forwardRef<HTMLDivElement, UserStorag
     },
     ref,
   ) => {
+    const apiRoutes = useApiRoutes();
     const theme = useTheme();
     const [internalData, setInternalData] = useState<StorageData | null>(null);
     const [internalLoading, setInternalLoading] = useState(false);
@@ -255,7 +256,7 @@ export const UserStorageWidgetImpl = React.forwardRef<HTMLDivElement, UserStorag
       } finally {
         setInternalLoading(false);
       }
-    }, [name]);
+    }, [name, apiRoutes.storage]);
 
     const handleRefresh = useCallback(() => {
       if (onRefresh) {

@@ -18,13 +18,14 @@ import {
 import { serverApiConfig } from '@/app/api/lib/server-config';
 import { createLogger } from '@/app/api/lib/logger';
 import type { PlatformLoad, SkahaStatsResponse } from '@/lib/api/skaha';
+import { getPublicRuntimeConfigFromEnv } from '@/lib/config/public-runtime-config';
 
 /**
  * GET /api/sessions/platform-load
  * Get platform load statistics
  */
 export const GET = withErrorHandling(async (request: NextRequest) => {
-  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+  const { basePath } = getPublicRuntimeConfigFromEnv();
   const sessionsAPIEndpoint = `${basePath}/api/sessions`;
   const logger = createLogger(`${sessionsAPIEndpoint}/platform-load`, 'GET');
   logger.logRequest(request);

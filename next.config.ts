@@ -1,16 +1,7 @@
 import type { NextConfig } from 'next';
 
-// Validate required environment variables at build time
-const requiredEnvVars = [
-  'NEXT_PUBLIC_LOGIN_API',
-  'NEXT_PUBLIC_SKAHA_API',
-] as const;
-
-requiredEnvVars.forEach((envVar) => {
-  if (!process.env[envVar]) {
-    throw new Error(`Missing required environment variable: ${envVar}`);
-  }
-});
+// External API URLs are resolved at runtime on the server (see server-config).
+// NEXT_PUBLIC_* values here are optional at build; set them in the container if needed.
 
 const nextConfig: NextConfig = {
   output: 'standalone',
@@ -21,10 +12,9 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true,
   },
-  // Expose environment variables to the client
+  // Client-exposed keys only. Do not set LOGIN_API/SKAHA_API here — that would
+  // bake empty build-time values and override runtime env in standalone/server.
   env: {
-    LOGIN_API: process.env.NEXT_PUBLIC_LOGIN_API,
-    SKAHA_API: process.env.NEXT_PUBLIC_SKAHA_API,
     API_TIMEOUT: process.env.NEXT_PUBLIC_API_TIMEOUT || '30000',
     ENABLE_QUERY_DEVTOOLS: process.env.NEXT_PUBLIC_ENABLE_QUERY_DEVTOOLS || 'false',
     NEXTAUTH_URL: process.env.NEXTAUTH_URL,

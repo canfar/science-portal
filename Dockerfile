@@ -25,16 +25,17 @@ COPY --from=deps /app/node_modules ./node_modules
 # Copy all source files
 COPY . .
 
-# Accept build arguments for required environment variables
-ARG NEXT_PUBLIC_LOGIN_API=https://ws-cadc.canfar.net/ac
-ARG NEXT_PUBLIC_SKAHA_API=https://ws-uv.canfar.net/skaha
+# Build-time: basePath and client-bundled flags. External API URLs are optional here;
+# set LOGIN_API, SKAHA_API, SERVICE_STORAGE_API, SRC_*, etc. at container runtime.
+ARG NEXT_PUBLIC_LOGIN_API=
+ARG NEXT_PUBLIC_SKAHA_API=
 ARG NEXT_PUBLIC_SRC_SKAHA_API=https://src.canfar.net/skaha
 ARG NEXT_PUBLIC_SRC_CAVERN_API=https://src.canfar.net/cavern
 ARG NEXT_PUBLIC_API_TIMEOUT=30000
 ARG NEXT_PUBLIC_USE_CANFAR=true
 ARG NEXT_PUBLIC_ENABLE_QUERY_DEVTOOLS=false
 ARG NEXT_PUBLIC_EXPERIMENTAL=true
-ARG NEXT_PUBLIC_BASE_PATH="/canfar-app"
+ARG NEXT_PUBLIC_BASE_PATH=/science-portal
 
 # Set environment variables for build
 ENV NEXT_TELEMETRY_DISABLED=1
@@ -83,10 +84,12 @@ EXPOSE 3000
 
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
+# Must match NEXT_PUBLIC_BASE_PATH used at build (next.config basePath).
+ENV NEXT_PUBLIC_BASE_PATH=/science-portal
 
-# Health check for container orchestration
+# Health check for container orchestration (basePath from runner ENV)
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3000${NEXT_PUBLIC_BASE_PATH}/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+  CMD node -e "const p=process.env.NEXT_PUBLIC_BASE_PATH||'';require('http').get('http://127.0.0.1:3000'+p+'/api/health',(r)=>{process.exit(r.statusCode===200?0:1)}).on('error',()=>process.exit(1))"
 
 # Use dumb-init to handle signals properly (graceful shutdown)
 ENTRYPOINT ["dumb-init", "--"]

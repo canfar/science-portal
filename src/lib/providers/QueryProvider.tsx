@@ -3,7 +3,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { useState, type ReactNode } from 'react';
-import { apiConfig } from '@/lib/config/api';
+import { usePublicRuntimeConfig } from '@/lib/providers/PublicRuntimeConfigProvider';
 
 /**
  * Default query client configuration
@@ -73,11 +73,12 @@ export function QueryProvider({ children }: QueryProviderProps) {
   //       suspend because React will throw away the client on the initial
   //       render if it suspends and there is no boundary
   const [queryClient] = useState(() => getQueryClient());
+  const { devtools } = usePublicRuntimeConfig();
 
   return (
     <QueryClientProvider client={queryClient}>
       {children}
-      {apiConfig.devtools.enabled && (
+      {devtools && (
         <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-right" position="bottom" />
       )}
     </QueryClientProvider>

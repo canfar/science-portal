@@ -6,7 +6,12 @@
  */
 
 import { getAuthHeader } from '@/lib/auth/token-storage';
-import { apiRoutes } from '@/lib/config/api';
+import { buildApiRoutes } from '@/lib/config/api';
+import { getRuntimeBasePath } from '@/lib/config/runtime-public-snapshot';
+
+function storageRoutes() {
+  return buildApiRoutes(getRuntimeBasePath()).storage;
+}
 
 export interface UserStorageQuota {
   name: string;
@@ -29,7 +34,7 @@ export interface StorageNode {
  */
 export async function getUserStorageQuota(username: string): Promise<UserStorageQuota> {
   const authHeaders = getAuthHeader();
-  const response = await fetch(apiRoutes.storage.quota(username), {
+  const response = await fetch(storageRoutes().quota(username), {
     method: 'GET',
     headers: { Accept: 'application/json', ...authHeaders },
     credentials: 'include',
@@ -50,7 +55,7 @@ export async function listStorageNodes(
   path: string = '',
 ): Promise<StorageNode[]> {
   const authHeaders = getAuthHeader();
-  const url = `${apiRoutes.storage.files(username)}${path ? `?path=${encodeURIComponent(path)}` : ''}`;
+  const url = `${storageRoutes().files(username)}${path ? `?path=${encodeURIComponent(path)}` : ''}`;
   const response = await fetch(url, {
     method: 'GET',
     headers: { Accept: 'application/json', ...authHeaders },
@@ -69,7 +74,7 @@ export async function listStorageNodes(
  */
 export async function uploadFile(username: string, path: string, file: File): Promise<void> {
   const authHeaders = getAuthHeader();
-  const url = `${apiRoutes.storage.files(username)}${path ? `?path=${encodeURIComponent(path)}` : ''}`;
+  const url = `${storageRoutes().files(username)}${path ? `?path=${encodeURIComponent(path)}` : ''}`;
   const formData = new FormData();
   formData.append('file', file);
 
@@ -90,7 +95,7 @@ export async function uploadFile(username: string, path: string, file: File): Pr
  */
 export async function deleteStorageNode(username: string, path: string): Promise<void> {
   const authHeaders = getAuthHeader();
-  const url = `${apiRoutes.storage.files(username)}?path=${encodeURIComponent(path)}`;
+  const url = `${storageRoutes().files(username)}?path=${encodeURIComponent(path)}`;
   const response = await fetch(url, {
     method: 'DELETE',
     headers: { Accept: 'application/json', ...authHeaders },
@@ -107,7 +112,7 @@ export async function deleteStorageNode(username: string, path: string): Promise
  */
 export async function createDirectory(username: string, path: string): Promise<void> {
   const authHeaders = getAuthHeader();
-  const url = `${apiRoutes.storage.files(username)}?path=${encodeURIComponent(path)}`;
+  const url = `${storageRoutes().files(username)}?path=${encodeURIComponent(path)}`;
   const response = await fetch(url, {
     method: 'PUT',
     headers: {

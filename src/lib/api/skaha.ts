@@ -8,9 +8,11 @@
 
 import { getAuthHeader } from '@/lib/auth/token-storage';
 import type { ImagesByTypeAndProject } from '@/lib/utils/image-parser';
+import { getRuntimeBasePath } from '@/lib/config/runtime-public-snapshot';
 
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
-const sessionsAPIEndpoint = `${basePath}/api/sessions`;
+function sessionsApiRoot(): string {
+  return `${getRuntimeBasePath()}/api/sessions`;
+}
 
 export type SessionType =
   | 'notebook'
@@ -190,7 +192,7 @@ function transformSkahaSession(skahaSession: SkahaSessionResponse): Session {
  */
 export async function getSessions(): Promise<Session[]> {
   const authHeaders = getAuthHeader();
-  const response = await fetch(sessionsAPIEndpoint, {
+  const response = await fetch(sessionsApiRoot(), {
     method: 'GET',
     headers: { Accept: 'application/json', ...authHeaders },
     credentials: 'include',
@@ -209,7 +211,7 @@ export async function getSessions(): Promise<Session[]> {
  */
 export async function getSession(sessionId: string): Promise<Session> {
   const authHeaders = getAuthHeader();
-  const response = await fetch(`${sessionsAPIEndpoint}/${sessionId}`, {
+  const response = await fetch(`${sessionsApiRoot()}/${sessionId}`, {
     method: 'GET',
     headers: { Accept: 'application/json', ...authHeaders },
     credentials: 'include',
@@ -228,7 +230,7 @@ export async function getSession(sessionId: string): Promise<Session> {
  */
 export async function launchSession(params: SessionLaunchParams): Promise<Session> {
   const authHeaders = getAuthHeader();
-  const response = await fetch(sessionsAPIEndpoint, {
+  const response = await fetch(sessionsApiRoot(), {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -289,7 +291,7 @@ export async function launchSession(params: SessionLaunchParams): Promise<Sessio
  */
 export async function deleteSession(sessionId: string): Promise<void> {
   const authHeaders = getAuthHeader();
-  const response = await fetch(`${sessionsAPIEndpoint}/${sessionId}`, {
+  const response = await fetch(`${sessionsApiRoot()}/${sessionId}`, {
     method: 'DELETE',
     headers: { Accept: 'application/json', ...authHeaders },
     credentials: 'include',
@@ -305,7 +307,7 @@ export async function deleteSession(sessionId: string): Promise<void> {
  */
 export async function getPlatformLoad(): Promise<PlatformLoad> {
   const authHeaders = getAuthHeader();
-  const response = await fetch(`${sessionsAPIEndpoint}/platform-load`, {
+  const response = await fetch(`${sessionsApiRoot()}/platform-load`, {
     method: 'GET',
     headers: { Accept: 'application/json', ...authHeaders },
     credentials: 'include',
@@ -323,7 +325,7 @@ export async function getPlatformLoad(): Promise<PlatformLoad> {
  */
 export async function getContainerImages(): Promise<ImagesByTypeAndProject> {
   const authHeaders = getAuthHeader();
-  const response = await fetch(`${sessionsAPIEndpoint}/images`, {
+  const response = await fetch(`${sessionsApiRoot()}/images`, {
     method: 'GET',
     headers: { Accept: 'application/json', ...authHeaders },
     credentials: 'include',
@@ -341,7 +343,7 @@ export async function getContainerImages(): Promise<ImagesByTypeAndProject> {
  */
 export async function getImageRepositories(): Promise<ImageRepository[]> {
   const authHeaders = getAuthHeader();
-  const response = await fetch(`${sessionsAPIEndpoint}/repository`, {
+  const response = await fetch(`${sessionsApiRoot()}/repository`, {
     method: 'GET',
     headers: { Accept: 'application/json', ...authHeaders },
     credentials: 'include',
@@ -359,7 +361,7 @@ export async function getImageRepositories(): Promise<ImageRepository[]> {
  */
 export async function getContext(): Promise<ContextResponse> {
   const authHeaders = getAuthHeader();
-  const response = await fetch(`${sessionsAPIEndpoint}/context`, {
+  const response = await fetch(`${sessionsApiRoot()}/context`, {
     method: 'GET',
     headers: { Accept: 'application/json', ...authHeaders },
     credentials: 'include',
@@ -377,7 +379,7 @@ export async function getContext(): Promise<ContextResponse> {
  */
 export async function getSessionLogs(sessionId: string): Promise<string> {
   const authHeaders = getAuthHeader();
-  const response = await fetch(`${sessionsAPIEndpoint}/${sessionId}/logs`, {
+  const response = await fetch(`${sessionsApiRoot()}/${sessionId}/logs`, {
     method: 'GET',
     headers: { Accept: 'text/plain', ...authHeaders },
     credentials: 'include',
@@ -406,7 +408,7 @@ export interface SessionEvent {
  */
 export async function getSessionEvents(sessionId: string): Promise<SessionEvent[]> {
   const authHeaders = getAuthHeader();
-  const response = await fetch(`${sessionsAPIEndpoint}/${sessionId}/events`, {
+  const response = await fetch(`${sessionsApiRoot()}/${sessionId}/events`, {
     method: 'GET',
     headers: { Accept: 'application/json', ...authHeaders },
     credentials: 'include',
@@ -427,7 +429,7 @@ export async function getSessionEvents(sessionId: string): Promise<SessionEvent[
  */
 export async function renewSession(sessionId: string, additionalHours?: number): Promise<Session> {
   const authHeaders = getAuthHeader();
-  const response = await fetch(`${sessionsAPIEndpoint}/${sessionId}/renew`, {
+  const response = await fetch(`${sessionsApiRoot()}/${sessionId}/renew`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

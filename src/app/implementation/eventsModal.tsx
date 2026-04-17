@@ -25,7 +25,7 @@ import {
   useTheme,
   useMediaQuery,
 } from '@mui/material';
-import { apiRoutes } from '@/lib/config/api';
+import { useApiRoutes } from '@/lib/hooks/useApiRoutes';
 import {
   Close as CloseIcon,
   Refresh as RefreshIcon,
@@ -151,6 +151,7 @@ const useSessionEvents = (
   eventsEndpoint?: string,
   initialEvents?: SessionEvent[],
 ): UseSessionEventsReturn => {
+  const apiRoutes = useApiRoutes();
   const [events, setEvents] = useState<SessionEvent[]>(initialEvents || []);
   const [rawData, setRawData] = useState<string | null>(null);
   const [loading, setLoading] = useState(!initialEvents);
@@ -194,7 +195,7 @@ const useSessionEvents = (
     } finally {
       setLoading(false);
     }
-  }, [sessionId, open, eventsEndpoint]);
+  }, [sessionId, open, eventsEndpoint, apiRoutes.sessions]);
 
   useEffect(() => {
     if (open && !initialEvents) {

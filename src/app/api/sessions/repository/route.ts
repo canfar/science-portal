@@ -19,13 +19,14 @@ import { serverApiConfig } from '@/app/api/lib/server-config';
 import { createLogger } from '@/app/api/lib/logger';
 import { HTTP_STATUS } from '@/app/api/lib/http-constants';
 import type { ImageRepository } from '@/lib/api/skaha';
+import { getPublicRuntimeConfigFromEnv } from '@/lib/config/public-runtime-config';
 
 /**
  * GET /api/sessions/repository
  * List the Image Repository hosts configured as a JSON Array
  */
 export const GET = withErrorHandling(async (request: NextRequest) => {
-  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+  const { basePath } = getPublicRuntimeConfigFromEnv();
   const sessionsAPIEndpoint = `${basePath}/api/sessions`;
   const logger = createLogger(`${sessionsAPIEndpoint}/repository`, 'GET');
   logger.logRequest(request);

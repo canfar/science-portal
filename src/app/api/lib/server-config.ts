@@ -6,13 +6,12 @@
  */
 
 import { isOIDCAuth } from '@/lib/config/auth-config';
+import { getProcessEnv } from '@/lib/config/safe-process-env';
 
 /**
- * Read env from this alias so values are resolved at runtime. Next.js replaces
- * `process.env.NEXT_PUBLIC_*` at build time when written as `process.env.NEXT_PUBLIC_*`,
- * which breaks Docker/K8s env injected after `next build`.
+ * Use `getProcessEnv` so keys are not build-inlined as `process.env.FOO` and
+ * so this module never references bare `process` (safe if ever imported client-side).
  */
-const env = process.env;
 
 /**
  * Check if using OIDC authentication mode (aligned with client and auth-config)
@@ -29,12 +28,15 @@ function isOIDCMode(): boolean {
 function getSkahaBaseUrl(): string {
   if (isOIDCMode()) {
     // OIDC mode: Use SRC Skaha API that accepts SKA IAM tokens
-    const srcSkahaApi = env.NEXT_PUBLIC_SRC_SKAHA_API || env.SRC_SKAHA_API || 'https://src.canfar.net/skaha';
+    const srcSkahaApi =
+      getProcessEnv('NEXT_PUBLIC_SRC_SKAHA_API') ||
+      getProcessEnv('SRC_SKAHA_API') ||
+      'https://src.canfar.net/skaha';
     console.log('🔍 Server config - OIDC mode, using SRC Skaha API:', srcSkahaApi);
     return srcSkahaApi;
   } else {
     // CANFAR mode: Use standard CANFAR Skaha API
-    const canfarSkahaApi = env.SKAHA_API || env.NEXT_PUBLIC_SKAHA_API;
+    const canfarSkahaApi = getProcessEnv('SKAHA_API') || getProcessEnv('NEXT_PUBLIC_SKAHA_API');
     console.log('🔍 Server config - CANFAR mode, using CANFAR Skaha API:', canfarSkahaApi);
     return canfarSkahaApi || '';
   }
@@ -48,19 +50,26 @@ function getSkahaBaseUrl(): string {
 function getStorageBaseUrl(): string {
   if (isOIDCMode()) {
     // OIDC mode: Use SRC Cavern API that accepts SKA IAM tokens
-    const srcCavernApi = env.NEXT_PUBLIC_SRC_CAVERN_API || env.SRC_CAVERN_API || 'https://src.canfar.net/cavern/nodes/home/';
+    const srcCavernApi =
+      getProcessEnv('NEXT_PUBLIC_SRC_CAVERN_API') ||
+      getProcessEnv('SRC_CAVERN_API') ||
+      'https://src.canfar.net/cavern/nodes/home/';
     console.log('🔍 Server config - OIDC mode, using SRC Cavern API:', srcCavernApi);
     return srcCavernApi;
   } else {
     // CANFAR mode: Use standard CANFAR storage API
-    const canfarStorageApi = env.SERVICE_STORAGE_API || env.NEXT_PUBLIC_SERVICE_STORAGE_API;
+    const canfarStorageApi =
+      getProcessEnv('SERVICE_STORAGE_API') || getProcessEnv('NEXT_PUBLIC_SERVICE_STORAGE_API');
     console.log('🔍 Server config - CANFAR mode, using CANFAR Storage API:', canfarStorageApi);
     return canfarStorageApi || '';
   }
 }
 
 function apiTimeout(): number {
-  return parseInt(env.API_TIMEOUT || env.NEXT_PUBLIC_API_TIMEOUT || '30000', 10);
+  return parseInt(
+    getProcessEnv('API_TIMEOUT') || getProcessEnv('NEXT_PUBLIC_API_TIMEOUT') || '30000',
+    10,
+  );
 }
 
 export type ServerApiConfig = {
@@ -98,31 +107,41 @@ export const serverApiConfig: ServerApiConfig = {
   },
   get login() {
     return {
-      baseUrl: env.LOGIN_API || env.NEXT_PUBLIC_LOGIN_API || '',
+      baseUrl: getProcessEnv('LOGIN_API') || getProcessEnv('NEXT_PUBLIC_LOGIN_API') || '',
       timeout: apiTimeout(),
     };
   },
   get ac() {
     return {
-      baseUrl: env.AC_API || env.NEXT_PUBLIC_AC_API || 'https://ws-uv.canfar.net/ac',
+      baseUrl:
+        getProcessEnv('AC_API') || getProcessEnv('NEXT_PUBLIC_AC_API') || 'https://ws-uv.canfar.net/ac',
       timeout: apiTimeout(),
     };
   },
   get passwordReset() {
     return {
-      url: env.PASSWORD_RESET_URL || env.NEXT_PUBLIC_PASSWORD_RESET_URL || 'https://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/access/passwordResetRequest',
+      url:
+        getProcessEnv('PASSWORD_RESET_URL') ||
+        getProcessEnv('NEXT_PUBLIC_PASSWORD_RESET_URL') ||
+        'https://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/access/passwordResetRequest',
       timeout: apiTimeout(),
     };
   },
   get registration() {
     return {
-      url: env.REGISTRATION_URL || env.NEXT_PUBLIC_REGISTRATION_URL || 'https://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/access/control/proxy',
+      url:
+        getProcessEnv('REGISTRATION_URL') ||
+        getProcessEnv('NEXT_PUBLIC_REGISTRATION_URL') ||
+        'https://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/access/control/proxy',
       timeout: apiTimeout(),
       proxyHeaders: {
-        resourceId: env.CADC_PROXY_RESOURCE_ID || 'ivo://cadc.nrc.ca/gms',
-        standardId: env.CADC_PROXY_STANDARD_ID || 'ivo://ivoa.net/std/UMS#reqs-0.1',
-        authType: env.CADC_PROXY_AUTH_TYPE || 'anon',
-        interfaceTypeId: env.CADC_PROXY_INTERFACE_TYPE_ID || 'http://www.ivoa.net/xml/VODataService/v1.1#ParamHTTP',
+        resourceId: getProcessEnv('CADC_PROXY_RESOURCE_ID') || 'ivo://cadc.nrc.ca/gms',
+        standardId:
+          getProcessEnv('CADC_PROXY_STANDARD_ID') || 'ivo://ivoa.net/std/UMS#reqs-0.1',
+        authType: getProcessEnv('CADC_PROXY_AUTH_TYPE') || 'anon',
+        interfaceTypeId:
+          getProcessEnv('CADC_PROXY_INTERFACE_TYPE_ID') ||
+          'http://www.ivoa.net/xml/VODataService/v1.1#ParamHTTP',
       },
     };
   },

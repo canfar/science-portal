@@ -18,6 +18,7 @@ import {
 import { serverApiConfig } from '@/app/api/lib/server-config';
 import { createLogger } from '@/app/api/lib/logger';
 import type { SkahaSessionResponse } from '@/lib/api/skaha';
+import { getPublicRuntimeConfigFromEnv } from '@/lib/config/public-runtime-config';
 
 /**
  * POST /api/sessions/[id]/renew
@@ -28,7 +29,7 @@ import type { SkahaSessionResponse } from '@/lib/api/skaha';
  */
 export const POST = withErrorHandling(
   async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
-    const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+    const { basePath } = getPublicRuntimeConfigFromEnv();
     const sessionsAPIEndpoint = `${basePath}/api/sessions`;
     const logger = createLogger(`${sessionsAPIEndpoint}/[id]/renew`, 'POST');
 

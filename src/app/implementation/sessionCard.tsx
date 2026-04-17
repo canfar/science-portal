@@ -22,16 +22,15 @@ import {
   Code as CodeIcon,
 } from '@mui/icons-material';
 import { SessionCardProps, SessionType, SessionStatus } from '@/app/types/SessionCardProps';
-import { apiRoutes } from '@/lib/config/api';
 import React, { useState, useCallback } from 'react';
+import { useApiRoutes } from '@/lib/hooks/useApiRoutes';
+import { usePublicRuntimeConfig } from '@/lib/providers/PublicRuntimeConfigProvider';
 import Image from 'next/image';
 import { EventsModal } from '@/app/components/EventsModal/EventsModal';
 import { DeleteSessionModal } from '@/app/components/DeleteSessionModal/DeleteSessionModal';
 import { SessionRenewModal } from '@/app/components/SessionRenewModal/SessionRenewModal';
 
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
-
-const getSessionIcon = (type: SessionType): React.ReactNode => {
+const getSessionIcon = (basePath: string, type: SessionType): React.ReactNode => {
   const iconSize = 24; // Standard icon size
 
   switch (type) {
@@ -174,6 +173,8 @@ export const SessionCardImpl = React.forwardRef<HTMLDivElement, SessionCardProps
     },
     ref,
   ) => {
+    const apiRoutes = useApiRoutes();
+    const { basePath } = usePublicRuntimeConfig();
     const theme = useTheme();
     const [showEventsModal, setShowEventsModal] = useState(false);
     const [showLogsModal, setShowLogsModal] = useState(false);
@@ -363,7 +364,7 @@ export const SessionCardImpl = React.forwardRef<HTMLDivElement, SessionCardProps
                     flexShrink: 0, // Icon never shrinks
                   }}
                 >
-                  {getSessionIcon(sessionType)}
+                  {getSessionIcon(basePath, sessionType)}
                 </Box>
                 <Typography
                   variant="h6"

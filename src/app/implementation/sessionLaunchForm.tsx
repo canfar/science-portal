@@ -44,6 +44,7 @@ import {
   SKAHA_PROJECT,
 } from '@/lib/config/constants';
 import { startsWithNumber } from '@/lib/utils/validation';
+import { usePublicRuntimeConfig } from '@/lib/providers/PublicRuntimeConfigProvider';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -74,9 +75,6 @@ const DEFAULT_MEMORY_OPTIONS = [
 ];
 const DEFAULT_CORE_OPTIONS = Array.from({ length: 16 }, (_, i) => i + 1);
 
-// Read experimental feature flag from env
-const USE_EXPERIMENTAL_FEATURES = process.env.NEXT_PUBLIC_EXPERIMENTAL === 'true';
-
 export const SessionLaunchFormImpl = React.forwardRef<HTMLDivElement, SessionLaunchFormProps>(
   (
     {
@@ -103,6 +101,7 @@ export const SessionLaunchFormImpl = React.forwardRef<HTMLDivElement, SessionLau
     },
     ref,
   ) => {
+    const { experimental: USE_EXPERIMENTAL_FEATURES } = usePublicRuntimeConfig();
     const theme = useTheme();
 
     // URL query parameters for deep linking

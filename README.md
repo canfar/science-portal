@@ -175,8 +175,30 @@ src/
 
 ### Docker
 
+Build the production image (standalone Node server on port 3000):
+
 ```bash
-# Build and run with Docker Compose
+docker build -t science-portal .
+```
+
+Run a minimal container. The app is served under **`NEXT_PUBLIC_BASE_PATH`** (defaults to `/science-portal` in the `Dockerfile`), so open **http://localhost:3000/science-portal** unless you use an empty base path at build time.
+
+```bash
+docker run --rm \
+  -p 3000:3000 \
+  -e AUTH_SECRET='replace-with-a-long-random-string' \
+  -e NEXT_USE_CANFAR=true \
+  -e LOGIN_API='https://ws-cadc.canfar.net/ac' \
+  -e SKAHA_API='https://ws-uv.canfar.net/skaha' \
+  -e SERVICE_STORAGE_API='https://ws-uv.canfar.net/arc/nodes/home/' \
+  science-portal
+```
+
+Adjust the three API URLs for your environment. For **OIDC** mode, set `NEXT_USE_CANFAR=false` and supply the OIDC-related variables from `.env.example` instead of the CANFAR URLs above.
+
+You can also use Docker Compose:
+
+```bash
 docker-compose up --build
 ```
 

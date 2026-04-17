@@ -16,9 +16,11 @@ import {
 import { Close as CloseIcon } from '@mui/icons-material';
 import { TextField } from '@/app/components/TextField/TextField';
 import { ResetPasswordModalProps } from '@/app/types/ResetPasswordModalProps';
+import { usePublicRuntimeConfig } from '@/lib/providers/PublicRuntimeConfigProvider';
 
 export const ResetPasswordModalImpl = React.forwardRef<HTMLDivElement, ResetPasswordModalProps>(
   ({ open, onClose, isLoading = false, errorMessage, successMessage, ...dialogProps }, ref) => {
+    const { basePath } = usePublicRuntimeConfig();
     const [email, setEmail] = useState('');
     const [emailError, setEmailError] = useState<string | undefined>();
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -96,7 +98,6 @@ export const ResetPasswordModalImpl = React.forwardRef<HTMLDivElement, ResetPass
         setInternalSuccess(null);
 
         try {
-          const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
           const authAPIEndpoint = `${basePath}/api/auth`;
           const response = await fetch(`${authAPIEndpoint}/reset-password`, {
             method: 'POST',
@@ -130,7 +131,7 @@ export const ResetPasswordModalImpl = React.forwardRef<HTMLDivElement, ResetPass
           setIsSubmitting(false);
         }
       },
-      [email, validateEmail],
+      [email, validateEmail, basePath],
     );
 
     const handleClose = useCallback(

@@ -21,9 +21,11 @@ import {
   RegistrationFormData,
   RegistrationFormErrors,
 } from '@/app/types/RegistrationModalProps';
+import { usePublicRuntimeConfig } from '@/lib/providers/PublicRuntimeConfigProvider';
 
 export const RegistrationModalImpl = React.forwardRef<HTMLDivElement, RegistrationModalProps>(
   ({ open, onClose, isLoading = false, errorMessage, successMessage, ...dialogProps }, ref) => {
+    const { basePath } = usePublicRuntimeConfig();
     const [formData, setFormData] = useState<RegistrationFormData>({
       username: '',
       password: '',
@@ -173,7 +175,6 @@ export const RegistrationModalImpl = React.forwardRef<HTMLDivElement, Registrati
         setInternalSuccess(null);
 
         try {
-          const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
           const authAPIEndpoint = `${basePath}/api/auth`;
           const response = await fetch(`${authAPIEndpoint}/register`, {
             method: 'POST',
@@ -218,7 +219,7 @@ export const RegistrationModalImpl = React.forwardRef<HTMLDivElement, Registrati
           setIsSubmitting(false);
         }
       },
-      [formData, validateForm],
+      [formData, validateForm, basePath],
     );
 
     const handleClose = useCallback(() => {

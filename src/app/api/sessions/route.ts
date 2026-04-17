@@ -21,13 +21,14 @@ import { serverApiConfig } from '@/app/api/lib/server-config';
 import { createLogger } from '@/app/api/lib/logger';
 import type { SkahaSessionResponse, SessionLaunchParams } from '@/lib/api/skaha';
 import { HTTP_STATUS } from '@/app/api/lib/http-constants';
+import { getPublicRuntimeConfigFromEnv } from '@/lib/config/public-runtime-config';
 
 /**
  * GET /api/sessions
  * List all active sessions for the current user
  */
 export const GET = withErrorHandling(async (request: NextRequest) => {
-  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+  const { basePath } = getPublicRuntimeConfigFromEnv();
   const sessionsAPIEndpoint = `${basePath}/api/sessions`;
   const logger = createLogger(sessionsAPIEndpoint, 'GET');
   logger.logRequest(request);
@@ -70,7 +71,7 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
  * Launch a new session
  */
 export const POST = withErrorHandling(async (request: NextRequest) => {
-  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+  const { basePath } = getPublicRuntimeConfigFromEnv();
   const sessionsAPIEndpoint = `${basePath}/api/sessions`;
   const logger = createLogger(sessionsAPIEndpoint, 'POST');
 
