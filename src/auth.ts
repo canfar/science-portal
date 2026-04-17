@@ -1,7 +1,6 @@
 import NextAuth from 'next-auth';
 import type { NextAuthConfig } from 'next-auth';
 import { getOIDCConfig, isOIDCAuth } from '@/lib/config/auth-config';
-import { getAuthApiBasePathFromEnv } from '@/lib/config/auth-base-path';
 
 /**
  * NextAuth Configuration for OIDC Authentication
@@ -31,7 +30,12 @@ interface OIDCProfile {
 }
 
 export const authConfig: NextAuthConfig = {
-  basePath: getAuthApiBasePathFromEnv(),
+  /**
+   * Must stay `/api/auth`: Next.js strips `basePath` before Auth.js sees `pathname`
+   * (e.g. `/api/auth/providers`). A value like `/science-portal/api/auth` breaks action parsing.
+   * The browser still calls `/science-portal/api/auth/*` via `SessionProvider` in AuthProvider.
+   */
+  basePath: '/api/auth',
   providers: [],
   pages: {
     signIn: `/`,
