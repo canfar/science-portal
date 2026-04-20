@@ -436,7 +436,7 @@ export default function SciencePortalPage() {
               }}
             >
               <LaunchFormWidget
-                helpUrl="https://www.opencadc.org/science-containers/"
+                helpUrl="https://www.opencadc.org/canfar/latest/platform/sessions/"
                 imagesByType={imagesByType}
                 repositoryHosts={imageRepositories
                   .map((repo) => repo.host)
