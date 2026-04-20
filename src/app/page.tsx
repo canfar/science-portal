@@ -389,7 +389,7 @@ export default function SciencePortalPage() {
                 onRefresh={handleSessionsRefresh}
                 emptyMessage={
                   showLoggedOutCopy
-                    ? 'Sign in to see your active sessions. Use Sign in in the header.'
+                    ? 'Sign in to see your active sessions. Use the Login button in the header.'
                     : 'No active sessions'
                 }
               />
@@ -409,7 +409,7 @@ export default function SciencePortalPage() {
                 isLoading={isLoadingUserStorage}
                 emptyMessage={
                   showLoggedOutCopy
-                    ? 'Sign in to view your storage usage. Use Sign in in the header.'
+                    ? 'Sign in to view your storage usage. Use the Login button in the header.'
                     : 'No storage data available'
                 }
               />
@@ -437,7 +437,7 @@ export default function SciencePortalPage() {
                 helpUrl="https://www.opencadc.org/canfar/latest/platform/sessions/"
                 signInAlertMessage={
                   showLoggedOutCopy
-                    ? 'Sign in to launch sessions. Use Sign in in the header.'
+                    ? 'Sign in to launch sessions. Use the Login button in the header.'
                     : undefined
                 }
                 imagesByType={imagesByType}
