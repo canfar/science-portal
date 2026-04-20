@@ -344,6 +344,8 @@ secrets:
     oidcClientSecret: "oidc-client-secret"
 ```
 
+Optional server environment variable (not `NEXT_PUBLIC_*`): **`NEXT_OIDC_ACCESS_TOKEN_REFRESH_MARGIN_MS`** — milliseconds before OIDC access token expiry that NextAuth should refresh the token (default **300000**, i.e. five minutes). Add under Helm `env` if you need a different margin.
+
 **Create secrets:**
 ```bash
 kubectl create secret generic science-portal-secrets \

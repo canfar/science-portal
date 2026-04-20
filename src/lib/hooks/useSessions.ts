@@ -57,6 +57,14 @@ export function useSessions(
     queryFn: getSessions,
     // Only fetch if authenticated (default to true for backward compatibility)
     enabled: isAuthenticated !== false,
+    // Avoid long “loading” from default retries when the token is rejected (stale/expired Bearer)
+    retry(failureCount, error) {
+      const msg = error instanceof Error ? error.message : String(error);
+      if (/\b401\b/.test(msg)) {
+        return false;
+      }
+      return failureCount < 3;
+    },
     // No auto-refresh - only manual refresh and on user actions (delete, launch, extend)
     ...options,
   });

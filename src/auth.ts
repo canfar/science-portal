@@ -20,6 +20,33 @@ interface TokenWithRefresh {
   [key: string]: unknown; // Index signature for JWT compatibility
 }
 
+/**
+ * Default margin before OIDC access token expiry to run refresh in the JWT callback.
+ * Override with server env `NEXT_OIDC_ACCESS_TOKEN_REFRESH_MARGIN_MS` (milliseconds, non-negative).
+ * Documented in `.env.example` and `helm/DEPLOYMENT-MODES.md`.
+ */
+const DEFAULT_ACCESS_TOKEN_REFRESH_MARGIN_MS = 5 * 60 * 1000;
+
+function getAccessTokenRefreshMarginMs(): number {
+  const raw = getProcessEnv('NEXT_OIDC_ACCESS_TOKEN_REFRESH_MARGIN_MS');
+  if (raw) {
+    const n = parseInt(raw, 10);
+    if (!Number.isNaN(n) && n >= 0) {
+      return n;
+    }
+  }
+  return DEFAULT_ACCESS_TOKEN_REFRESH_MARGIN_MS;
+}
+
+function isAccessTokenStillValid(token: TokenWithRefresh): boolean {
+  const expiresAt = token.accessTokenExpires as number | undefined;
+  if (!expiresAt) {
+    return false;
+  }
+  const marginMs = getAccessTokenRefreshMarginMs();
+  return Date.now() < expiresAt - marginMs;
+}
+
 // OIDC profile type
 interface OIDCProfile {
   sub: string;
@@ -91,13 +118,12 @@ export const authConfig: NextAuthConfig = {
         };
       }
 
-      // Return previous token if the access token has not expired yet
-      if (Date.now() < (token.accessTokenExpires as number)) {
+      // Return previous token if still valid (including proactive margin before expiry)
+      if (isAccessTokenStillValid(token)) {
         return token;
       }
 
-      console.log('⏰ JWT Callback - Token Expired, Refreshing...');
-      // Access token has expired, try to refresh it
+      console.log('⏰ JWT Callback - Token expired or within refresh margin, refreshing...');
       return refreshAccessToken(token);
     },
     async session({ session, token }) {
@@ -159,6 +185,7 @@ async function refreshAccessToken(token: TokenWithRefresh): Promise<TokenWithRef
       accessToken: refreshedTokens.access_token,
       accessTokenExpires: Date.now() + refreshedTokens.expires_in * 1000,
       refreshToken: refreshedTokens.refresh_token ?? token.refreshToken,
+      error: undefined,
     };
   } catch (error) {
     console.error('Error refreshing access token:', error);

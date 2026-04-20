@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useCallback, useMemo, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
 import { AppBarWithAuth } from '@/app/components/AppBarWithAuth/AppBarWithAuth';
 import { ActiveSessionsWidget } from '@/app/components/ActiveSessionsWidget/ActiveSessionsWidget';
 import { UserStorageWidget } from '@/app/components/UserStorageWidget/UserStorageWidget';
@@ -26,7 +25,6 @@ import { useContainerImages, useImageRepositories, useContext } from '@/lib/hook
 import { STATIC_PLATFORM_LOAD_DATA } from '@/lib/config/static-platform-load';
 import { useQueryClient } from '@tanstack/react-query';
 import type { Session, SessionLaunchParams } from '@/lib/api/skaha';
-import { saveToken, hasToken } from '@/lib/auth/token-storage';
 import {
   DOCS_URL,
   ABOUT_URL,
@@ -45,18 +43,7 @@ export default function SciencePortalPage() {
   const { useCanfar } = usePublicRuntimeConfig();
   const isOIDCMode = !useCanfar;
 
-  // Get NextAuth session to extract and save token
-  const { data: session, status: sessionStatus } = useSession();
-
-  // Save token to localStorage when NextAuth session is available
-  useEffect(() => {
-    if (sessionStatus === 'authenticated' && session?.accessToken) {
-      // Only save if not already in localStorage
-      if (!hasToken()) {
-        saveToken(session.accessToken);
-      }
-    }
-  }, [session, sessionStatus]);
+  // OIDC token mirror: useAuthStatus → useAuth syncs session.accessToken to localStorage
 
   // Get authentication status and query client for cache management
   const { data: authStatus } = useAuthStatus();

@@ -61,10 +61,11 @@ export function getOIDCConfig(allowMissing = false): OIDCConfig {
     getProcessEnv('NEXT_OIDC_CALLBACK_URI') || getProcessEnv('NEXT_PUBLIC_OIDC_CALLBACK_URI');
   const redirectUrl =
     getProcessEnv('NEXT_OIDC_REDIRECT_URI') || getProcessEnv('NEXT_PUBLIC_OIDC_REDIRECT_URI');
+  // Include offline_access so the IdP can issue refresh tokens (required by many providers; omit via env if unsupported).
   const scope =
     getProcessEnv('NEXT_OIDC_SCOPE') ||
     getProcessEnv('NEXT_PUBLIC_OIDC_SCOPE') ||
-    'openid profile email';
+    'openid profile email offline_access';
   const isBuildTime = getProcessEnv('NEXT_PHASE') === 'phase-production-build';
 
   if (!issuer || !clientId || !callbackUrl || !redirectUrl) {
