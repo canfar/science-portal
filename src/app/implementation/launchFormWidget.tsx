@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useCallback } from 'react';
-import { Paper, Typography, IconButton, Box, LinearProgress, Link } from '@mui/material';
+import { Paper, Typography, IconButton, Box, LinearProgress, Link, Alert } from '@mui/material';
 import { Refresh as RefreshIcon, HelpOutline as HelpOutlineIcon } from '@mui/icons-material';
 import { useTheme } from '@mui/material/styles';
 import { LaunchFormWidgetProps } from '@/app/types/LaunchFormWidgetProps';
@@ -18,6 +18,7 @@ export function LaunchFormWidgetImpl({
   showProgressIndicator = false,
   progressPercentage = 0,
   helpUrl,
+  signInAlertMessage,
   imagesByType = {},
   repositoryHosts = [],
   activeSessions = [],
@@ -134,6 +135,12 @@ export function LaunchFormWidgetImpl({
       }}
       component="div"
     >
+      {signInAlertMessage ? (
+        <Alert severity="info" sx={{ mb: 2 }}>
+          {signInAlertMessage}
+        </Alert>
+      ) : null}
+
       {/* Header */}
       <Box
         sx={{

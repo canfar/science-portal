@@ -46,8 +46,9 @@ export default function SciencePortalPage() {
   // OIDC token mirror: useAuthStatus → useAuth syncs session.accessToken to localStorage
 
   // Get authentication status and query client for cache management
-  const { data: authStatus } = useAuthStatus();
+  const { data: authStatus, isLoading: authLoading } = useAuthStatus();
   const isAuthenticated = authStatus?.authenticated ?? false;
+  const showLoggedOutCopy = !authLoading && !isAuthenticated;
   const queryClient = useQueryClient();
 
   // Track previous auth state to detect logout
@@ -223,19 +224,19 @@ export default function SciencePortalPage() {
     };
   }, [pollingSessionId, startPolling, stopPolling]);
 
-  // LOADING LOGIC - ALL IN ONE PLACE:
-  // NOT authenticated → ALWAYS show loading
-  // IS authenticated → show loading while initial loading OR refetching (after 30s delay from mutations)
-  const isLoadingSessions = !isAuthenticated || isLoading || isFetching;
+  // LOADING: show skeletons while auth is unknown, or while authenticated and data is loading/refetching
+  const isLoadingSessions =
+    authLoading || (isAuthenticated && (isLoading || isFetching));
   const isLoadingLaunchForm =
-    !isAuthenticated ||
-    isLoadingImages ||
-    isLoadingRepositories ||
-    isLoadingContext ||
-    isFetchingImages ||
-    isFetchingRepositories ||
-    isFetchingContext;
-  const isLoadingUserStorage = !isAuthenticated;
+    authLoading ||
+    (isAuthenticated &&
+      (isLoadingImages ||
+        isLoadingRepositories ||
+        isLoadingContext ||
+        isFetchingImages ||
+        isFetchingRepositories ||
+        isFetchingContext));
+  const isLoadingUserStorage = authLoading;
 
   // Create stable handlers using useCallback
   const handleDeleteSession = useCallback(
@@ -386,6 +387,11 @@ export default function SciencePortalPage() {
                 layout="responsive"
                 isLoading={isLoadingSessions}
                 onRefresh={handleSessionsRefresh}
+                emptyMessage={
+                  showLoggedOutCopy
+                    ? 'Sign in to see your active sessions. Use Sign in in the header.'
+                    : 'No active sessions'
+                }
               />
             </Box>
 
@@ -401,6 +407,11 @@ export default function SciencePortalPage() {
                 isAuthenticated={isAuthenticated}
                 name={authStatus?.user?.username || ''}
                 isLoading={isLoadingUserStorage}
+                emptyMessage={
+                  showLoggedOutCopy
+                    ? 'Sign in to view your storage usage. Use Sign in in the header.'
+                    : 'No storage data available'
+                }
               />
             </Box>
           </Box>
@@ -424,6 +435,11 @@ export default function SciencePortalPage() {
             >
               <LaunchFormWidget
                 helpUrl="https://www.opencadc.org/canfar/latest/platform/sessions/"
+                signInAlertMessage={
+                  showLoggedOutCopy
+                    ? 'Sign in to launch sessions. Use Sign in in the header.'
+                    : undefined
+                }
                 imagesByType={imagesByType}
                 repositoryHosts={imageRepositories
                   .map((repo) => repo.host)

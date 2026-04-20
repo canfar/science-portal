@@ -8,6 +8,8 @@ export interface LaunchFormWidgetProps extends SessionLaunchFormProps {
   showProgressIndicator?: boolean;
   progressPercentage?: number;
   helpUrl?: string;
+  /** When set (e.g. logged-out empty state), shows an info alert above the form. */
+  signInAlertMessage?: string;
   // Optional custom launch function to override default API call
   launchSessionFn?: (params: SessionLaunchParams) => Promise<Session>;
 }

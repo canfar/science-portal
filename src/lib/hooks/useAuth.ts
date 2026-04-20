@@ -93,6 +93,14 @@ export function useAuthStatus(options?: Omit<UseQueryOptions<AuthStatus>, 'query
     }
   }, [isCanfar, status, session?.accessToken]);
 
+  useEffect(() => {
+    if (!isCanfar && status === 'unauthenticated') {
+      import('@/lib/auth/token-storage').then(({ clearAuth }) => {
+        clearAuth();
+      });
+    }
+  }, [isCanfar, status]);
+
   // In OIDC mode, directly return NextAuth session state (no React Query)
   if (!isCanfar) {
     const oidcAuthStatus: AuthStatus =
@@ -212,7 +220,8 @@ export function useLogout(options?: UseMutationOptions<void, Error, void>) {
         // CANFAR logout
         await canfarLogout();
       } else {
-        // OIDC logout - use NextAuth signOut
+        const { clearAuth } = await import('@/lib/auth/token-storage');
+        clearAuth();
         await nextAuthSignOut({ callbackUrl: callbackBase });
       }
     },
