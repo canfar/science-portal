@@ -10,6 +10,9 @@ import {
   getImagesForType,
   getImagesForTypeAndProject,
   getProjectNames,
+  getImageRegistryFromId,
+  filterImagesByRegistry,
+  filterImagesByProjectForRegistry,
   type RawImage,
   type ParsedImage,
   type ImagesByProject,
@@ -491,5 +494,87 @@ describe('getProjectNames', () => {
 
     const result = getProjectNames(projectMap);
     expect(result).toEqual(['alpha', 'Beta', 'Zebra']);
+  });
+});
+
+describe('getImageRegistryFromId', () => {
+  it('returns registry from a valid image id', () => {
+    expect(getImageRegistryFromId('images.canfar.net/skaha/carta:4.0')).toBe('images.canfar.net');
+  });
+
+  it('returns undefined for invalid id', () => {
+    expect(getImageRegistryFromId('')).toBeUndefined();
+    expect(getImageRegistryFromId('two/parts')).toBeUndefined();
+  });
+});
+
+describe('filterImagesByRegistry', () => {
+  const mixed: ParsedImage[] = [
+    {
+      id: 'images.canfar.net/skaha/notebook:1.0',
+      registry: 'images.canfar.net',
+      project: 'skaha',
+      name: 'notebook:1.0',
+      imageName: 'notebook',
+      version: '1.0',
+      label: 'notebook:1.0',
+    },
+    {
+      id: 'images.opencadc.org/proj/tool:1.0',
+      registry: 'images.opencadc.org',
+      project: 'proj',
+      name: 'tool:1.0',
+      imageName: 'tool',
+      version: '1.0',
+      label: 'tool:1.0',
+    },
+  ];
+
+  it('filters by registry', () => {
+    const r = filterImagesByRegistry(mixed, 'images.canfar.net');
+    expect(r).toHaveLength(1);
+    expect(r[0].id).toBe('images.canfar.net/skaha/notebook:1.0');
+  });
+
+  it('returns empty for invalid inputs', () => {
+    expect(filterImagesByRegistry(mixed, '')).toEqual([]);
+    expect(filterImagesByRegistry([], 'images.canfar.net')).toEqual([]);
+  });
+});
+
+describe('filterImagesByProjectForRegistry', () => {
+  it('drops projects with no images in registry', () => {
+    const byProject: ImagesByProject = {
+      skaha: [
+        {
+          id: 'images.canfar.net/skaha/notebook:1.0',
+          registry: 'images.canfar.net',
+          project: 'skaha',
+          name: 'notebook:1.0',
+          imageName: 'notebook',
+          version: '1.0',
+          label: 'notebook:1.0',
+        },
+      ],
+      other: [
+        {
+          id: 'images.opencadc.org/other/x:1.0',
+          registry: 'images.opencadc.org',
+          project: 'other',
+          name: 'x:1.0',
+          imageName: 'x',
+          version: '1.0',
+          label: 'x:1.0',
+        },
+      ],
+    };
+
+    const r = filterImagesByProjectForRegistry(byProject, 'images.canfar.net');
+    expect(Object.keys(r)).toEqual(['skaha']);
+    expect(r.skaha).toHaveLength(1);
+  });
+
+  it('returns empty object for empty registry', () => {
+    expect(filterImagesByProjectForRegistry({ skaha: [] }, 'images.canfar.net')).toEqual({});
   });
 });

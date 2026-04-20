@@ -293,3 +293,43 @@ export function getProjectNames(imagesByProject: ImagesByProject): string[] {
     a.localeCompare(b, undefined, { sensitivity: 'base' }),
   );
 }
+
+/**
+ * Registry segment from a full image id (first path segment).
+ * Prefer {@link parseImageId} for structured parsing.
+ */
+export function getImageRegistryFromId(imageId: string): string | undefined {
+  const parsed = parseImageId(imageId);
+  return parsed?.registry;
+}
+
+/**
+ * Keep only images whose registry matches (uses {@link ParsedImage.registry}).
+ */
+export function filterImagesByRegistry(images: ParsedImage[], registry: string): ParsedImage[] {
+  if (!Array.isArray(images) || !registry) {
+    return [];
+  }
+  return images.filter((img) => img.registry === registry);
+}
+
+/**
+ * Per-project image lists filtered to a single registry; drops empty projects.
+ */
+export function filterImagesByProjectForRegistry(
+  imagesByProject: ImagesByProject,
+  registry: string,
+): ImagesByProject {
+  if (!imagesByProject || !registry) {
+    return {};
+  }
+
+  const result: ImagesByProject = {};
+  for (const [project, imgs] of Object.entries(imagesByProject)) {
+    const filtered = filterImagesByRegistry(imgs, registry);
+    if (filtered.length > 0) {
+      result[project] = filtered;
+    }
+  }
+  return result;
+}

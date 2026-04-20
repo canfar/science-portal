@@ -33,7 +33,11 @@ import {
   SessionFormData,
   SessionType,
 } from '@/app/types/SessionLaunchFormProps';
-import { getProjectNames } from '@/lib/utils/image-parser';
+import {
+  getProjectNames,
+  filterImagesByProjectForRegistry,
+  type ImagesByProject,
+} from '@/lib/utils/image-parser';
 import {
   DEFAULT_CORES_NUMBER,
   DEFAULT_RAM_NUMBER,
@@ -141,35 +145,61 @@ export const SessionLaunchFormImpl = React.forwardRef<HTMLDivElement, SessionLau
       gpus: urlParams.gpus ?? defaultValues.gpus ?? 0,
       resourceType: initialResourceType, // Track resource type
       // Advanced tab fields
-      repositoryHost:
-        repositoryHosts.find((host) => host && typeof host === 'string') || 'images-rc.canfar.net',
+      repositoryHost: (() => {
+        const rh = repositoryHosts.filter((host) => host && typeof host === 'string');
+        if (rh.length === 1) {
+          return rh[0];
+        }
+        if (rh.length > 1) {
+          return '';
+        }
+        return rh[0] || 'images-rc.canfar.net';
+      })(),
       image: '',
       repositoryAuthUsername: '',
       repositoryAuthSecret: '',
     });
 
-    // Get available projects for the selected session type
-    const availableProjects = useMemo(() => {
-      const imagesForType = imagesByType[formData.type];
-      if (!imagesForType) return [];
-      return getProjectNames(imagesForType);
-    }, [imagesByType, formData.type]);
+    const validHosts = useMemo(
+      () => repositoryHosts.filter((h): h is string => typeof h === 'string' && h.length > 0),
+      [repositoryHosts],
+    );
 
-    // Get available images for the selected type and project
-    // Filter by the primary repository host (first in repositoryHosts array)
+    const hasMultipleRegistries = validHosts.length > 1;
+
+    const effectiveRegistry = useMemo(() => {
+      if (validHosts.length === 0) {
+        return undefined;
+      }
+      if (validHosts.length === 1) {
+        return validHosts[0];
+      }
+      const selected = formData.repositoryHost;
+      if (selected && validHosts.includes(selected)) {
+        return selected;
+      }
+      return undefined;
+    }, [validHosts, formData.repositoryHost]);
+
+    const imagesByTypeForRegistry = useMemo(() => {
+      const imagesForType = imagesByType[formData.type];
+      if (!imagesForType || !effectiveRegistry) {
+        return {} as ImagesByProject;
+      }
+      return filterImagesByProjectForRegistry(imagesForType, effectiveRegistry);
+    }, [imagesByType, formData.type, effectiveRegistry]);
+
+    const availableProjects = useMemo(
+      () => getProjectNames(imagesByTypeForRegistry),
+      [imagesByTypeForRegistry],
+    );
+
     const availableImages = useMemo(() => {
-      const imagesForType = imagesByType[formData.type];
-      if (!imagesForType || !formData.project) return [];
-      const imagesForProject = imagesForType[formData.project];
-      if (!imagesForProject) return [];
-
-      // Filter images to only show those from the primary repository host
-      const validHosts = repositoryHosts.filter((host) => host && typeof host === 'string');
-      const primaryHost = validHosts[0];
-      if (!primaryHost) return imagesForProject;
-
-      return imagesForProject.filter((img) => img.registry === primaryHost);
-    }, [imagesByType, formData.type, formData.project, repositoryHosts]);
+      if (!formData.project || !effectiveRegistry) {
+        return [];
+      }
+      return imagesByTypeForRegistry[formData.project] || [];
+    }, [imagesByTypeForRegistry, formData.project, effectiveRegistry]);
 
     // Check if the selected session type supports resource configuration
     // firefly and desktop don't support custom resource allocation
@@ -203,48 +233,67 @@ export const SessionLaunchFormImpl = React.forwardRef<HTMLDivElement, SessionLau
       setUrlParams({ name: newSessionName });
     }, [activeSessionsCount, generateSessionName, formData.type, setUrlParams]);
 
-    // Auto-select default image when images load or type/project changes
+    // Keep project in sync with selected registry / session type (must exist in filtered map)
     useEffect(() => {
-      // Only auto-select if no image is currently selected or if the current image is invalid
-      if (!imagesByType || Object.keys(imagesByType).length === 0) return;
-
-      const imagesForType = imagesByType[formData.type];
-      if (!imagesForType) return;
-
-      const imagesForProject = imagesForType[formData.project];
-      if (!imagesForProject || imagesForProject.length === 0) return;
-
-      // Check if current containerImage is valid for the current type/project
-      const currentImageValid = imagesForProject.some((img) => img.id === formData.containerImage);
-
-      // If no image selected or current image is invalid, select the first available image
-      if (!formData.containerImage || !currentImageValid) {
-        const firstImage = imagesForProject[0];
+      if (!effectiveRegistry) {
+        return;
+      }
+      const names = getProjectNames(imagesByTypeForRegistry);
+      if (names.length === 0) {
+        return;
+      }
+      if (!formData.project || !names.includes(formData.project)) {
+        const next = names.includes(SKAHA_PROJECT) ? SKAHA_PROJECT : names[0];
         setFormData((prev) => ({
           ...prev,
-          containerImage: firstImage.id,
+          project: next,
+          containerImage: '',
         }));
-        setUrlParams({ image: firstImage.id });
+        setUrlParams({ project: next, image: '' });
       }
-    }, [imagesByType, formData.type, formData.project, formData.containerImage, setUrlParams]);
+    }, [effectiveRegistry, imagesByTypeForRegistry, formData.project, formData.type, setUrlParams]);
 
-    // Update repositoryHost when repositoryHosts changes (API loads)
+    // Auto-select first image for current project within the effective registry
     useEffect(() => {
-      const validHosts = repositoryHosts.filter((host) => host && typeof host === 'string');
-      if (validHosts.length > 0) {
-        // Update if no host is set OR if current host is the fallback value
-        // This ensures we use the API value instead of the fallback
-        const isFallbackValue = formData.repositoryHost === 'images-rc.canfar.net';
-        const needsUpdate = !formData.repositoryHost || isFallbackValue;
-
-        if (needsUpdate && validHosts[0] !== formData.repositoryHost) {
-          setFormData((prev) => ({
-            ...prev,
-            repositoryHost: validHosts[0],
-          }));
-        }
+      if (!effectiveRegistry || availableImages.length === 0) {
+        return;
       }
-    }, [repositoryHosts, formData.repositoryHost]);
+      const currentValid = availableImages.some((img) => img.id === formData.containerImage);
+      if (!formData.containerImage || !currentValid) {
+        const first = availableImages[0];
+        setFormData((prev) => ({
+          ...prev,
+          containerImage: first.id,
+        }));
+        setUrlParams({ image: first.id });
+      }
+    }, [
+      effectiveRegistry,
+      availableImages,
+      formData.containerImage,
+      formData.project,
+      setUrlParams,
+    ]);
+
+    // Single registry: always mirror that host. Multiple: clear invalid selection.
+    useEffect(() => {
+      if (validHosts.length === 1) {
+        const only = validHosts[0];
+        if (formData.repositoryHost !== only) {
+          setFormData((prev) => ({ ...prev, repositoryHost: only }));
+        }
+        return;
+      }
+      if (validHosts.length > 1 && formData.repositoryHost && !validHosts.includes(formData.repositoryHost)) {
+        setFormData((prev) => ({
+          ...prev,
+          repositoryHost: '',
+          project: '',
+          containerImage: '',
+        }));
+        setUrlParams({ project: '', image: '' });
+      }
+    }, [validHosts, formData.repositoryHost, setUrlParams]);
 
     const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
       setTabValue(newValue);
@@ -290,6 +339,11 @@ export const SessionLaunchFormImpl = React.forwardRef<HTMLDivElement, SessionLau
             newData.sessionName = generateSessionName(value);
           }
 
+          if (field === 'repositoryHost') {
+            newData.project = '';
+            newData.containerImage = '';
+          }
+
           // Reset container image when project changes
           if (field === 'project') {
             newData.containerImage = '';
@@ -315,6 +369,8 @@ export const SessionLaunchFormImpl = React.forwardRef<HTMLDivElement, SessionLau
           } else {
             setUrlParams({ type: newType, project: SKAHA_PROJECT, image: '' });
           }
+        } else if (field === 'repositoryHost') {
+          setUrlParams({ project: '', image: '' });
         } else if (field === 'project') {
           setUrlParams({ project: value as string, image: '' });
         } else if (field === 'containerImage') {
@@ -355,9 +411,16 @@ export const SessionLaunchFormImpl = React.forwardRef<HTMLDivElement, SessionLau
         cores: defaultValues.cores || DEFAULT_CORES_NUMBER,
         gpus: defaultValues.gpus ?? 0,
         // Advanced tab fields
-        repositoryHost:
-          repositoryHosts.find((host) => host && typeof host === 'string') ||
-          'images-rc.canfar.net',
+        repositoryHost: (() => {
+          const rh = repositoryHosts.filter((host) => host && typeof host === 'string');
+          if (rh.length === 1) {
+            return rh[0];
+          }
+          if (rh.length > 1) {
+            return '';
+          }
+          return rh[0] || 'images-rc.canfar.net';
+        })(),
         image: '',
         repositoryAuthUsername: '',
         repositoryAuthSecret: '',
@@ -538,6 +601,21 @@ export const SessionLaunchFormImpl = React.forwardRef<HTMLDivElement, SessionLau
                   </Grid>
                 </Grid>
 
+                {/* Image registry field skeleton */}
+                <Grid container alignItems="center" spacing={2}>
+                  <Grid size={{ xs: 12, sm: 4 }}>
+                    <Skeleton variant="text" width="55%" height={20} />
+                  </Grid>
+                  <Grid size={{ xs: 12, sm: 8 }}>
+                    <Skeleton
+                      variant="rectangular"
+                      width="100%"
+                      height={40}
+                      sx={{ borderRadius: 1 }}
+                    />
+                  </Grid>
+                </Grid>
+
                 {/* Project field skeleton */}
                 <Grid container alignItems="center" spacing={2}>
                   <Grid size={{ xs: 12, sm: 4 }}>
@@ -675,6 +753,56 @@ export const SessionLaunchFormImpl = React.forwardRef<HTMLDivElement, SessionLau
                     </Grid>
                   </Grid>
 
+                  {/* Image registry field */}
+                  <Grid container alignItems="center" spacing={2}>
+                    <Grid size={{ xs: 12, sm: 4 }}>
+                      <FormLabel
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          fontSize: '0.875rem',
+                          fontWeight: 500,
+                        }}
+                      >
+                        image registry
+                        <HelpIcon title="Select the image registry containing your container images." />
+                      </FormLabel>
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 8 }}>
+                      {hasMultipleRegistries ? (
+                        <Select
+                          id="session-registry"
+                          value={formData.repositoryHost ?? ''}
+                          onChange={
+                            handleSelectChange('repositoryHost') as React.ComponentProps<
+                              typeof Select
+                            >['onChange']
+                          }
+                          disabled={isLoading}
+                          fullWidth
+                          size="sm"
+                        >
+                          <MenuItem value="">
+                            <em>Select registry</em>
+                          </MenuItem>
+                          {validHosts.map((host) => (
+                            <MenuItem key={host} value={host}>
+                              {host}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      ) : (
+                        <TextField
+                          id="session-registry-readonly"
+                          value={validHosts[0] ?? formData.repositoryHost ?? ''}
+                          disabled
+                          fullWidth
+                          size="sm"
+                        />
+                      )}
+                    </Grid>
+                  </Grid>
+
                   {/* Project field */}
                   <Grid container alignItems="center" spacing={2}>
                     <Grid size={{ xs: 12, sm: 4 }}>
@@ -699,7 +827,11 @@ export const SessionLaunchFormImpl = React.forwardRef<HTMLDivElement, SessionLau
                             typeof Select
                           >['onChange']
                         }
-                        disabled={isLoading || availableProjects.length === 0}
+                        disabled={
+                          isLoading ||
+                          availableProjects.length === 0 ||
+                          (hasMultipleRegistries && !effectiveRegistry)
+                        }
                         fullWidth
                         size="sm"
                       >
@@ -739,7 +871,12 @@ export const SessionLaunchFormImpl = React.forwardRef<HTMLDivElement, SessionLau
                             typeof Select
                           >['onChange']
                         }
-                        disabled={isLoading || !formData.project || availableImages.length === 0}
+                        disabled={
+                          isLoading ||
+                          !formData.project ||
+                          availableImages.length === 0 ||
+                          (hasMultipleRegistries && !effectiveRegistry)
+                        }
                         fullWidth
                         size="sm"
                       >
