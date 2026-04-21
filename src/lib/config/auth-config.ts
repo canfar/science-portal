@@ -49,12 +49,20 @@ export function isOIDCAuth(): boolean {
 }
 
 /**
- * OIDC env vars often use a trailing slash. Auth.js builds discovery as
- * `{issuer}/.well-known/...` — a trailing slash on issuer yields `//.well-known`
- * and can break fetches. Normalize to no trailing slash.
+ * OpenID configuration URL. Uses WHATWG `new URL` so a trailing slash on
+ * `issuer` (as published by the IdP) does not create `//` in the path.
+ * Set `NEXT_OIDC_URI` to the same `issuer` string as the IdP (including `/` or not).
  */
-export function normalizeOidcIssuer(issuer: string): string {
-  return issuer.replace(/\/+$/, '');
+export function getOidcOpenIdConfigurationUrl(issuer: string): string {
+  return new URL('.well-known/openid-configuration', issuer).href;
+}
+
+/**
+ * Join a path segment (e.g. `token` for a token endpoint at `{issuer}token` relative
+ * to issuer root) without duplicating slashes when `issuer` ends with `/`.
+ */
+export function getOidcIssuerPathUrl(issuer: string, pathSegment: string): string {
+  return new URL(pathSegment, issuer).href;
 }
 
 /**
@@ -82,7 +90,7 @@ export function getOIDCConfig(allowMissing = false): OIDCConfig {
     if (isBuildTime || allowMissing) {
       console.warn('⚠️ OIDC config missing - using dummy values (build time)');
       return {
-        issuer: normalizeOidcIssuer(issuer || 'https://example.com'),
+        issuer: (issuer || 'https://example.com/').trim(),
         clientId: clientId || 'dummy-client-id',
         clientSecret: clientSecret || 'dummy-secret',
         callbackUrl: callbackUrl || 'http://localhost:3000/',
@@ -102,7 +110,7 @@ export function getOIDCConfig(allowMissing = false): OIDCConfig {
   }
 
   return {
-    issuer: normalizeOidcIssuer(issuer),
+    issuer: issuer.trim(),
     clientId,
     clientSecret,
     callbackUrl,

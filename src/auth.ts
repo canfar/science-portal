@@ -1,6 +1,6 @@
 import NextAuth from 'next-auth';
 import type { NextAuthConfig } from 'next-auth';
-import { getOIDCConfig, isOIDCAuth } from '@/lib/config/auth-config';
+import { getOIDCConfig, getOidcIssuerPathUrl, isOIDCAuth } from '@/lib/config/auth-config';
 import { getProcessEnv } from '@/lib/config/safe-process-env';
 
 /**
@@ -159,7 +159,7 @@ export const authConfig: NextAuthConfig = {
 async function refreshAccessToken(token: TokenWithRefresh): Promise<TokenWithRefresh> {
   try {
     const oidcConfig = getOIDCConfig();
-    const url = `${oidcConfig.issuer}/token`;
+    const url = getOidcIssuerPathUrl(oidcConfig.issuer, 'token');
 
     if (!token.refreshToken) {
       throw new Error('No refresh token available');

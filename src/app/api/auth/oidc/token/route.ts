@@ -6,7 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getOIDCConfig } from '@/lib/config/auth-config';
+import { getOIDCConfig, getOidcOpenIdConfigurationUrl } from '@/lib/config/auth-config';
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     const oidcConfig = getOIDCConfig();
 
     // Discover OIDC endpoints
-    const discoveryUrl = `${oidcConfig.issuer}/.well-known/openid-configuration`;
+    const discoveryUrl = getOidcOpenIdConfigurationUrl(oidcConfig.issuer);
     const discoveryResponse = await fetch(discoveryUrl);
 
     if (!discoveryResponse.ok) {

@@ -5,7 +5,7 @@
  * This allows us to obtain and manage access tokens directly for backend API calls.
  */
 
-import { getOIDCConfig } from '@/lib/config/auth-config';
+import { getOIDCConfig, getOidcOpenIdConfigurationUrl } from '@/lib/config/auth-config';
 
 const CODE_VERIFIER_KEY = 'oidc_code_verifier';
 const STATE_KEY = 'oidc_state';
@@ -47,7 +47,7 @@ export async function initiateOIDCLogin(): Promise<void> {
     const config = getOIDCConfig();
 
     // Discover OIDC endpoints
-    const discoveryUrl = `${config.issuer}/.well-known/openid-configuration`;
+    const discoveryUrl = getOidcOpenIdConfigurationUrl(config.issuer);
     const discoveryResponse = await fetch(discoveryUrl);
 
     if (!discoveryResponse.ok) {
