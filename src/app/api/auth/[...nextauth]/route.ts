@@ -1,7 +1,7 @@
 import { handlers } from '@/auth';
 import type { NextRequest } from 'next/server';
 
-import { patchAuthProvidersResponse } from '@/lib/auth/patch-providers-response';
+import { patchNextAuthResponse } from '@/lib/auth/patch-providers-response';
 
 /**
  * NextAuth API Route Handler
@@ -12,10 +12,10 @@ import { patchAuthProvidersResponse } from '@/lib/auth/patch-providers-response'
 
 export async function GET(request: NextRequest) {
   const res = await handlers.GET(request);
-  return patchAuthProvidersResponse(request, res);
+  return patchNextAuthResponse(request, res);
 }
 
 export async function POST(request: NextRequest) {
   const res = await handlers.POST(request);
-  return patchAuthProvidersResponse(request, res);
+  return patchNextAuthResponse(request, res);
 }

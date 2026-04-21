@@ -2,6 +2,50 @@ import type { NextRequest } from 'next/server';
 
 import { getProcessEnv } from '@/lib/config/safe-process-env';
 
+function getNormalizedAppBasePath(): string {
+  return (getProcessEnv('NEXT_PUBLIC_BASE_PATH') || '').replace(/\/$/, '');
+}
+
+/**
+ * Auth.js redirect responses often use `Location: https://host/api/auth/...` or
+ * `Location: /api/auth/...`, omitting the Next.js app `basePath`. Browsers then
+ * hit the wrong URL (e.g. `/api/auth/error` instead of `/my-app/api/auth/error`).
+ */
+export function patchAuthRedirectLocation(request: NextRequest, response: Response): Response {
+  const appBase = getNormalizedAppBasePath();
+  if (!appBase) {
+    return response;
+  }
+
+  const location = response.headers.get('Location');
+  if (!location) {
+    return response;
+  }
+
+  const origin = request.nextUrl.origin;
+  let nextLocation: string | undefined;
+
+  if (location.startsWith(`${origin}/api/auth`)) {
+    if (!location.startsWith(`${origin}${appBase}/api/auth`)) {
+      nextLocation = `${origin}${appBase}${location.slice(origin.length)}`;
+    }
+  } else if (location.startsWith('/api/auth') && !location.startsWith(`${appBase}/api/auth`)) {
+    nextLocation = `${origin}${appBase}${location}`;
+  }
+
+  if (nextLocation && nextLocation !== location) {
+    const headers = new Headers(response.headers);
+    headers.set('Location', nextLocation);
+    return new Response(response.body, {
+      status: response.status,
+      statusText: response.statusText,
+      headers,
+    });
+  }
+
+  return response;
+}
+
 /**
  * Auth.js builds provider signin/callback URLs from `origin + config.basePath`,
  * which drops the Next.js app `basePath`. Rewrite those fields on the
@@ -11,7 +55,7 @@ export async function patchAuthProvidersResponse(
   request: NextRequest,
   response: Response,
 ): Promise<Response> {
-  const appBase = (getProcessEnv('NEXT_PUBLIC_BASE_PATH') || '').replace(/\/$/, '');
+  const appBase = getNormalizedAppBasePath();
   if (!appBase) {
     return response;
   }
@@ -61,4 +105,16 @@ export async function patchAuthProvidersResponse(
     statusText: response.statusText,
     headers,
   });
+}
+
+/**
+ * Apply all Auth.js response patches for apps deployed with Next.js `basePath`:
+ * redirect `Location` headers, then `/api/auth/providers` JSON body.
+ */
+export async function patchNextAuthResponse(
+  request: NextRequest,
+  response: Response,
+): Promise<Response> {
+  const withLocation = patchAuthRedirectLocation(request, response);
+  return patchAuthProvidersResponse(request, withLocation);
 }

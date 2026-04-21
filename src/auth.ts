@@ -57,7 +57,11 @@ interface OIDCProfile {
   family_name?: string;
 }
 
+const trustHostFromEnv =
+  getProcessEnv('AUTH_TRUST_HOST') === 'true' ? ({ trustHost: true } as const) : {};
+
 export const authConfig: NextAuthConfig = {
+  ...trustHostFromEnv,
   /**
    * Must stay `/api/auth`: Next.js strips `basePath` before Auth.js sees `pathname`
    * (e.g. `/api/auth/providers`). A value like `/science-portal/api/auth` breaks action parsing.
