@@ -49,6 +49,15 @@ export function isOIDCAuth(): boolean {
 }
 
 /**
+ * OIDC env vars often use a trailing slash. Auth.js builds discovery as
+ * `{issuer}/.well-known/...` — a trailing slash on issuer yields `//.well-known`
+ * and can break fetches. Normalize to no trailing slash.
+ */
+export function normalizeOidcIssuer(issuer: string): string {
+  return issuer.replace(/\/+$/, '');
+}
+
+/**
  * Get OIDC configuration from environment variables
  * @param allowMissing - If true, returns dummy config when vars are missing (for build time)
  */
@@ -73,7 +82,7 @@ export function getOIDCConfig(allowMissing = false): OIDCConfig {
     if (isBuildTime || allowMissing) {
       console.warn('⚠️ OIDC config missing - using dummy values (build time)');
       return {
-        issuer: issuer || 'https://example.com/',
+        issuer: normalizeOidcIssuer(issuer || 'https://example.com'),
         clientId: clientId || 'dummy-client-id',
         clientSecret: clientSecret || 'dummy-secret',
         callbackUrl: callbackUrl || 'http://localhost:3000/',
@@ -93,7 +102,7 @@ export function getOIDCConfig(allowMissing = false): OIDCConfig {
   }
 
   return {
-    issuer,
+    issuer: normalizeOidcIssuer(issuer),
     clientId,
     clientSecret,
     callbackUrl,

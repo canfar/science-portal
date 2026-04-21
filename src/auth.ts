@@ -159,7 +159,7 @@ export const authConfig: NextAuthConfig = {
 async function refreshAccessToken(token: TokenWithRefresh): Promise<TokenWithRefresh> {
   try {
     const oidcConfig = getOIDCConfig();
-    const url = `${oidcConfig.issuer}token`;
+    const url = `${oidcConfig.issuer}/token`;
 
     if (!token.refreshToken) {
       throw new Error('No refresh token available');

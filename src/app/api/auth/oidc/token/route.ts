@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     const oidcConfig = getOIDCConfig();
 
     // Discover OIDC endpoints
-    const discoveryUrl = `${oidcConfig.issuer}.well-known/openid-configuration`;
+    const discoveryUrl = `${oidcConfig.issuer}/.well-known/openid-configuration`;
     const discoveryResponse = await fetch(discoveryUrl);
 
     if (!discoveryResponse.ok) {

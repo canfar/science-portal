@@ -47,7 +47,7 @@ export async function initiateOIDCLogin(): Promise<void> {
     const config = getOIDCConfig();
 
     // Discover OIDC endpoints
-    const discoveryUrl = `${config.issuer}.well-known/openid-configuration`;
+    const discoveryUrl = `${config.issuer}/.well-known/openid-configuration`;
     const discoveryResponse = await fetch(discoveryUrl);
 
     if (!discoveryResponse.ok) {
