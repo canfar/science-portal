@@ -49,12 +49,25 @@ export function isOIDCAuth(): boolean {
 }
 
 /**
+ * If `NEXT_OIDC_URI` is an absolute URL with an accidental extra slash after the host
+ * (e.g. `https://host//`, pathname `//`), oauth4webapi’s discovery path join uses
+ * one `//` → `/` fix and the pathname can stay `//.well-known/...` — the exact broken
+ * URL you see from undici. Coalesce runs of slashes in the path; root becomes `/`.
+ * Result still matches a normal IdP `issuer` of `https://host/`.
+ */
+export function normalizeOidcIssuerUrl(issuer: string): string {
+  const u = new URL(issuer.trim());
+  u.pathname = u.pathname.replace(/\/+/g, '/') || '/';
+  return u.href;
+}
+
+/**
  * OpenID configuration URL. Uses WHATWG `new URL` so a trailing slash on
  * `issuer` (as published by the IdP) does not create `//` in the path.
  * Set `NEXT_OIDC_URI` to the same `issuer` string as the IdP (including `/` or not).
  */
 export function getOidcOpenIdConfigurationUrl(issuer: string): string {
-  return new URL('.well-known/openid-configuration', issuer).href;
+  return new URL('.well-known/openid-configuration', normalizeOidcIssuerUrl(issuer)).href;
 }
 
 /**
@@ -62,7 +75,7 @@ export function getOidcOpenIdConfigurationUrl(issuer: string): string {
  * to issuer root) without duplicating slashes when `issuer` ends with `/`.
  */
 export function getOidcIssuerPathUrl(issuer: string, pathSegment: string): string {
-  return new URL(pathSegment, issuer).href;
+  return new URL(pathSegment, normalizeOidcIssuerUrl(issuer)).href;
 }
 
 /**
