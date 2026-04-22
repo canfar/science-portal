@@ -25,6 +25,10 @@ export interface AppBarProps extends Omit<MuiAppBarProps, 'position' | 'variant'
   menuItems?: AppBarMenuItem[];
   menuLabel?: ReactNode;
   accountButton?: ReactNode;
+  /**
+   * When true, the primary account / menu control is disabled (e.g. OIDC sign-in in progress).
+   */
+  accountActionDisabled?: boolean;
   onAccountButtonClick?: () => void;
   position?: 'fixed' | 'absolute' | 'sticky' | 'static' | 'relative';
   elevation?: number;

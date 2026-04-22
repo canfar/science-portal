@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { AppBar } from '@/app/components/AppBar/AppBar';
 import { AppBarProps } from '@/app/types/AppBarProps';
 import { LoginModal } from '@/app/components/LoginModal/LoginModal';
@@ -15,7 +15,7 @@ import {
 } from '@/lib/hooks/useAuth';
 import type { LoginCredentials } from '@/lib/api/login';
 import { PersonOutline, VpnKey, Verified, Logout as LogoutIcon } from '@mui/icons-material';
-import { CircularProgress } from '@mui/material';
+import { Box, CircularProgress, Typography } from '@mui/material';
 import { UPDATE_PROFILE_URL, getCertificateUrl } from '@/lib/config/site-config';
 import { saveCredentials, getCredentials, removeCredentials } from '@/lib/auth/token-storage';
 
@@ -42,6 +42,8 @@ export function AppBarWithAuth({
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [resetPasswordModalOpen, setResetPasswordModalOpen] = useState(false);
   const [registrationModalOpen, setRegistrationModalOpen] = useState(false);
+  const [isOidcLoginPending, setIsOidcLoginPending] = useState(false);
+  const oidcLoginInFlightRef = useRef(false);
   const { data: authStatus, isLoading: isCheckingAuth } = useAuthStatus();
   const { mutate: login, isPending: isLoggingIn, error: loginError } = useLogin();
   const { mutate: logout } = useLogout();
@@ -202,20 +204,34 @@ export function AppBarWithAuth({
   const loadingMenuItem = dummyMenuItem;
 
   // Handle account button click - open login modal or redirect to OIDC provider
-  const handleAccountButtonClick = useCallback(() => {
-    console.log('handleAccountButtonClick called in AppBarWithAuth');
+  const handleAccountButtonClick = useCallback(async () => {
     if (!isCheckingAuth && !isAuthenticated && showLoginButton) {
       if (isOIDCMode) {
-        // For OIDC, redirect to provider
-        console.log('Redirecting to OIDC provider');
-        oidcLogin();
+        if (oidcLoginInFlightRef.current) {
+          return;
+        }
+        oidcLoginInFlightRef.current = true;
+        setIsOidcLoginPending(true);
+        try {
+          await oidcLogin();
+        } catch (error) {
+          console.error('OIDC sign-in failed:', error);
+        } finally {
+          oidcLoginInFlightRef.current = false;
+          setIsOidcLoginPending(false);
+        }
       } else {
-        // For CANFAR, open login modal
-        console.log('Opening login modal');
         handleOpenLogin();
       }
     }
-  }, [isCheckingAuth, isAuthenticated, showLoginButton, isOIDCMode, oidcLogin, handleOpenLogin]);
+  }, [
+    isCheckingAuth,
+    isAuthenticated,
+    showLoginButton,
+    isOIDCMode,
+    oidcLogin,
+    handleOpenLogin,
+  ]);
 
   // Determine menu items to pass
   const menuItemsToPass = isCheckingAuth
@@ -229,16 +245,16 @@ export function AppBarWithAuth({
     <CircularProgress size={20} color="inherit" />
   ) : showAuthenticatedMenu ? (
     displayName
+  ) : isOIDCMode && isOidcLoginPending ? (
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+      <CircularProgress size={20} color="inherit" />
+      <Typography component="span" variant="body2" color="inherit" sx={{ whiteSpace: 'nowrap' }}>
+        Signing in…
+      </Typography>
+    </Box>
   ) : (
     'Login'
   );
-
-  console.log('AppBarWithAuth rendering:', {
-    menuItemsLength: menuItemsToPass.length,
-    menuLabel: typeof menuLabelToShow === 'string' ? menuLabelToShow : 'CircularProgress',
-    isCheckingAuth,
-    showAuthenticatedMenu,
-  });
 
   return (
     <>
@@ -251,6 +267,7 @@ export function AppBarWithAuth({
         menuLabel={menuLabelToShow}
         menuItems={menuItemsToPass}
         onAccountButtonClick={handleAccountButtonClick}
+        accountActionDisabled={isOIDCMode && isOidcLoginPending}
         accountButton={accountButton}
         position={position}
         elevation={elevation}

@@ -30,6 +30,7 @@ export const AppBarImpl = React.forwardRef<HTMLDivElement, AppBarProps>(
       menuItems = [],
       menuLabel = 'Menu',
       accountButton,
+      accountActionDisabled = false,
       onAccountButtonClick,
       position = 'static',
       elevation = 0,
@@ -691,6 +692,8 @@ export const AppBarImpl = React.forwardRef<HTMLDivElement, AppBarProps>(
                 <>
                   <Box
                     component="button"
+                    type="button"
+                    disabled={accountActionDisabled}
                     sx={{
                       display: 'flex',
                       alignItems: 'center',
@@ -707,7 +710,7 @@ export const AppBarImpl = React.forwardRef<HTMLDivElement, AppBarProps>(
                       minHeight: '48px',
                       minWidth: '120px',
                       transition: theme.transitions.create(
-                        ['background-color', 'border-color', 'color'],
+                        ['background-color', 'border-color', 'color', 'opacity'],
                         {
                           duration: theme.transitions.duration.short,
                         },
@@ -720,6 +723,15 @@ export const AppBarImpl = React.forwardRef<HTMLDivElement, AppBarProps>(
                       '&:focus-visible': {
                         outline: `2px solid ${theme.palette.primary.main}`,
                         outlineOffset: theme.spacing(0.25),
+                      },
+                      '&:disabled': {
+                        opacity: theme.palette.action.disabledOpacity,
+                        cursor: 'not-allowed',
+                      },
+                      '&:disabled:hover': {
+                        backgroundColor: 'transparent',
+                        borderColor: theme.palette.divider,
+                        color: theme.palette.text.primary,
                       },
                     }}
                     aria-label={typeof menuLabel === 'string' ? menuLabel : 'Account menu'}
