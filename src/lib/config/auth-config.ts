@@ -62,17 +62,17 @@ export function normalizeOidcIssuerUrl(issuer: string): string {
 }
 
 /**
- * OpenID configuration URL. Uses WHATWG `new URL` so a trailing slash on
- * `issuer` (as published by the IdP) does not create `//` in the path.
- * Set `NEXT_OIDC_URI` to the same `issuer` string as the IdP (including `/` or not).
+ * OpenID configuration URL. Resolves `.well-known/openid-configuration` against a
+ * normalized issuer so path joins match what we pass to NextAuth / oauth4webapi even
+ * if `issuer` is passed through unnormalized (e.g. `https://host//`).
  */
 export function getOidcOpenIdConfigurationUrl(issuer: string): string {
-  return new URL(`${normalizeOidcIssuerUrl(issuer)}.well-known/openid-configuration`).href;
+  return new URL('.well-known/openid-configuration', normalizeOidcIssuerUrl(issuer)).href;
 }
 
 /**
- * Join a path segment (e.g. `token` for a token endpoint at `{issuer}token` relative
- * to issuer root) without duplicating slashes when `issuer` ends with `/`.
+ * Join a path segment (e.g. `token`) relative to the issuer root. Normalizes `issuer`
+ * first (same as `getOIDCConfig().issuer` / NextAuth).
  */
 export function getOidcIssuerPathUrl(issuer: string, pathSegment: string): string {
   return new URL(pathSegment, normalizeOidcIssuerUrl(issuer)).href;
@@ -103,7 +103,7 @@ export function getOIDCConfig(allowMissing = false): OIDCConfig {
     if (isBuildTime || allowMissing) {
       console.warn('⚠️ OIDC config missing - using dummy values (build time)');
       return {
-        issuer: (issuer || 'https://example.com/').trim(),
+        issuer: normalizeOidcIssuerUrl(issuer || 'https://example.com/'),
         clientId: clientId || 'dummy-client-id',
         clientSecret: clientSecret || 'dummy-secret',
         callbackUrl: callbackUrl || 'http://localhost:3000/',
@@ -123,7 +123,7 @@ export function getOIDCConfig(allowMissing = false): OIDCConfig {
   }
 
   return {
-    issuer: issuer.trim(),
+    issuer: normalizeOidcIssuerUrl(issuer),
     clientId,
     clientSecret,
     callbackUrl,

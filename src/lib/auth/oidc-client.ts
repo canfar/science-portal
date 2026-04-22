@@ -48,7 +48,6 @@ export async function initiateOIDCLogin(): Promise<void> {
 
     // Discover OIDC endpoints
     const discoveryUrl = getOidcOpenIdConfigurationUrl(config.issuer);
-    console.log('*** OIDC Discovery URL from client:', discoveryUrl);
     const discoveryResponse = await fetch(discoveryUrl);
 
     if (!discoveryResponse.ok) {
