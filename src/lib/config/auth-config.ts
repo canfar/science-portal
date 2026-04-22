@@ -67,7 +67,11 @@ export function normalizeOidcIssuerUrl(issuer: string): string {
  * Set `NEXT_OIDC_URI` to the same `issuer` string as the IdP (including `/` or not).
  */
 export function getOidcOpenIdConfigurationUrl(issuer: string): string {
-  return new URL('.well-known/openid-configuration', normalizeOidcIssuerUrl(issuer)).href;
+  console.log('getOidcOpenIdConfigurationUrl', issuer);
+  console.log('normalizeOidcIssuerUrl', normalizeOidcIssuerUrl(issuer));
+  const url = new URL('/.well-known/openid-configuration', normalizeOidcIssuerUrl(issuer)).href;
+  console.log('url', url);
+  return url;
 }
 
 /**
