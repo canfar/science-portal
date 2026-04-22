@@ -1,7 +1,13 @@
 'use client';
 
 import React, { useState, useCallback, useMemo } from 'react';
-import { AppBar as MuiAppBar, useTheme as useMuiTheme, useMediaQuery, Drawer } from '@mui/material';
+import {
+  AppBar as MuiAppBar,
+  Box as MuiBox,
+  useTheme as useMuiTheme,
+  useMediaQuery,
+  Drawer,
+} from '@mui/material';
 import type { Theme } from '@mui/material/styles';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -690,7 +696,7 @@ export const AppBarImpl = React.forwardRef<HTMLDivElement, AppBarProps>(
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               {!isMobile && menuItems.length > 0 && (
                 <>
-                  <Box
+                  <MuiBox
                     component="button"
                     type="button"
                     disabled={accountActionDisabled}
@@ -752,7 +758,7 @@ export const AppBarImpl = React.forwardRef<HTMLDivElement, AppBarProps>(
                         }}
                       />
                     )}
-                  </Box>
+                  </MuiBox>
                   <Menu
                     id="app-bar-menu"
                     anchorEl={anchorEl}
