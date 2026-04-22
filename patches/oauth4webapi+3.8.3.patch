@@ -1,0 +1,13 @@
+diff --git a/node_modules/oauth4webapi/build/index.js b/node_modules/oauth4webapi/build/index.js
+index a4e22f5..bfe1001 100644
+--- a/node_modules/oauth4webapi/build/index.js
++++ b/node_modules/oauth4webapi/build/index.js
+@@ -205,7 +205,7 @@ function signal(url, value) {
+ }
+ function replaceDoubleSlash(pathname) {
+     if (pathname.includes('//')) {
+-        return pathname.replace('//', '/');
++        return pathname.replace(/\/+/g, '/');
+     }
+     return pathname;
+ }
