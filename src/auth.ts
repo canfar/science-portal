@@ -101,17 +101,17 @@ export const authConfig: NextAuthConfig = {
     async jwt({ token, user, account }) {
       // Initial sign in
       if (account && user) {
-        console.log('\n' + '🔐'.repeat(40));
-        console.log('🔐 JWT Callback - Initial Sign In - PURE TOKEN FROM IAM:');
-        console.log('🔐'.repeat(40));
-        console.log('📋 FULL ACCESS TOKEN:');
-        console.log(account.access_token);
-        console.log('\n📋 Token Details:');
-        console.log('  - Token length:', account.access_token?.length);
-        console.log('  - Refresh token:', account.refresh_token ? 'present' : 'missing');
-        console.log('  - Expires at:', account.expires_at);
-        console.log('  - User:', JSON.stringify(user, null, 2));
-        console.log('🔐'.repeat(40) + '\n');
+        console.debug('\n' + '🔐'.repeat(40));
+        console.debug('🔐 JWT Callback - Initial Sign In - PURE TOKEN FROM IAM:');
+        console.debug('🔐'.repeat(40));
+        console.debug('📋 FULL ACCESS TOKEN:');
+        console.debug(account.access_token);
+        console.debug('\n📋 Token Details:');
+        console.debug('  - Token length:', account.access_token?.length);
+        console.debug('  - Refresh token:', account.refresh_token ? 'present' : 'missing');
+        console.debug('  - Expires at:', account.expires_at);
+        console.debug('  - User:', JSON.stringify(user, null, 2));
+        console.debug('🔐'.repeat(40) + '\n');
 
         return {
           ...token,
@@ -132,13 +132,13 @@ export const authConfig: NextAuthConfig = {
     },
     async session({ session, token }) {
       if (token) {
-        console.log('📋 Session Callback:');
-        console.log(
+        console.debug('📋 Session Callback:');
+        console.debug(
           '  - token.accessToken:',
           token.accessToken ? token.accessToken.substring(0, 50) + '...' : 'missing',
         );
-        console.log('  - token.user:', JSON.stringify(token.user, null, 2));
-        console.log('  - token.error:', token.error);
+        console.debug('  - token.user:', JSON.stringify(token.user, null, 2));
+        console.debug('  - token.error:', token.error);
 
         session.user = {
           ...session.user,
