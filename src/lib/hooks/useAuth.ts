@@ -64,7 +64,7 @@ export function useAuthStatus(options?: Omit<UseQueryOptions<AuthStatus>, 'query
     }
   }, [isCanfar]);
 
-  console.log('🔍 useAuthStatus called:', { isCanfar, sessionStatus: status });
+  console.debug('🔍 useAuthStatus called:', { isCanfar, sessionStatus: status });
 
   // For CANFAR mode, use existing auth status check
   const canfarAuthStatus = useQuery({
@@ -117,7 +117,7 @@ export function useAuthStatus(options?: Omit<UseQueryOptions<AuthStatus>, 'query
           }
         : { authenticated: false };
 
-    console.log('🔍 useAuthStatus returning (OIDC):', {
+    console.debug('🔍 useAuthStatus returning (OIDC):', {
       isLoading: status === 'loading',
       isAuthenticated: oidcAuthStatus.authenticated,
       username: oidcAuthStatus.user?.username,
@@ -134,7 +134,7 @@ export function useAuthStatus(options?: Omit<UseQueryOptions<AuthStatus>, 'query
   }
 
   // CANFAR mode uses React Query
-  console.log('🔍 useAuthStatus returning (CANFAR):', {
+  console.debug('🔍 useAuthStatus returning (CANFAR):', {
     isLoading: canfarAuthStatus.isLoading,
     isAuthenticated: canfarAuthStatus.data?.authenticated,
   });

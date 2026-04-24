@@ -13,10 +13,11 @@ export const OPEN_SOURCE_URL = 'https://github.com/opencadc';
 export const SUPPORT_EMAIL = 'mailto:support@canfar.net';
 export const DISCORD_URL = 'https://discord.gg/vcCQ8QBvBa';
 
-// Services
+// Services (defaults; override at runtime with NEXT_PUBLIC_SERVICE_*_URL in public runtime config)
 export const STORAGE_MANAGEMENT_URL = 'https://www.canfar.net/storage/list';
 export const GROUP_MANAGEMENT_URL = 'https://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/en/groups/';
 export const DATA_PUBLICATION_URL = 'https://www.canfar.net/citation';
+/** URL for this Science Portal instance in the Services menu (set NEXT_PUBLIC_SERVICE_SCIENCE_PORTAL_URL to override at runtime). */
 export const SCIENCE_PORTAL_URL = 'https://www.canfar.net/science-portal';
 export const CADC_SEARCH_URL = 'https://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/en/search';
 export const OPENSTACK_CLOUD_URL = 'https://arbutus-canfar.cloud.computecanada.ca/';

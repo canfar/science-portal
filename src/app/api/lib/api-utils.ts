@@ -140,7 +140,7 @@ export async function fetchExternalApi(
     const statusIcon = response.ok ? '✅' : '❌';
 
     console.log('\n' + '🟢'.repeat(40));
-    console.log(`${statusIcon} SKAHA API RESPONSE: ${method} ${url}`);
+    console.log(`${statusIcon} API RESPONSE: ${method} ${url}`);
     console.log('🟢'.repeat(40));
     console.log(`📊 Status: ${response.status} ${response.statusText}`);
     console.log(`⏱️  Duration: ${duration}ms`);

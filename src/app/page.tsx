@@ -31,17 +31,17 @@ import {
   OPEN_SOURCE_URL,
   SUPPORT_EMAIL,
   DISCORD_URL,
-  STORAGE_MANAGEMENT_URL,
-  GROUP_MANAGEMENT_URL,
-  DATA_PUBLICATION_URL,
-  SCIENCE_PORTAL_URL,
-  CADC_SEARCH_URL,
-  OPENSTACK_CLOUD_URL,
 } from '@/lib/config/site-config';
+import { applyServiceNavUrlsToAppBarLinks } from '@/lib/config/apply-service-nav-urls';
 
 export default function SciencePortalPage() {
-  const { useCanfar } = usePublicRuntimeConfig();
+  const { useCanfar, serviceUrls } = usePublicRuntimeConfig();
   const isOIDCMode = !useCanfar;
+
+  const canfarAppBarLinks = useMemo(
+    () => applyServiceNavUrlsToAppBarLinks(appBarWithUserMenu.links, serviceUrls),
+    [serviceUrls],
+  );
 
   // OIDC token mirror: useAuthStatus → useAuth syncs session.accessToken to localStorage
 
@@ -299,46 +299,49 @@ export default function SciencePortalPage() {
     refetchContext();
   }, [refetchImages, refetchRepositories, refetchContext]);
 
-  const footerSections = [
-    {
-      title: 'Resources',
-      links: [
-        { label: 'Documentation', href: DOCS_URL, external: true },
-        { label: 'About', href: ABOUT_URL, external: true },
-        { label: 'Open Source', href: OPEN_SOURCE_URL, external: true },
-      ],
-    },
-    {
-      title: 'Services',
-      links: [
-        {
-          label: 'Storage Management',
-          href: STORAGE_MANAGEMENT_URL,
-          external: true,
-        },
-        {
-          label: 'Group Management',
-          href: GROUP_MANAGEMENT_URL,
-          external: true,
-        },
-        {
-          label: 'Data Publication',
-          href: DATA_PUBLICATION_URL,
-          external: true,
-        },
-        { label: 'Science Portal', href: SCIENCE_PORTAL_URL, external: true },
-        { label: 'CADC Search', href: CADC_SEARCH_URL, external: true },
-        { label: 'OpenStack Cloud', href: OPENSTACK_CLOUD_URL, external: true },
-      ],
-    },
-    {
-      title: 'Support',
-      links: [
-        { label: 'Help', href: SUPPORT_EMAIL, external: false },
-        { label: 'Join us on Discord', href: DISCORD_URL, external: true },
-      ],
-    },
-  ];
+  const footerSections = useMemo(
+    () => [
+      {
+        title: 'Resources',
+        links: [
+          { label: 'Documentation', href: DOCS_URL, external: true },
+          { label: 'About', href: ABOUT_URL, external: true },
+          { label: 'Open Source', href: OPEN_SOURCE_URL, external: true },
+        ],
+      },
+      {
+        title: 'Services',
+        links: [
+          {
+            label: 'Storage Management',
+            href: serviceUrls.storageManagement,
+            external: true,
+          },
+          {
+            label: 'Group Management',
+            href: serviceUrls.groupManagement,
+            external: true,
+          },
+          {
+            label: 'Data Publication',
+            href: serviceUrls.dataPublication,
+            external: true,
+          },
+          { label: 'Science Portal', href: serviceUrls.sciencePortal, external: true },
+          { label: 'CADC Search', href: serviceUrls.cadcSearch, external: true },
+          { label: 'OpenStack Cloud', href: serviceUrls.openstackCloud, external: true },
+        ],
+      },
+      {
+        title: 'Support',
+        links: [
+          { label: 'Help', href: SUPPORT_EMAIL, external: false },
+          { label: 'Join us on Discord', href: DISCORD_URL, external: true },
+        ],
+      },
+    ],
+    [serviceUrls],
+  );
 
   return (
     <Box
@@ -357,7 +360,7 @@ export default function SciencePortalPage() {
         wordmark="Science Portal"
         logoHref="/"
         logo={isOIDCMode ? <SRCNetLogo /> : <CanfarLogo />}
-        links={isOIDCMode ? [] : appBarWithUserMenu.links}
+        links={isOIDCMode ? [] : canfarAppBarLinks}
         accountButton={<ThemeToggle size="md" />}
         showLoginButton={true}
       />
