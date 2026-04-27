@@ -75,7 +75,6 @@ const StorageCard: React.FC<StorageCardProps> = ({ label, value, isLoading, isWa
   return (
     <Box
       sx={{
-        height: '100%',
         borderRadius: 2,
         backgroundColor: 'background.paper',
         border: `1px solid ${theme.palette.divider}`,
@@ -309,6 +308,9 @@ export const UserStorageWidgetImpl = React.forwardRef<HTMLDivElement, UserStorag
           border: `1px solid ${theme.palette.divider}`,
           boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
           maxWidth: 600,
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
           // Better mobile padding
           [theme.breakpoints.down('sm')]: {
             padding: theme.spacing(1.5),
@@ -405,60 +407,70 @@ export const UserStorageWidgetImpl = React.forwardRef<HTMLDivElement, UserStorag
           />
         )}
 
-        {/* Storage Cards or Empty State */}
-        {!displayData && !currentLoading ? (
-          <Box
-            sx={{
-              textAlign: 'center',
-              py: 4,
-              color: theme.palette.text.secondary,
-            }}
-          >
-            <Typography variant="body2">{emptyMessage}</Typography>
-          </Box>
-        ) : (
-          <Box sx={{ mb: 2 }}>
-            <Grid container spacing={2} direction="column">
-              {cardData.map((card, index) => (
-                <Grid size={12} key={index}>
-                  <StorageCard
-                    label={card.label}
-                    value={card.value}
-                    isLoading={currentLoading}
-                    isWarning={card.isWarning}
-                  />
-                </Grid>
-              ))}
-            </Grid>
-          </Box>
-        )}
+        <Box
+          sx={{
+            flex: 1,
+            minHeight: 0,
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        >
+          {/* Storage Cards or Empty State */}
+          {!displayData && !currentLoading ? (
+            <Box
+              sx={{
+                textAlign: 'center',
+                py: 4,
+                color: theme.palette.text.secondary,
+              }}
+            >
+              <Typography variant="body2">{emptyMessage}</Typography>
+            </Box>
+          ) : (
+            <Box sx={{ mb: 2 }}>
+              <Grid container spacing={2} direction="column">
+                {cardData.map((card, index) => (
+                  <Grid size={12} key={index}>
+                    <StorageCard
+                      label={card.label}
+                      value={card.value}
+                      isLoading={currentLoading}
+                      isWarning={card.isWarning}
+                    />
+                  </Grid>
+                ))}
+              </Grid>
+            </Box>
+          )}
 
-        {/* Last Update Timestamp */}
-        {lastUpdate && !currentLoading && (
-          <Box
-            sx={{
-              textAlign: 'center',
-              mt: 2,
-              color: theme.palette.text.secondary,
-            }}
-          >
-            <Typography variant="caption" sx={{ fontSize: '10px' }}>
-              Last update:{' '}
-              <Typography
-                component="span"
-                variant="caption"
-                sx={{
-                  fontSize: '10px',
-                  fontWeight: 'bold',
-                  fontFamily: 'monospace',
-                  color: 'primary.500',
-                }}
-              >
-                {lastUpdate}
+          {/* Last Update Timestamp */}
+          {lastUpdate && !currentLoading && (
+            <Box
+              sx={{
+                textAlign: 'center',
+                mt: 'auto',
+                pt: 2,
+                color: theme.palette.text.secondary,
+              }}
+            >
+              <Typography variant="caption" sx={{ fontSize: '10px' }}>
+                Last update:{' '}
+                <Typography
+                  component="span"
+                  variant="caption"
+                  sx={{
+                    fontSize: '10px',
+                    fontWeight: 'bold',
+                    fontFamily: 'monospace',
+                    color: 'primary.500',
+                  }}
+                >
+                  {lastUpdate}
+                </Typography>
               </Typography>
-            </Typography>
-          </Box>
-        )}
+            </Box>
+          )}
+        </Box>
 
         {/* Help Popover */}
         {helpContent && (
