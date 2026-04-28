@@ -381,21 +381,32 @@ export default function SciencePortalPage() {
               sx={{
                 flex: { xs: 1, lg: '0 0 80%' },
                 minWidth: 0, // Prevent flex item from overflowing
+                display: 'flex',
+                flexDirection: 'column',
               }}
             >
-              <ActiveSessionsWidget
-                sessions={activeSessions}
-                operatingSessionIds={operatingSessionIds}
-                pollingSessionId={pollingSessionId}
-                layout="responsive"
-                isLoading={isLoadingSessions}
-                onRefresh={handleSessionsRefresh}
-                emptyMessage={
-                  showLoggedOutCopy
-                    ? 'Sign in to see your active sessions. Use the Login button in the header.'
-                    : 'No active sessions'
-                }
-              />
+              <Box
+                sx={{
+                  flex: { xs: 'none', lg: 1 },
+                  minHeight: { lg: 0 },
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}
+              >
+                <ActiveSessionsWidget
+                  sessions={activeSessions}
+                  operatingSessionIds={operatingSessionIds}
+                  pollingSessionId={pollingSessionId}
+                  layout="responsive"
+                  isLoading={isLoadingSessions}
+                  onRefresh={handleSessionsRefresh}
+                  emptyMessage={
+                    showLoggedOutCopy
+                      ? 'Sign in to see your active sessions. Use the Login button in the header.'
+                      : 'No active sessions'
+                  }
+                />
+              </Box>
             </Box>
 
             {/* UserStorageWidget - 20% width on large screens */}
@@ -404,18 +415,29 @@ export default function SciencePortalPage() {
                 flex: { xs: 1, lg: '0 0 20%' },
                 minWidth: 0, // Prevent flex item from overflowing
                 px: { xs: 1, sm: 2 }, // Add horizontal padding
+                display: 'flex',
+                flexDirection: 'column',
               }}
             >
-              <UserStorageWidget
-                isAuthenticated={isAuthenticated}
-                name={authStatus?.user?.username || ''}
-                isLoading={isLoadingUserStorage}
-                emptyMessage={
-                  showLoggedOutCopy
-                    ? 'Sign in to view your storage usage. Use the Login button in the header.'
-                    : 'No storage data available'
-                }
-              />
+              <Box
+                sx={{
+                  flex: { xs: 'none', lg: 1 },
+                  minHeight: { lg: 0 },
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}
+              >
+                <UserStorageWidget
+                  isAuthenticated={isAuthenticated}
+                  name={authStatus?.user?.username || ''}
+                  isLoading={isLoadingUserStorage}
+                  emptyMessage={
+                    showLoggedOutCopy
+                      ? 'Sign in to view your storage usage. Use the Login button in the header.'
+                      : 'No storage data available'
+                  }
+                />
+              </Box>
             </Box>
           </Box>
         </Container>

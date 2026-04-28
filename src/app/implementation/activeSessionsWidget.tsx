@@ -86,6 +86,9 @@ export function ActiveSessionsWidgetImpl({
         borderRadius: theme.shape.borderRadius,
         border: `1px solid ${theme.palette.divider}`,
         boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
       }}
       component="div"
     >
@@ -130,7 +133,15 @@ export function ActiveSessionsWidgetImpl({
       />
 
       {/* Content - Session Cards */}
-      <Box sx={{ marginBottom: theme.spacing(2) }}>
+      <Box
+        sx={{
+          flex: 1,
+          minHeight: 0,
+          marginBottom: theme.spacing(2),
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
         {isLoading ? (
           // Show skeleton cards during loading
           effectiveLayout === 'column' ? (

@@ -3,6 +3,10 @@ node_modules
 /.pnp
 .pnp.js
 
+#AI Tools
+.cursor/
+.playwright*/
+
 # Testing
 /coverage
 
