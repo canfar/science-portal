@@ -21,12 +21,37 @@ import {
   StorageCardData,
 } from '@/app/types/UserStorageWidgetProps';
 import { useApiRoutes } from '@/lib/hooks/useApiRoutes';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import relativeTime from 'dayjs/plugin/relativeTime';
+import updateLocale from 'dayjs/plugin/updateLocale';
+
+dayjs.extend(utc);
+dayjs.extend(relativeTime);
+dayjs.extend(updateLocale);
+dayjs.updateLocale('en', {
+  relativeTime: {
+    future: 'in %s',
+    past: '%s ago',
+    s: 'a few seconds',
+    m: 'a min',
+    mm: '%d mins',
+    h: 'an hr',
+    hh: '%d hrs',
+    d: 'a day',
+    dd: '%d days',
+    M: 'a month',
+    MM: '%d months',
+    y: 'a year',
+    yy: '%d years',
+  },
+});
 
 // Test data for development
 const TEST_DATA: StorageData = {
   size: 11281596360,
   quota: 200000000000,
-  date: 'Jun 11, 2025, 11:27:58 PM PDT',
+  date: '2025-06-12T06:27:58.000Z',
   usage: 94,
 };
 
@@ -48,17 +73,63 @@ const convertToFileSize = (bytes: number): string => {
   return `${size.toFixed(size < 10 ? 2 : 1)} ${units[u]}`;
 };
 
-const formatDateUTC = (dateString: string): string => {
-  if (!dateString) return 'Unknown';
-  try {
-    const date = new Date(dateString);
-    return date
-      .toISOString()
-      .replace('T', ' ')
-      .replace(/\.\d{3}Z$/, ' UTC');
-  } catch {
-    return 'Unknown';
+/**
+ * Parse storage API `date` as a UTC instant (VOSpace node date for used size / totals).
+ * Naive `YYYY-MM-DD …` values are treated as UTC wall time, not local.
+ */
+const parseStorageApiUtc = (raw: string): dayjs.Dayjs | null => {
+  const s = raw.trim();
+  if (!s) return null;
+
+  const utcLiteral = s.match(/^(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2}:\d{2})(\.\d+)?\s*UTC$/i);
+  if (utcLiteral) {
+    const stamp = `${utcLiteral[1]} ${utcLiteral[2]}${utcLiteral[3] ?? ''}`;
+    const fmt = utcLiteral[3] ? 'YYYY-MM-DD HH:mm:ss.SSS' : 'YYYY-MM-DD HH:mm:ss';
+    const d = dayjs.utc(stamp, fmt);
+    return d.isValid() ? d : null;
   }
+
+  if (/[zZ]$|[+-]\d{2}:\d{2}$|[+-]\d{4}$/.test(s)) {
+    const d = dayjs(s);
+    return d.isValid() ? d.utc() : null;
+  }
+
+  const naive = s.match(/^(\d{4}-\d{2}-\d{2})([ T])(\d{2}:\d{2}:\d{2})(\.\d+)?$/);
+  if (naive) {
+    const stamp = `${naive[1]} ${naive[3]}${naive[4] ?? ''}`;
+    const fmt = naive[4] ? 'YYYY-MM-DD HH:mm:ss.SSS' : 'YYYY-MM-DD HH:mm:ss';
+    const d = dayjs.utc(stamp, fmt);
+    return d.isValid() ? d : null;
+  }
+
+  const loose = dayjs.utc(s);
+  if (loose.isValid()) return loose;
+
+  const localFallback = dayjs(s);
+  return localFallback.isValid() ? localFallback : null;
+};
+
+const formatStorageDateLocalDefault = (raw: string): string => {
+  const instant = parseStorageApiUtc(raw);
+  if (!instant) return 'Unknown';
+
+  return new Intl.DateTimeFormat(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+    timeZoneName: 'short',
+  }).format(instant.toDate());
+};
+
+/** Relative time since totals were last modified (API instant → browser “now”). */
+const formatRelativeStorageModified = (raw: string, nowMs: number): string => {
+  const instant = parseStorageApiUtc(raw);
+  if (!instant) return 'Unknown';
+  return instant.from(dayjs(nowMs));
 };
 
 // Storage Card Component
@@ -137,7 +208,7 @@ export const UserStorageWidgetImpl = React.forwardRef<HTMLDivElement, UserStorag
       progressPercentage = 0,
       warningThreshold = 90,
       emptyMessage = 'No storage data available',
-      dateFormatter = formatDateUTC,
+      dateFormatter = formatStorageDateLocalDefault,
       fileSizeFormatter = convertToFileSize,
       testMode = false,
     },
@@ -149,6 +220,7 @@ export const UserStorageWidgetImpl = React.forwardRef<HTMLDivElement, UserStorag
     const [internalLoading, setInternalLoading] = useState(false);
     const [internalError, setInternalError] = useState<string | undefined>();
     const [helpAnchorEl, setHelpAnchorEl] = useState<HTMLElement | null>(null);
+    const [relativeNowMs, setRelativeNowMs] = useState(() => Date.now());
 
     // Use external data if provided, otherwise use internal data or test data
     const currentData = useMemo(() => {
@@ -200,9 +272,13 @@ export const UserStorageWidgetImpl = React.forwardRef<HTMLDivElement, UserStorag
       }));
     }, [displayData, cardConfigs, warningThreshold]);
 
-    const lastUpdate = useMemo(() => {
+    const sizeTotalsModifiedAbsolute = useMemo(() => {
       return displayData?.date ? dateFormatter(displayData.date) : null;
     }, [displayData?.date, dateFormatter]);
+
+    const sizeTotalsModifiedRelative = useMemo(() => {
+      return displayData?.date ? formatRelativeStorageModified(displayData.date, relativeNowMs) : null;
+    }, [displayData?.date, relativeNowMs]);
 
     // Internal fetch function
     const fetchStorageData = useCallback(async () => {
@@ -294,6 +370,19 @@ export const UserStorageWidgetImpl = React.forwardRef<HTMLDivElement, UserStorag
         setInternalError(undefined);
       }
     }, [isAuthenticated]);
+
+    useEffect(() => {
+      if (!displayData?.date) return;
+      setRelativeNowMs(Date.now());
+
+      const intervalId = window.setInterval(() => {
+        setRelativeNowMs(Date.now());
+      }, 60000);
+
+      return () => {
+        window.clearInterval(intervalId);
+      };
+    }, [displayData?.date]);
 
     return (
       <Paper
@@ -443,33 +532,44 @@ export const UserStorageWidgetImpl = React.forwardRef<HTMLDivElement, UserStorag
             </Box>
           )}
 
-          {/* Last Update Timestamp */}
-          {lastUpdate && !currentLoading && (
-            <Box
-              sx={{
-                textAlign: 'center',
-                mt: 'auto',
-                pt: 2,
-                color: theme.palette.text.secondary,
-              }}
-            >
-              <Typography variant="caption" sx={{ fontSize: '10px' }}>
-                Last update:{' '}
-                <Typography
-                  component="span"
-                  variant="caption"
-                  sx={{
-                    fontSize: '10px',
-                    fontWeight: 'bold',
-                    fontFamily: 'monospace',
-                    color: 'primary.500',
-                  }}
+          {/* When used size / quota totals last changed (VOSpace node mtime), not “last polled” */}
+          {sizeTotalsModifiedRelative &&
+            sizeTotalsModifiedRelative !== 'Unknown' &&
+            !currentLoading && (
+              <Box
+                sx={{
+                  textAlign: 'center',
+                  mt: 'auto',
+                  pt: 2,
+                  color: theme.palette.text.secondary,
+                }}
+              >
+                <Tooltip
+                  title={
+                    sizeTotalsModifiedAbsolute
+                      ? `${sizeTotalsModifiedAbsolute}`
+                      : 'Unknown'
+                  }
+                  arrow
                 >
-                  {lastUpdate}
-                </Typography>
-              </Typography>
-            </Box>
-          )}
+                  <Typography variant="caption" sx={{ fontSize: '10px' }}>
+                    Modified{' '}
+                    <Typography
+                      component="span"
+                      variant="caption"
+                      sx={{
+                        fontSize: '10px',
+                        fontWeight: 'bold',
+                        color: 'primary.500',
+                      }}
+                    >
+                      {sizeTotalsModifiedRelative}
+                    </Typography>
+                    {'.'}
+                  </Typography>
+                </Tooltip>
+              </Box>
+            )}
         </Box>
 
         {/* Help Popover */}
