@@ -1,7 +1,7 @@
 /**
  * Status of the session request
  */
-export type SessionRequestStatus = 'requesting' | 'provisioning' | 'success' | 'error';
+export type SessionRequestStatus = 'requesting' | 'provisioning' | 'error';
 
 /**
  * Props for the SessionRequestModal component
@@ -33,19 +33,9 @@ export interface SessionRequestModalProps {
   errorMessage?: string;
 
   /**
-   * Optional success URL to display when session is ready
-   */
-  sessionUrl?: string;
-
-  /**
    * Callback when the modal should be closed
    */
   onClose: () => void;
-
-  /**
-   * Callback when user clicks the connect button (for success state)
-   */
-  onConnect?: () => void;
 
   /**
    * Callback when user clicks retry (for error state)

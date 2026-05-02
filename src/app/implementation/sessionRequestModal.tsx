@@ -12,10 +12,8 @@ import {
   CircularProgress,
   Alert,
   IconButton,
-  Link,
 } from '@mui/material';
 import {
-  CheckCircle as CheckCircleIcon,
   ErrorOutline as ErrorIcon,
   Close as CloseIcon,
 } from '@mui/icons-material';
@@ -75,9 +73,7 @@ export const SessionRequestModalImpl: React.FC<SessionRequestModalProps> = ({
   sessionType,
   status,
   errorMessage,
-  sessionUrl,
   onClose,
-  onConnect,
   onRetry,
 }) => {
   const theme = useTheme();
@@ -88,8 +84,6 @@ export const SessionRequestModalImpl: React.FC<SessionRequestModalProps> = ({
       case 'requesting':
       case 'provisioning':
         return <CircularProgress size={48} sx={{ color: theme.palette.primary.main }} />;
-      case 'success':
-        return <CheckCircleIcon sx={{ fontSize: 48, color: theme.palette.success.main }} />;
       case 'error':
         return <ErrorIcon sx={{ fontSize: 48, color: theme.palette.error.main }} />;
     }
@@ -101,8 +95,6 @@ export const SessionRequestModalImpl: React.FC<SessionRequestModalProps> = ({
         return 'Requesting session...';
       case 'provisioning':
         return 'Provisioning resources...';
-      case 'success':
-        return 'Session ready!';
       case 'error':
         return 'Failed to create session';
     }
@@ -114,8 +106,6 @@ export const SessionRequestModalImpl: React.FC<SessionRequestModalProps> = ({
         return `Submitting request for ${sessionType} session "${sessionName}"`;
       case 'provisioning':
         return 'Allocating compute resources and preparing your environment';
-      case 'success':
-        return `Your ${sessionType} session "${sessionName}" is ready to use`;
       case 'error':
         return 'An error occurred while creating your session. See details below.';
     }
@@ -124,7 +114,7 @@ export const SessionRequestModalImpl: React.FC<SessionRequestModalProps> = ({
   return (
     <Dialog
       open={open}
-      onClose={status === 'success' || status === 'error' ? onClose : undefined}
+      onClose={status === 'error' ? onClose : undefined}
       maxWidth="sm"
       fullWidth
       disableEscapeKeyDown={status === 'requesting' || status === 'provisioning'}
@@ -166,7 +156,7 @@ export const SessionRequestModalImpl: React.FC<SessionRequestModalProps> = ({
           >
             Session Request
           </Typography>
-          {(status === 'success' || status === 'error') && (
+          {status === 'error' && (
             <IconButton aria-label="close" onClick={onClose} sx={{ ml: 2 }}>
               <CloseIcon />
             </IconButton>
@@ -204,42 +194,6 @@ export const SessionRequestModalImpl: React.FC<SessionRequestModalProps> = ({
           <Typography variant="body2" color="text.secondary">
             {getStatusDescription()}
           </Typography>
-
-          {status === 'success' && sessionUrl && (
-            <Alert
-              severity="success"
-              sx={(theme) => ({
-                mt: 3,
-                width: '100%',
-                // Better mobile text handling
-                [theme.breakpoints.down('sm')]: {
-                  mt: 2,
-                  '& .MuiAlert-message': {
-                    fontSize: theme.typography.body2.fontSize,
-                  },
-                },
-              })}
-            >
-              <Typography variant="body2">
-                Session URL:{' '}
-                <Link
-                  href={sessionUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  sx={{
-                    wordBreak: 'break-all',
-                    // Better mobile link wrapping
-                    '@media (max-width: 600px)': {
-                      display: 'block',
-                      mt: 0.5,
-                    },
-                  }}
-                >
-                  {sessionUrl}
-                </Link>
-              </Typography>
-            </Alert>
-          )}
 
           {status === 'error' && (
             <Alert
@@ -279,19 +233,6 @@ export const SessionRequestModalImpl: React.FC<SessionRequestModalProps> = ({
           },
         })}
       >
-        {status === 'success' && (
-          <>
-            <Button onClick={onClose} color="inherit">
-              Close
-            </Button>
-            {onConnect && (
-              <Button variant="contained" onClick={onConnect} autoFocus>
-                Connect to Session
-              </Button>
-            )}
-          </>
-        )}
-
         {status === 'error' && (
           <>
             <Button onClick={onClose} color="inherit">

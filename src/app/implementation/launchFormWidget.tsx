@@ -9,7 +9,6 @@ import { SessionLaunchForm } from '@/app/components/SessionLaunchForm/SessionLau
 import { SessionRequestModal } from '@/app/components/SessionRequestModal/SessionRequestModal';
 import { SessionFormData } from '@/app/types/SessionLaunchFormProps';
 import { SessionRequestStatus } from '@/app/types/SessionRequestModalProps';
-import type { Session } from '@/lib/api/skaha';
 
 export function LaunchFormWidgetImpl({
   isLoading = false,
@@ -32,7 +31,6 @@ export function LaunchFormWidgetImpl({
   const [requestStatus, setRequestStatus] = useState<SessionRequestStatus>('requesting');
   const [requestError, setRequestError] = useState<string | undefined>();
   const [sessionData, setSessionData] = useState<SessionFormData | null>(null);
-  const [launchedSession, setLaunchedSession] = useState<Session | null>(null);
 
   const handleLaunch = useCallback(
     async (formData: SessionFormData) => {
@@ -40,7 +38,6 @@ export function LaunchFormWidgetImpl({
       setModalOpen(true);
       setRequestStatus('requesting');
       setRequestError(undefined);
-      setLaunchedSession(null);
 
       try {
         // Determine which image to use
@@ -70,13 +67,11 @@ export function LaunchFormWidgetImpl({
         };
 
         // Launch the session using custom function if provided, otherwise use default API
-        let initialSession;
         if (launchSessionFn) {
-          initialSession = await launchSessionFn(launchParams);
+          await launchSessionFn(launchParams);
         } else {
-          // Fallback to default API call
           const { launchSession } = await import('@/lib/api/skaha');
-          initialSession = await launchSession(launchParams);
+          await launchSession(launchParams);
         }
 
         // Call the original onLaunch if provided
@@ -84,10 +79,8 @@ export function LaunchFormWidgetImpl({
           await onLaunch(formData);
         }
 
-        // Session created successfully - modal will show success
         // The 30-second delay in useLaunchSession hook will refetch all sessions
-        setLaunchedSession(initialSession);
-        setRequestStatus('success');
+        setModalOpen(false);
       } catch (error) {
         setRequestStatus('error');
         setRequestError(error instanceof Error ? error.message : 'An unknown error occurred');
@@ -105,16 +98,6 @@ export function LaunchFormWidgetImpl({
       handleLaunch(sessionData);
     }
   }, [sessionData, handleLaunch]);
-
-  const handleConnect = useCallback(() => {
-    // Open the session in a new tab using the connectURL from the API response
-    if (launchedSession?.connectUrl) {
-      window.open(launchedSession.connectUrl, '_blank', 'noopener,noreferrer');
-    } else {
-      console.error('No connectURL available for session');
-    }
-    setModalOpen(false);
-  }, [launchedSession]);
 
   return (
     <Paper
@@ -250,13 +233,7 @@ export function LaunchFormWidgetImpl({
         sessionType={sessionData?.type || ''}
         status={requestStatus}
         errorMessage={requestError}
-        sessionUrl={launchedSession?.connectUrl}
         onClose={handleModalClose}
-        onConnect={
-          launchedSession?.status === 'Running' && launchedSession?.connectUrl
-            ? handleConnect
-            : undefined
-        }
         onRetry={handleRetry}
       />
     </Paper>

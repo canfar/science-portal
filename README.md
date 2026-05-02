@@ -30,7 +30,7 @@ All endpoints require authentication with CANFAR, and authorization to access Sk
 
 ### OIDC Configuration
 
-The Science Portal UI is configurable to work with an OpenID Connect provider. See the `oidc` settings in the [org.opencadc.science-portal.properties](./org.opencadc.science-portal.properties) file.
+Science Portal supports OpenID Connect in the Next.js app (NextAuth). For registering URIs at your identity provider and for environment variables, see **[Deploying with OIDC](#deploying-with-oidc-openid-connect)** under Deployment below and [.env.example](.env.example). Older servlet-based deployments may still document `oidc` settings in [org.opencadc.science-portal.properties](./org.opencadc.science-portal.properties).
 
 ## User Workflows
 
@@ -126,6 +126,8 @@ Configure the following environment variables in `.env.local`:
 | `AUTH_SECRET` | NextAuth secret key |
 | `NEXT_USE_CANFAR` | Toggle between CANFAR/OIDC auth mode |
 
+When **`NEXT_USE_CANFAR=false`** (and matching `NEXT_PUBLIC_USE_CANFAR`), also configure OIDC issuer, client, `NEXTAUTH_URL`, **`NEXT_OIDC_REDIRECT_URI` / `NEXT_PUBLIC_OIDC_REDIRECT_URI`**, and **`NEXT_OIDC_CALLBACK_URI` / `NEXT_PUBLIC_OIDC_CALLBACK_URI`**—see [.env.example](.env.example). Full deployment notes including IdP redirect registration are under [Deploying with OIDC](#deploying-with-oidc-openid-connect).
+
 ### Development
 
 ```bash
@@ -194,13 +196,47 @@ docker run --rm \
   science-portal
 ```
 
-Adjust the three API URLs for your environment. For **OIDC** mode, set `NEXT_USE_CANFAR=false` and supply the OIDC-related variables from `.env.example` instead of the CANFAR URLs above.
+Adjust the three API URLs for your environment. For **OIDC** mode, follow [Deploying with OIDC](#deploying-with-oidc-openid-connect) below instead of the CANFAR URLs above.
 
 You can also use Docker Compose:
 
 ```bash
 docker-compose up --build
 ```
+
+Example compose files that wire OIDC env vars include [docker-compose.oidc.example.yml](./docker-compose.oidc.example.yml).
+
+### Deploying with OIDC (OpenID Connect)
+
+Use OIDC mode when **`NEXT_USE_CANFAR=false`** and **`NEXT_PUBLIC_USE_CANFAR=false`**. Supply **`AUTH_SECRET`** and set **`NEXTAUTH_URL`** to the public URL visitors use for this deployment (scheme, host, and non-default port if any). Behind a reverse proxy that terminates TLS, set **`AUTH_TRUST_HOST=true`** (or **`AUTH_URL`**) so redirects and cookie security match HTTPS; align this with `.env.example` comments.
+
+Define your IdP (**`NEXT_OIDC_URI`**, **`NEXT_OIDC_CLIENT_ID`**, **`NEXT_OIDC_CLIENT_SECRET`**, **`NEXT_OIDC_SCOPE`**) plus the mirrored **`NEXT_PUBLIC_OIDC_*`** values for client-side discovery. OIDC-backed deployments normally use **`SRC_SKAHA_API`** / **`SRC_CAVERN_API`** instead of CANFAR `LOGIN_API`/`SKAHA_API`—see [.env.example](.env.example).
+
+#### Callback and redirect URIs
+
+Naming in this codebase:
+
+- **Redirect URI** (`NEXT_OIDC_REDIRECT_URI` / `NEXT_PUBLIC_OIDC_REDIRECT_URI`) — OAuth 2 authorization-code **`redirect_uri`**. Sent to the IdP and handled by Auth.js / NextAuth at **`/api/auth/callback/oidc`**. This value **must exactly match** an allowed redirect URI in your IdP registration (often called “Redirect URIs”, “Valid redirect URIs”, or callback URLs).
+
+- **Callback URI** (`NEXT_OIDC_CALLBACK_URI` / `NEXT_PUBLIC_OIDC_CALLBACK_URI`) — The portal’s **public landing URL** for this build (usually the UI root). It is required in configuration and must match how users reach the app; register it too if your IdP asks for origins, post-login URLs, or CORS/Web origins separately.
+
+Express both using your public **origin** (no trailing path beyond what you need for the host) plus **`NEXT_PUBLIC_BASE_PATH`** (empty for root deployments, otherwise e.g. `/science-portal`):
+
+| Concept | Typical URL |
+| --------|---------------|
+| **Register with IdP as OAuth redirect** | `{ORIGIN}{BASE}/api/auth/callback/oidc` |
+| **Set redirect env vars to** | same as the row above |
+| **Set callback env vars to** | `{ORIGIN}{BASE}` (portal entry; optionally with a trailing `/` consistent with how you expose the app) |
+
+Here `{ORIGIN}` is whatever you effectively use as the site URL (e.g. `https://www.canfar.net` or `http://localhost:3000`), and **`{BASE}`** is **`NEXT_PUBLIC_BASE_PATH`** with no duplicate slashes when concatenating.
+
+**Examples:**
+
+- Production-style host with base path: `ORIGIN=https://www.canfar.net`, `BASE=/science-portal` → register and set **`https://www.canfar.net/science-portal/api/auth/callback/oidc`**; set callback env vars to **`https://www.canfar.net/science-portal`**.
+
+- **`npm run dev`** on port `3000` with no base path: register **`http://localhost:3000/api/auth/callback/oidc`**; set callback vars to **`http://localhost:3000/`** (see [.env.example](.env.example) for the exact defaults your team prefers).
+
+Never omit **`{BASE}`** from the OAuth path when **`NEXT_PUBLIC_BASE_PATH`** is set; browsers invoke NextAuth at **`{BASE}/api/auth/*`**.
 
 ### Kubernetes
 
@@ -216,7 +252,7 @@ For deployment mode details (CANFAR vs OIDC), refer to [DEPLOYMENT-MODES.md](./h
 ## Documentation
 
 - [Development Guide](./DEVELOPMENT_GUIDE.md) - Local development setup and testing
-- [Helm Deployment](./helm/README.md) - Kubernetes deployment with Helm
+- [Helm Deployment](https://www.opencadc.org/deployments/helm/science-platform/science-portal/) - Kubernetes deployment with Helm
 - [Kubernetes Guide](./helm/KUBERNETES-DEPLOYMENT-GUIDE.md) - Complete K8s deployment instructions
 
 ## Scripts
