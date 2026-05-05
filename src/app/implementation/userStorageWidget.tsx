@@ -215,22 +215,9 @@ export const UserStorageWidgetImpl = React.forwardRef<HTMLDivElement, UserStorag
       try {
         // Use server-side API route to avoid CORS issues
         const url = apiRoutes.storage.raw(name);
-
-        console.log('[UserStorageWidget] Fetching storage data:', {
-          username: name,
-          url,
-        });
-
         const response = await fetch(url, {
           headers: { Accept: 'application/json' },
           credentials: 'include',
-        });
-
-        console.log('[UserStorageWidget] Fetch response:', {
-          username: name,
-          status: response.status,
-          ok: response.ok,
-          statusText: response.statusText,
         });
 
         if (!response.ok) {
@@ -239,19 +226,8 @@ export const UserStorageWidgetImpl = React.forwardRef<HTMLDivElement, UserStorag
         }
 
         const parsedData: StorageData = await response.json();
-
-        console.log('[UserStorageWidget] Received storage data:', {
-          username: name,
-          data: parsedData,
-        });
-
         setInternalData(parsedData);
-      } catch (err) {
-        console.error('[UserStorageWidget] Storage data fetch error:', {
-          username: name,
-          error: err,
-          errorMessage: err instanceof Error ? err.message : String(err),
-        });
+      } catch {
         setInternalError('Failed to fetch storage data');
       } finally {
         setInternalLoading(false);
@@ -419,8 +395,8 @@ export const UserStorageWidgetImpl = React.forwardRef<HTMLDivElement, UserStorag
         ) : (
           <Box sx={{ mb: 2 }}>
             <Grid container spacing={2} direction="column">
-              {cardData.map((card, index) => (
-                <Grid size={12} key={index}>
+              {cardData.map((card) => (
+                <Grid size={12} key={card.label}>
                   <StorageCard
                     label={card.label}
                     value={card.value}

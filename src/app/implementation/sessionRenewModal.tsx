@@ -19,7 +19,6 @@ export const SessionRenewModalImpl = React.forwardRef<HTMLDivElement, SessionRen
     // Trigger the renew action when modal opens
     useEffect(() => {
       if (open && onConfirm) {
-        console.log('SessionRenewModal: Calling onConfirm for session:', sessionId);
         onConfirm(12); // Default 12 hours - can be made configurable later
       }
     }, [open, onConfirm, sessionId]);

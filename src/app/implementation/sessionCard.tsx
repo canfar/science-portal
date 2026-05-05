@@ -216,8 +216,8 @@ export const SessionCardImpl = React.forwardRef<HTMLDivElement, SessionCardProps
         }
         // Wait a bit to show the deleting state before closing modal
         await new Promise((resolve) => setTimeout(resolve, 500));
-      } catch (error) {
-        console.error('Error deleting session:', error);
+      } catch {
+        // Swallow — the underlying mutation surfaces the error to the user.
       } finally {
         setIsDeleting(false);
         setShowDeleteModal(false);
@@ -239,8 +239,8 @@ export const SessionCardImpl = React.forwardRef<HTMLDivElement, SessionCardProps
           }
           // Wait a bit to show success state
           await new Promise((resolve) => setTimeout(resolve, 500));
-        } catch (error) {
-          console.error('Error renewing session:', error);
+        } catch {
+          // Swallow — the underlying mutation surfaces the error to the user.
         } finally {
           setIsRenewing(false);
           setTimeout(() => {

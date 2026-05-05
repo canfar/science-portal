@@ -23,7 +23,7 @@ import {
 } from '@/lib/hooks/useSessions';
 import { useContainerImages, useImageRepositories, useContext } from '@/lib/hooks/useImages';
 import { STATIC_PLATFORM_LOAD_DATA } from '@/lib/config/static-platform-load';
-import { useQueryClient } from '@tanstack/react-query';
+import { useLogoutReset } from '@/lib/hooks/useLogoutReset';
 import type { Session, SessionLaunchParams } from '@/lib/api/skaha';
 import {
   DOCS_URL,
@@ -45,51 +45,18 @@ export default function SciencePortalPage() {
   );
 
   // OIDC token mirror: useAuthStatus → useAuth syncs session.accessToken to localStorage
-
-  // Get authentication status and query client for cache management
   const { data: authStatus, isLoading: authLoading } = useAuthStatus();
   const isAuthenticated = authStatus?.authenticated ?? false;
   const showLoggedOutCopy = !authLoading && !isAuthenticated;
-  const queryClient = useQueryClient();
 
-  // Track previous auth state to detect logout
-  const [prevAuthState, setPrevAuthState] = useState(isAuthenticated);
+  // On logout transition, drop React Query cache + URL state + reload.
+  useLogoutReset(isAuthenticated);
 
   // Track which sessions are currently being operated on (delete/renew)
   const [operatingSessionIds, setOperatingSessionIds] = useState<Set<string>>(new Set());
 
   // Track which sessions are being polled after launch
   const [pollingSessionId, setPollingSessionId] = useState<string | null>(null);
-
-  // Detect logout and trigger page reload to reset everything
-  useEffect(() => {
-    // If user logged out, clear everything and reload the page
-    if (!isAuthenticated && prevAuthState === true) {
-      setPrevAuthState(isAuthenticated);
-
-      // Clear all queries except auth status
-      queryClient.invalidateQueries({
-        predicate: (query) => {
-          return !query.queryKey.includes('auth');
-        },
-      });
-
-      // Remove all non-auth queries from cache
-      queryClient.removeQueries({
-        predicate: (query) => {
-          return !query.queryKey.includes('auth');
-        },
-      });
-
-      // Clear nuqs state from URL (remove all query parameters)
-      // and reload the page to reset all state
-      const currentUrl = new URL(window.location.href);
-      currentUrl.search = ''; // Clear all query parameters
-      window.location.href = currentUrl.toString(); // Full page reload
-    } else if (isAuthenticated && prevAuthState === false) {
-      setPrevAuthState(isAuthenticated);
-    }
-  }, [isAuthenticated, prevAuthState, queryClient]);
 
   // Fetch active sessions using the hook
   const {
@@ -124,21 +91,11 @@ export default function SciencePortalPage() {
     refetch: refetchContext,
   } = useContext(isAuthenticated);
 
-  // Debug: Log context state
-  useEffect(() => {
-    console.log('🔍 Context Hook State:', {
-      isAuthenticated,
-      isLoadingContext,
-      isFetchingContext,
-      hasData: !!context,
-      context,
-    });
-  }, [isAuthenticated, isLoadingContext, isFetchingContext, context]);
-
-  // Mutation hooks for session actions
+  // Mutation hooks for session actions. Errors are surfaced to the user via the
+  // mutation state in each consumer (SessionCard / LaunchFormWidget); no need
+  // to log them here.
   const { mutate: deleteSession } = useDeleteSession({
     onSuccess: (_, sessionId) => {
-      console.log('Session deleted successfully');
       // Keep operating state for 3 seconds while verification happens
       setTimeout(() => {
         setOperatingSessionIds((prev) => {
@@ -148,9 +105,7 @@ export default function SciencePortalPage() {
         });
       }, 3500); // Slightly longer than the 3s verification delay
     },
-    onError: (error, sessionId) => {
-      console.error('Failed to delete session:', error);
-      // Remove operating state on error
+    onError: (_error, sessionId) => {
       setOperatingSessionIds((prev) => {
         const next = new Set(prev);
         next.delete(sessionId);
@@ -161,17 +116,13 @@ export default function SciencePortalPage() {
 
   const { mutate: renewSession } = useRenewSession({
     onSuccess: (_, { sessionId }) => {
-      console.log('Session renewed successfully');
-      // Remove operating state immediately since we trust the API response
       setOperatingSessionIds((prev) => {
         const next = new Set(prev);
         next.delete(sessionId);
         return next;
       });
     },
-    onError: (error, { sessionId }) => {
-      console.error('Failed to renew session:', error);
-      // Remove operating state on error
+    onError: (_error, { sessionId }) => {
       setOperatingSessionIds((prev) => {
         const next = new Set(prev);
         next.delete(sessionId);
@@ -182,12 +133,8 @@ export default function SciencePortalPage() {
 
   const { mutateAsync: launchSessionAsync } = useLaunchSession({
     onSuccess: (newSession) => {
-      console.log('Session launched successfully:', newSession.id);
       // Start polling this session
       setPollingSessionId(newSession.id);
-    },
-    onError: (error) => {
-      console.error('Failed to launch session:', error);
     },
   });
 
@@ -202,15 +149,10 @@ export default function SciencePortalPage() {
   // Session polling hook for newly launched sessions
   const { startPolling, stopPolling } = useSessionPolling(pollingSessionId, {
     interval: 30000, // Poll every 30 seconds
-    onStatusChange: (session) => {
-      console.log('Session status changed:', session.status);
-    },
     onComplete: () => {
-      console.log('Session polling complete');
       setPollingSessionId(null);
     },
-    onError: (error) => {
-      console.error('Error polling session:', error);
+    onError: () => {
       setPollingSessionId(null);
     },
   });

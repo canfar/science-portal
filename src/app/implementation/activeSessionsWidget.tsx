@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Paper,
   Typography,
@@ -31,9 +31,13 @@ const cardSx = {
   maxWidth: SESSION_CARD_MAX,
 };
 
+// Hoisted so callers omitting `operatingSessionIds` get a stable Set reference;
+// otherwise a fresh `new Set()` per render breaks downstream memoization.
+const EMPTY_OPERATING_IDS: Set<string> = new Set();
+
 export function ActiveSessionsWidgetImpl({
   sessions = [],
-  operatingSessionIds = new Set(),
+  operatingSessionIds = EMPTY_OPERATING_IDS,
   pollingSessionId = null,
   isLoading = false,
   onRefresh,
@@ -53,14 +57,29 @@ export function ActiveSessionsWidgetImpl({
 
   const hasMoreSessions = maxSessionsToShow && sessions.length > maxSessionsToShow;
 
+  // Keep refs to in-flight timers so we can cancel on unmount; otherwise
+  // setState fires on an unmounted component when the user navigates away
+  // mid-check.
+  const checkTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (checkTimerRef.current) clearTimeout(checkTimerRef.current);
+      if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+    };
+  }, []);
+
   const handleRefreshClick = () => {
     setShowCheckModal(true);
     setIsChecking(true);
 
-    setTimeout(() => {
+    if (checkTimerRef.current) clearTimeout(checkTimerRef.current);
+    checkTimerRef.current = setTimeout(() => {
       setIsChecking(false);
       onRefresh?.();
-      setTimeout(() => {
+      if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = setTimeout(() => {
         setShowCheckModal(false);
       }, 1000);
     }, 2000);
