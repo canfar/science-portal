@@ -12,6 +12,7 @@ export const OPEN_SOURCE_URL = 'https://github.com/opencadc';
 // Support
 export const SUPPORT_EMAIL = 'mailto:support@canfar.net';
 export const DISCORD_URL = 'https://discord.gg/vcCQ8QBvBa';
+export const STATUS_PAGE_URL = 'https://canfar.statuspage.io/';
 
 // Services (defaults; override at runtime with NEXT_PUBLIC_SERVICE_*_URL in public runtime config)
 export const STORAGE_MANAGEMENT_URL = 'https://www.canfar.net/storage/list';

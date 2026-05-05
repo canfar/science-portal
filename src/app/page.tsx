@@ -31,6 +31,7 @@ import {
   OPEN_SOURCE_URL,
   SUPPORT_EMAIL,
   DISCORD_URL,
+  STATUS_PAGE_URL,
 } from '@/lib/config/site-config';
 import { applyServiceNavUrlsToAppBarLinks } from '@/lib/config/apply-service-nav-urls';
 
@@ -258,10 +259,14 @@ export default function SciencePortalPage() {
     [renewSession],
   );
 
-  // Transform Session data to SessionCardProps format with action handlers
+  // Transform Session data to SessionCardProps format with action handlers.
+  // Headless (batch) sessions are excluded — the Active Sessions widget shows
+  // user-facing interactive sessions only.
   // NOTE: We do NOT include isOperating here - it's passed separately to avoid recreating the array
   const activeSessions: SessionCardProps[] = useMemo(() => {
-    return sessions.map((session: Session) => ({
+    return sessions
+      .filter((session: Session) => session.sessionType !== 'headless')
+      .map((session: Session) => ({
       id: session.id,
       sessionId: session.sessionId,
       sessionType: session.sessionType,
@@ -337,6 +342,7 @@ export default function SciencePortalPage() {
         links: [
           { label: 'Help', href: SUPPORT_EMAIL, external: false },
           { label: 'Join us on Discord', href: DISCORD_URL, external: true },
+          { label: 'Status Page', href: STATUS_PAGE_URL, external: true },
         ],
       },
     ],
@@ -387,7 +393,6 @@ export default function SciencePortalPage() {
                 sessions={activeSessions}
                 operatingSessionIds={operatingSessionIds}
                 pollingSessionId={pollingSessionId}
-                layout="responsive"
                 isLoading={isLoadingSessions}
                 onRefresh={handleSessionsRefresh}
                 emptyMessage={
@@ -476,7 +481,7 @@ export default function SciencePortalPage() {
       </Box>
 
       {/* Footer - full width - CANFAR mode only */}
-      {!isOIDCMode && <Footer sections={footerSections} copyright="© 2022-2025" />}
+      {!isOIDCMode && <Footer sections={footerSections} copyright="© 2022-2026" />}
     </Box>
   );
 }

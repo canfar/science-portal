@@ -27,7 +27,6 @@ export type ServiceNavUrls = {
 export type PublicRuntimeConfig = {
   basePath: string;
   useCanfar: boolean;
-  experimental: boolean;
   apiTimeout: number;
   devtools: boolean;
   serviceUrls: ServiceNavUrls;
@@ -39,7 +38,6 @@ export function getPublicRuntimeConfigFromEnv(): PublicRuntimeConfig {
     useCanfar:
       getProcessEnv('NEXT_USE_CANFAR') === 'true' ||
       getProcessEnv('NEXT_PUBLIC_USE_CANFAR') === 'true',
-    experimental: getProcessEnv('NEXT_PUBLIC_EXPERIMENTAL') === 'true',
     apiTimeout: parseInt(getProcessEnv('NEXT_PUBLIC_API_TIMEOUT') || '30000', 10),
     devtools: getProcessEnv('NEXT_PUBLIC_ENABLE_QUERY_DEVTOOLS') === 'true',
     serviceUrls: {

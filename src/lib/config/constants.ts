@@ -8,6 +8,9 @@
 export const DEFAULT_CORES_NUMBER = 2;
 export const DEFAULT_RAM_NUMBER = 8;
 
+// Per-user cap on concurrently running interactive (non-headless) sessions.
+export const MAX_INTERACTIVE_SESSIONS = 3;
+
 // Session type constants
 export const NOTEBOOK_TYPE = 'notebook';
 export const CARTA_TYPE = 'carta';

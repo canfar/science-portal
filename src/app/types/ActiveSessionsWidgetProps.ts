@@ -10,6 +10,4 @@ export interface ActiveSessionsWidgetProps {
   showSessionCount?: boolean;
   maxSessionsToShow?: number;
   emptyMessage?: string;
-  layout?: 'column' | 'row' | 'responsive';
-  sessionCardMaxWidth?: string | number;
 }

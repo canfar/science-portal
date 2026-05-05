@@ -14,12 +14,14 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import DocumentationIcon from '@mui/icons-material/Description';
 import InfoIcon from '@mui/icons-material/Info';
 import DiamondIcon from '@mui/icons-material/Diamond';
+import MonitorHeartIcon from '@mui/icons-material/MonitorHeart';
 import {
   DOCS_URL,
   ABOUT_URL,
   OPEN_SOURCE_URL,
   SUPPORT_EMAIL,
   DISCORD_URL,
+  STATUS_PAGE_URL,
   STORAGE_MANAGEMENT_URL,
   GROUP_MANAGEMENT_URL,
   DATA_PUBLICATION_URL,
@@ -106,6 +108,12 @@ export const navigationItems: NavigationItem[] = [
         label: 'Join us on Discord',
         icon: <ChatIcon />,
         href: DISCORD_URL,
+        type: 'link',
+      },
+      {
+        label: 'Status Page',
+        icon: <MonitorHeartIcon />,
+        href: STATUS_PAGE_URL,
         type: 'link',
       },
     ],
