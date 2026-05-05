@@ -143,6 +143,9 @@ const formatTimestamp = (timestamp: string): string => {
 export const SessionCardImpl = React.forwardRef<HTMLDivElement, SessionCardProps>(
   (
     {
+      // Strip custom session-card props so they don't fall through to the DOM
+      // via {...cardProps} on <MuiCard>. React warns on unknown DOM attributes.
+      id: _id,
       sessionType,
       sessionName,
       sessionId,
@@ -157,6 +160,9 @@ export const SessionCardImpl = React.forwardRef<HTMLDivElement, SessionCardProps
       gpuAllocated,
       isFixedResources,
       connectUrl,
+      requestedRAM: _requestedRAM,
+      requestedCPU: _requestedCPU,
+      requestedGPU: _requestedGPU,
       onDelete,
       onShowEvents,
       onShowLogs,
@@ -164,7 +170,7 @@ export const SessionCardImpl = React.forwardRef<HTMLDivElement, SessionCardProps
       onClick,
       loading = false,
       isOperating = false,
-      // disableHover = true, // Hover effects removed globally
+      disableHover: _disableHover,
       ...cardProps
     },
     ref,
