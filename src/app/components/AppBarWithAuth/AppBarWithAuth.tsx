@@ -84,13 +84,22 @@ export function AppBarWithAuth({
   );
 
   const handleLogout = useCallback(() => {
-    // Remove stored credentials. The auth-state transition
-    // (authenticated → unauthenticated) is observed by `useLogoutReset` in
-    // page.tsx, which clears the React Query cache, the URL query string, and
-    // triggers a full reload — no need to do that here. The user lands on the
-    // logged-out page; they can click "Login" when they want to sign back in.
+    // Remove stored credentials, then run the logout mutation. We force a hard
+    // reload from `onSuccess` so every widget (sessions, storage, launch form,
+    // platform-load) resets cleanly — relying purely on auth-state observation
+    // is racy in CANFAR mode against production: between the cookie clear, the
+    // mutation's `queryClient.clear()`, and the auth-status refetch there's a
+    // brief window where `isAuthenticated` doesn't flip in a way React Query's
+    // subscribers observe consistently. `useLogoutReset` is still wired in
+    // page.tsx as a safety net for non-button-driven auth transitions.
     removeCredentials();
-    logout();
+    logout(undefined, {
+      onSuccess: () => {
+        const url = new URL(window.location.href);
+        url.search = '';
+        window.location.href = url.toString();
+      },
+    });
   }, [logout]);
 
   const handleUpdateProfile = useCallback(() => {
