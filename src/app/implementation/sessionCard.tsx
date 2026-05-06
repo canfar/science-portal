@@ -320,13 +320,15 @@ export const SessionCardImpl = React.forwardRef<HTMLDivElement, SessionCardProps
             position: 'relative',
           }}
         >
-          {/* Operating state overlay */}
+          {/* Operating state overlay — kept inside the Card with a low z-index so
+              a sticky AppBar above always wins the stacking order. */}
           {isOperating && (
             <Backdrop
               open={isOperating}
               sx={{
                 position: 'absolute',
-                zIndex: theme.zIndex.drawer + 1,
+                inset: 0,
+                zIndex: 1,
                 backgroundColor:
                   theme.palette.mode === 'dark' ? 'rgba(0, 0, 0, 0.7)' : 'rgba(255, 255, 255, 0.7)',
                 borderRadius: theme.shape.borderRadius,
