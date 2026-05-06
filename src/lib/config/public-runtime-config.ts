@@ -27,6 +27,14 @@ export type ServiceNavUrls = {
 export type PublicRuntimeConfig = {
   basePath: string;
   useCanfar: boolean;
+  /**
+   * Reserved feature-flag plumbing for future experimental rollouts. Read from
+   * `NEXT_PUBLIC_EXPERIMENTAL`. No code currently gates on this — the resource
+   * sliders (previously experimental) are now the only resource UI. Keep the
+   * field so existing deployments can flip the env var in advance, and so new
+   * experiments have a place to wire in.
+   */
+  experimental: boolean;
   apiTimeout: number;
   devtools: boolean;
   serviceUrls: ServiceNavUrls;
@@ -38,6 +46,7 @@ export function getPublicRuntimeConfigFromEnv(): PublicRuntimeConfig {
     useCanfar:
       getProcessEnv('NEXT_USE_CANFAR') === 'true' ||
       getProcessEnv('NEXT_PUBLIC_USE_CANFAR') === 'true',
+    experimental: getProcessEnv('NEXT_PUBLIC_EXPERIMENTAL') === 'true',
     apiTimeout: parseInt(getProcessEnv('NEXT_PUBLIC_API_TIMEOUT') || '30000', 10),
     devtools: getProcessEnv('NEXT_PUBLIC_ENABLE_QUERY_DEVTOOLS') === 'true',
     serviceUrls: {

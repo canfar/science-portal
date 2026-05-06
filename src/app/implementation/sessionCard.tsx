@@ -127,10 +127,24 @@ const parseImagePath = (fullImagePath: string): { project: string; image: string
   return { project: 'N/A', image: parts[0] };
 };
 
-/** Skaha returns memory like "8G"/"16G"; render as "8GB"/"16GB". Leaves "N/A"/"<none>" alone. */
+/**
+ * Skaha returns memory either as bare GB numbers ("1.4", "16") or, occasionally,
+ * with a unit suffix ("8G"). Render with a "GB" suffix. Falsy / "<none>" → "N/A".
+ */
 const formatMemoryUnit = (value: string | undefined): string => {
-  if (!value) return 'N/A';
-  return value.replace(/(\d)([KMGT])$/, '$1$2B');
+  if (!value || value === '<none>') return 'N/A';
+  if (/[KMGT]$/.test(value)) return `${value}B`;
+  if (/^\d+(\.\d+)?$/.test(value)) return `${value}GB`;
+  return value;
+};
+
+/**
+ * Strip any unit suffix; used for the usage side of "usage / allocated" so the
+ * unit appears only once at the end (e.g. "1.4 / 16GB").
+ */
+const stripMemoryUnit = (value: string | undefined): string => {
+  if (!value || value === '<none>') return 'N/A';
+  return value.replace(/[KMGT]B?$/, '');
 };
 
 /** Format ISO timestamp as "YYYY-MM-DD HH:mm" in UTC. */
@@ -612,7 +626,7 @@ export const SessionCardImpl = React.forwardRef<HTMLDivElement, SessionCardProps
                   >
                     {isFixedResources === false
                       ? formatMemoryUnit(memoryUsage)
-                      : `${formatMemoryUnit(memoryUsage)} / ${formatMemoryUnit(memoryAllocated)}`}
+                      : `${stripMemoryUnit(memoryUsage)} / ${formatMemoryUnit(memoryAllocated)}`}
                   </Typography>
                 </Box>
                 <Box
