@@ -3,7 +3,6 @@ import { SessionCardProps } from './SessionCardProps';
 export interface ActiveSessionsWidgetProps {
   sessions: SessionCardProps[];
   operatingSessionIds?: Set<string>; // IDs of sessions currently being operated on (delete/renew)
-  pollingSessionId?: string | null; // ID of session being polled after launch
   isLoading?: boolean;
   onRefresh?: () => void;
   title?: string;

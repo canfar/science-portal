@@ -185,6 +185,7 @@ export const SessionCardImpl = React.forwardRef<HTMLDivElement, SessionCardProps
       loading = false,
       isOperating = false,
       disableHover: _disableHover,
+      sx,
       ...cardProps
     },
     ref,
@@ -278,9 +279,10 @@ export const SessionCardImpl = React.forwardRef<HTMLDivElement, SessionCardProps
           {...cardProps}
           elevation={0}
           variant="outlined"
-          sx={{
-            border: `1px solid ${theme.palette.divider}`,
-          }}
+          sx={[
+            { border: `1px solid ${theme.palette.divider}` },
+            ...(Array.isArray(sx) ? sx : sx ? [sx] : []),
+          ]}
         >
           <CardContent>
             <Stack spacing={2}>
@@ -314,11 +316,21 @@ export const SessionCardImpl = React.forwardRef<HTMLDivElement, SessionCardProps
           elevation={0}
           raised={false}
           variant="outlined"
-          sx={{
-            cursor: status === 'Running' ? 'pointer' : 'default',
-            border: `1px solid ${theme.palette.divider}`,
-            position: 'relative',
-          }}
+          sx={[
+            {
+              cursor: status === 'Running' ? 'pointer' : 'default',
+              border: `1px solid ${theme.palette.divider}`,
+              position: 'relative',
+              // Flex column so CardContent can fill the card vertically (the
+              // widget enforces a 360px minHeight on every card; without this
+              // the body sits at the top and leftover space falls between the
+              // footer and the card's bottom border, breaking the footer's
+              // perceived position).
+              display: 'flex',
+              flexDirection: 'column',
+            },
+            ...(Array.isArray(sx) ? sx : sx ? [sx] : []),
+          ]}
         >
           {/* Operating state overlay — kept inside the Card with a low z-index so
               a sticky AppBar above always wins the stacking order. */}
@@ -340,6 +352,11 @@ export const SessionCardImpl = React.forwardRef<HTMLDivElement, SessionCardProps
 
           <CardContent
             sx={{
+              // Fill the card's height (set by widget cardSx minHeight) so the
+              // footer can be pushed to the bottom via `mt: auto`.
+              flex: 1,
+              display: 'flex',
+              flexDirection: 'column',
               [theme.breakpoints.down('sm')]: {
                 padding: theme.spacing(2),
                 '&:last-child': {
@@ -722,20 +739,31 @@ export const SessionCardImpl = React.forwardRef<HTMLDivElement, SessionCardProps
             {/* Footer Actions */}
             <Box
               display="flex"
+              alignItems="center"
               gap={theme.spacing(0.5)}
               sx={{
                 borderTop: 1,
                 borderColor: theme.palette.divider,
-                pt: theme.spacing(1.5),
+                // Equal top/bottom padding so the icon row is visually
+                // Y-centered between the divider and the card's bottom edge.
+                py: theme.spacing(1.5),
                 mt: theme.spacing(2),
+                // Cancel CardContent's edges so the footer truly bleeds to the
+                // card border and the centering is honest. CardContent uses
+                // `&:last-child { paddingBottom: 24 }` (the special last-child
+                // rule), so we need -3 (= -24px) on `mb`, not -2.
                 mx: theme.spacing(-2),
+                mb: theme.spacing(-3),
                 px: theme.spacing(2),
                 justifyContent: 'flex-end',
                 flexWrap: 'wrap', // Allow wrapping on very small screens
                 [theme.breakpoints.down('sm')]: {
                   justifyContent: 'space-evenly', // Better distribution on mobile
                   gap: theme.spacing(0.5), // Consistent gap
-                  pt: theme.spacing(2), // More padding on mobile
+                  py: theme.spacing(2), // More padding on mobile
+                  // Mobile CardContent override sets last-child paddingBottom
+                  // to 16, so the negative offset there is only -2.
+                  mb: theme.spacing(-2),
                 },
               }}
             >
@@ -744,7 +772,7 @@ export const SessionCardImpl = React.forwardRef<HTMLDivElement, SessionCardProps
               >
                 <span>
                   <IconButton
-                    size="small"
+                    size="medium"
                     onClick={handleExtendClick}
                     aria-label="Extend time"
                     disabled={status === 'Pending'}
@@ -755,13 +783,13 @@ export const SessionCardImpl = React.forwardRef<HTMLDivElement, SessionCardProps
                       },
                     }}
                   >
-                    <ExtendIcon fontSize="small" />
+                    <ExtendIcon fontSize="medium" />
                   </IconButton>
                 </span>
               </Tooltip>
               <Tooltip title="View session logs">
                 <IconButton
-                  size="small"
+                  size="medium"
                   onClick={handleShowLogs}
                   aria-label="View logs"
                   sx={{
@@ -771,12 +799,12 @@ export const SessionCardImpl = React.forwardRef<HTMLDivElement, SessionCardProps
                     },
                   }}
                 >
-                  <LogsIcon fontSize="small" />
+                  <LogsIcon fontSize="medium" />
                 </IconButton>
               </Tooltip>
               <Tooltip title="View launch info">
                 <IconButton
-                  size="small"
+                  size="medium"
                   onClick={handleShowEvents}
                   aria-label="View events"
                   sx={{
@@ -786,12 +814,12 @@ export const SessionCardImpl = React.forwardRef<HTMLDivElement, SessionCardProps
                     },
                   }}
                 >
-                  <FlagIcon fontSize="small" />
+                  <FlagIcon fontSize="medium" />
                 </IconButton>
               </Tooltip>
               <Tooltip title="Delete session">
                 <IconButton
-                  size="small"
+                  size="medium"
                   onClick={handleDeleteClick}
                   aria-label="Delete session"
                   sx={{
@@ -801,7 +829,7 @@ export const SessionCardImpl = React.forwardRef<HTMLDivElement, SessionCardProps
                     },
                   }}
                 >
-                  <DeleteIcon fontSize="small" />
+                  <DeleteIcon fontSize="medium" />
                 </IconButton>
               </Tooltip>
             </Box>

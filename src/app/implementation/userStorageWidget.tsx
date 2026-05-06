@@ -105,11 +105,11 @@ const StorageCard: React.FC<StorageCardProps> = ({ label, value, isLoading, isWa
             gap: 1,
           }}
         >
-          <Typography variant="body2" fontWeight="bold" color="text.primary">
+          <Typography variant="body1" fontWeight="bold" color="text.primary">
             {label}:
           </Typography>
           <Typography
-            variant="body2"
+            variant="body1"
             fontWeight="bold"
             color={isWarning ? 'error.main' : 'primary.main'}
           >
@@ -418,16 +418,15 @@ export const UserStorageWidgetImpl = React.forwardRef<HTMLDivElement, UserStorag
               color: theme.palette.text.secondary,
             }}
           >
-            <Typography variant="caption" sx={{ fontSize: '10px' }}>
+            <Typography variant="body2">
               Last update:{' '}
               <Typography
                 component="span"
-                variant="caption"
+                variant="body2"
                 sx={{
-                  fontSize: '10px',
                   fontWeight: 'bold',
                   fontFamily: 'monospace',
-                  color: 'primary.500',
+                  color: 'primary.main',
                 }}
               >
                 {lastUpdate}

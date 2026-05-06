@@ -552,8 +552,25 @@ export const createTheme = (mode: ThemeMode, overrides?: ThemeOptions) => {
             margin: `${tokens.spacing[1]} ${tokens.spacing[2]}`,
             padding: `${tokens.spacing[2]} ${tokens.spacing[3]}`,
             transition: 'none',
+            // Hover: subtle primary tint in light mode (was a near-invisible
+            // neutral grey against the white surface, especially next to the
+            // selected item's blue tint). Dark mode keeps the neutral hover —
+            // it reads fine there. Selected-item hover follows the same
+            // pattern, slightly stronger so the selected state still wins.
             '&:hover': {
-              backgroundColor: isDark ? tokens.colors.neutral[700] : tokens.colors.neutral[100],
+              backgroundColor: isDark
+                ? tokens.colors.neutral[700]
+                : tokens.colors.primary[100],
+            },
+            '&.Mui-selected': {
+              backgroundColor: isDark
+                ? tokens.colors.neutral[800]
+                : tokens.colors.primary[100],
+            },
+            '&.Mui-selected:hover': {
+              backgroundColor: isDark
+                ? tokens.colors.neutral[700]
+                : tokens.colors.primary[200],
             },
             '&:focus-visible': {
               outline: `2px solid ${tokens.colors.border.focus}`,
@@ -595,6 +612,42 @@ export const createTheme = (mode: ThemeMode, overrides?: ThemeOptions) => {
                 borderColor: tokens.colors.border.focus,
                 borderWidth: '2px',
               },
+            },
+          },
+        },
+      },
+      // Form-field labels (Type, Image Registry, Project, etc.). Bumped a notch
+      // larger and uses primary text color so they read clearly in both modes —
+      // the MUI default `text.secondary` is too washed out in light mode.
+      MuiFormLabel: {
+        styleOverrides: {
+          root: {
+            fontSize: tokens.typography.fontSize.md,
+            fontWeight: tokens.typography.fontWeight.medium,
+            color: isDark ? tokens.colors.text.primary.dark : tokens.colors.text.primary.light,
+            '&.Mui-focused': {
+              color: isDark ? tokens.colors.text.primary.dark : tokens.colors.text.primary.light,
+            },
+            '&.Mui-disabled': {
+              color: isDark ? tokens.colors.text.secondary.dark : tokens.colors.text.secondary.light,
+            },
+          },
+        },
+      },
+      // Disabled inputs (e.g. the read-only image-registry field when only one
+      // host is configured) were unreadable due to MUI's default low-contrast
+      // grey. Force the primary text color with a slight opacity so the value
+      // is visible in both modes; -webkit-text-fill-color is required on
+      // WebKit/Blink browsers which override `color` for disabled inputs.
+      MuiInputBase: {
+        styleOverrides: {
+          input: {
+            '&.Mui-disabled': {
+              WebkitTextFillColor: isDark
+                ? tokens.colors.text.primary.dark
+                : tokens.colors.text.primary.light,
+              color: isDark ? tokens.colors.text.primary.dark : tokens.colors.text.primary.light,
+              opacity: 0.85,
             },
           },
         },

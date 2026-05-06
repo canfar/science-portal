@@ -5,7 +5,6 @@ import { AppBar } from '@/app/components/AppBar/AppBar';
 import { AppBarProps } from '@/app/types/AppBarProps';
 import { LoginModal } from '@/app/components/LoginModal/LoginModal';
 import { ResetPasswordModal } from '@/app/components/ResetPasswordModal/ResetPasswordModal';
-import { RegistrationModal } from '@/app/components/RegistrationModal/RegistrationModal';
 import {
   useAuthStatus,
   useLogin,
@@ -41,7 +40,6 @@ export function AppBarWithAuth({
 }: AppBarWithAuthProps) {
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [resetPasswordModalOpen, setResetPasswordModalOpen] = useState(false);
-  const [registrationModalOpen, setRegistrationModalOpen] = useState(false);
   const [isOidcLoginPending, setIsOidcLoginPending] = useState(false);
   const oidcLoginInFlightRef = useRef(false);
   const { data: authStatus, isLoading: isCheckingAuth } = useAuthStatus();
@@ -52,18 +50,11 @@ export function AppBarWithAuth({
   // Sync auth mode from environment
   useAuthModeSync();
 
-  // Check for showLogin URL parameter on mount (after logout redirect)
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('showLogin') === 'true') {
-      // Open login modal
-      setLoginModalOpen(true);
-      // Clean up URL by removing the showLogin parameter
-      const newUrl = new URL(window.location.href);
-      newUrl.searchParams.delete('showLogin');
-      window.history.replaceState({}, '', newUrl.toString());
-    }
-  }, []);
+  // Track whether we've already auto-opened the modal this page lifetime.
+  // Effect that actually opens it lives below, after `isAuthenticated` is
+  // computed — but the ref needs to exist before any renders so it's stable
+  // across the lifetime of this component instance.
+  const autoOpenedRef = useRef(false);
 
   const handleOpenLogin = useCallback(() => {
     setLoginModalOpen(true);
@@ -93,17 +84,13 @@ export function AppBarWithAuth({
   );
 
   const handleLogout = useCallback(() => {
-    // Remove stored credentials
+    // Remove stored credentials. The auth-state transition
+    // (authenticated → unauthenticated) is observed by `useLogoutReset` in
+    // page.tsx, which clears the React Query cache, the URL query string, and
+    // triggers a full reload — no need to do that here. The user lands on the
+    // logged-out page; they can click "Login" when they want to sign back in.
     removeCredentials();
-    logout(undefined, {
-      onSuccess: () => {
-        // Clear URL query parameters and add showLogin flag
-        const currentUrl = new URL(window.location.href);
-        currentUrl.search = '?showLogin=true';
-        // Reload the page to reset all state and show login modal
-        window.location.href = currentUrl.toString();
-      },
-    });
+    logout();
   }, [logout]);
 
   const handleUpdateProfile = useCallback(() => {
@@ -114,18 +101,6 @@ export function AppBarWithAuth({
     // Open reset password modal in CANFAR mode
     // In OIDC mode, this menu item is not shown
     setResetPasswordModalOpen(true);
-  }, []);
-
-  const handleForgotPassword = useCallback(() => {
-    // Close login modal and open reset password modal
-    setLoginModalOpen(false);
-    setResetPasswordModalOpen(true);
-  }, []);
-
-  const handleRequestAccount = useCallback(() => {
-    // Close login modal and open registration modal
-    setLoginModalOpen(false);
-    setRegistrationModalOpen(true);
   }, []);
 
   const handleObtainCertificate = useCallback(() => {
@@ -144,6 +119,22 @@ export function AppBarWithAuth({
   }, []);
 
   const isAuthenticated = authStatus?.authenticated ?? false;
+
+  // Auto-open the login modal once per page lifetime when the auth check
+  // resolves and the user is unauthenticated. CANFAR mode only — auto-
+  // redirecting to the OIDC provider would be intrusive, so users click Login
+  // themselves there. `autoOpenedRef` ensures dismissing the modal doesn't
+  // immediately re-open it on the next render; a page reload resets the ref
+  // so the prompt appears again.
+  useEffect(() => {
+    if (autoOpenedRef.current) return;
+    if (isCheckingAuth) return;
+    if (isOIDCMode) return;
+    if (!showLoginButton) return;
+    if (isAuthenticated) return;
+    autoOpenedRef.current = true;
+    setLoginModalOpen(true);
+  }, [isCheckingAuth, isAuthenticated, isOIDCMode, showLoginButton]);
 
   // Get user's first and last name, fallback to username or 'User'
   const firstName = authStatus?.user?.firstName ?? '';
@@ -274,30 +265,26 @@ export function AppBarWithAuth({
         variant={variant}
         sx={sx}
       />
-      {/* Only show login modal in CANFAR mode */}
+      {/* Only show login modal in CANFAR mode. The "Forgot your Account
+          information?" and "Request a CADC Account" links are intentionally
+          NOT wired to local handlers so the modal falls through to its
+          built-in external anchors (target="_blank") pointing at the CADC
+          account-management pages. */}
       {!isOIDCMode && (
         <LoginModal
           open={loginModalOpen}
           onClose={handleCloseLogin}
           onSubmit={handleLogin}
-          onForgotPassword={handleForgotPassword}
-          onRequestAccount={handleRequestAccount}
           isLoading={isLoggingIn}
           errorMessage={loginError?.message}
         />
       )}
-      {/* Only show reset password modal in CANFAR mode */}
+      {/* Reset-password modal is still triggered from the authenticated
+          user-account menu (`handleResetPassword`). */}
       {!isOIDCMode && (
         <ResetPasswordModal
           open={resetPasswordModalOpen}
           onClose={() => setResetPasswordModalOpen(false)}
-        />
-      )}
-      {/* Only show registration modal in CANFAR mode */}
-      {!isOIDCMode && (
-        <RegistrationModal
-          open={registrationModalOpen}
-          onClose={() => setRegistrationModalOpen(false)}
         />
       )}
     </>

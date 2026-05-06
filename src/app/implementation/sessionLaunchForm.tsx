@@ -546,7 +546,7 @@ export const SessionLaunchFormImpl = React.forwardRef<HTMLDivElement, SessionLau
             <Box sx={{ pt: theme.spacing(3) }}>
               <Stack spacing={2.5}>
                 {/* Type field skeleton */}
-                <Grid container alignItems="center" spacing={2}>
+                <Grid container alignItems="center" spacing={1}>
                   <Grid size={{ xs: 12, sm: 4 }}>
                     <Skeleton variant="text" width="60%" height={20} />
                   </Grid>
@@ -561,7 +561,7 @@ export const SessionLaunchFormImpl = React.forwardRef<HTMLDivElement, SessionLau
                 </Grid>
 
                 {/* Image registry field skeleton */}
-                <Grid container alignItems="center" spacing={2}>
+                <Grid container alignItems="center" spacing={1}>
                   <Grid size={{ xs: 12, sm: 4 }}>
                     <Skeleton variant="text" width="55%" height={20} />
                   </Grid>
@@ -576,7 +576,7 @@ export const SessionLaunchFormImpl = React.forwardRef<HTMLDivElement, SessionLau
                 </Grid>
 
                 {/* Project field skeleton */}
-                <Grid container alignItems="center" spacing={2}>
+                <Grid container alignItems="center" spacing={1}>
                   <Grid size={{ xs: 12, sm: 4 }}>
                     <Skeleton variant="text" width="60%" height={20} />
                   </Grid>
@@ -591,7 +591,7 @@ export const SessionLaunchFormImpl = React.forwardRef<HTMLDivElement, SessionLau
                 </Grid>
 
                 {/* Container Image field skeleton */}
-                <Grid container alignItems="center" spacing={2}>
+                <Grid container alignItems="center" spacing={1}>
                   <Grid size={{ xs: 12, sm: 4 }}>
                     <Skeleton variant="text" width="80%" height={20} />
                   </Grid>
@@ -606,7 +606,7 @@ export const SessionLaunchFormImpl = React.forwardRef<HTMLDivElement, SessionLau
                 </Grid>
 
                 {/* Session Name field skeleton */}
-                <Grid container alignItems="center" spacing={2}>
+                <Grid container alignItems="center" spacing={1}>
                   <Grid size={{ xs: 12, sm: 4 }}>
                     <Skeleton variant="text" width="70%" height={20} />
                   </Grid>
@@ -621,7 +621,7 @@ export const SessionLaunchFormImpl = React.forwardRef<HTMLDivElement, SessionLau
                 </Grid>
 
                 {/* Resources field skeleton */}
-                <Grid container alignItems="center" spacing={2}>
+                <Grid container alignItems="center" spacing={1}>
                   <Grid size={{ xs: 12, sm: 4 }}>
                     <Skeleton variant="text" width="60%" height={20} />
                   </Grid>
@@ -676,14 +676,12 @@ export const SessionLaunchFormImpl = React.forwardRef<HTMLDivElement, SessionLau
                   }}
                 >
                   {/* Type field */}
-                  <Grid container alignItems="center" spacing={2}>
+                  <Grid container alignItems="center" spacing={1}>
                     <Grid size={{ xs: 12, sm: 4 }}>
                       <FormLabel
                         sx={{
                           display: 'flex',
                           alignItems: 'center',
-                          fontSize: '0.875rem',
-                          fontWeight: 500,
                         }}
                       >
                         type
@@ -713,14 +711,12 @@ export const SessionLaunchFormImpl = React.forwardRef<HTMLDivElement, SessionLau
                   </Grid>
 
                   {/* Image registry field */}
-                  <Grid container alignItems="center" spacing={2}>
+                  <Grid container alignItems="center" spacing={1}>
                     <Grid size={{ xs: 12, sm: 4 }}>
                       <FormLabel
                         sx={{
                           display: 'flex',
                           alignItems: 'center',
-                          fontSize: '0.875rem',
-                          fontWeight: 500,
                         }}
                       >
                         image registry
@@ -760,14 +756,12 @@ export const SessionLaunchFormImpl = React.forwardRef<HTMLDivElement, SessionLau
                   </Grid>
 
                   {/* Project field */}
-                  <Grid container alignItems="center" spacing={2}>
+                  <Grid container alignItems="center" spacing={1}>
                     <Grid size={{ xs: 12, sm: 4 }}>
                       <FormLabel
                         sx={{
                           display: 'flex',
                           alignItems: 'center',
-                          fontSize: '0.875rem',
-                          fontWeight: 500,
                         }}
                       >
                         project
@@ -804,14 +798,12 @@ export const SessionLaunchFormImpl = React.forwardRef<HTMLDivElement, SessionLau
                   </Grid>
 
                   {/* Container Image field */}
-                  <Grid container alignItems="center" spacing={2}>
+                  <Grid container alignItems="center" spacing={1}>
                     <Grid size={{ xs: 12, sm: 4 }}>
                       <FormLabel
                         sx={{
                           display: 'flex',
                           alignItems: 'center',
-                          fontSize: '0.875rem',
-                          fontWeight: 500,
                         }}
                       >
                         container image
@@ -849,14 +841,12 @@ export const SessionLaunchFormImpl = React.forwardRef<HTMLDivElement, SessionLau
                   </Grid>
 
                   {/* Session Name field */}
-                  <Grid container alignItems="center" spacing={2}>
+                  <Grid container alignItems="center" spacing={1}>
                     <Grid size={{ xs: 12, sm: 4 }}>
                       <FormLabel
                         sx={{
                           display: 'flex',
                           alignItems: 'center',
-                          fontSize: '0.875rem',
-                          fontWeight: 500,
                         }}
                       >
                         session name
@@ -879,16 +869,9 @@ export const SessionLaunchFormImpl = React.forwardRef<HTMLDivElement, SessionLau
 
                   {/* Resources field - only show for session types that support it */}
                   {supportsResourceConfig && (
-                    <Grid container alignItems="center" spacing={2}>
+                    <Grid container alignItems="center" spacing={1}>
                       <Grid size={{ xs: 12, sm: 4 }}>
-                        <FormLabel
-                          sx={{
-                            fontSize: '0.875rem',
-                            fontWeight: 500,
-                          }}
-                        >
-                          resources
-                        </FormLabel>
+                        <FormLabel>resources</FormLabel>
                       </Grid>
                       <Grid size={{ xs: 12, sm: 8 }}>
                         <FormControl component="fieldset">
@@ -1024,14 +1007,12 @@ export const SessionLaunchFormImpl = React.forwardRef<HTMLDivElement, SessionLau
                     <Divider sx={{ mb: theme.spacing(3) }} />
                     <Box sx={{ px: theme.spacing(2) }}>
                       {/* Container image field */}
-                      <Grid container alignItems="center" spacing={2} sx={{ mb: 2 }}>
+                      <Grid container alignItems="center" spacing={1} sx={{ mb: 2 }}>
                         <Grid size={{ xs: 12, sm: 4 }}>
                           <FormLabel
                             sx={{
                               display: 'flex',
                               alignItems: 'center',
-                              fontSize: '0.875rem',
-                              fontWeight: 500,
                             }}
                           >
                             container image
@@ -1083,14 +1064,12 @@ export const SessionLaunchFormImpl = React.forwardRef<HTMLDivElement, SessionLau
                       </Grid>
 
                       {/* Repository username field */}
-                      <Grid container alignItems="center" spacing={2} sx={{ mb: 2 }}>
+                      <Grid container alignItems="center" spacing={1} sx={{ mb: 2 }}>
                         <Grid size={{ xs: 12, sm: 4 }}>
                           <FormLabel
                             sx={{
                               display: 'flex',
                               alignItems: 'center',
-                              fontSize: '0.875rem',
-                              fontWeight: 500,
                             }}
                           >
                             repository username
@@ -1112,14 +1091,12 @@ export const SessionLaunchFormImpl = React.forwardRef<HTMLDivElement, SessionLau
                       </Grid>
 
                       {/* Repository secret field */}
-                      <Grid container alignItems="center" spacing={2}>
+                      <Grid container alignItems="center" spacing={1}>
                         <Grid size={{ xs: 12, sm: 4 }}>
                           <FormLabel
                             sx={{
                               display: 'flex',
                               alignItems: 'center',
-                              fontSize: '0.875rem',
-                              fontWeight: 500,
                             }}
                           >
                             repository secret
@@ -1158,14 +1135,12 @@ export const SessionLaunchFormImpl = React.forwardRef<HTMLDivElement, SessionLau
                     <Divider sx={{ mb: theme.spacing(3) }} />
                     <Box sx={{ px: theme.spacing(2) }}>
                       {/* Type field */}
-                      <Grid container alignItems="center" spacing={2} sx={{ mb: 2 }}>
+                      <Grid container alignItems="center" spacing={1} sx={{ mb: 2 }}>
                         <Grid size={{ xs: 12, sm: 4 }}>
                           <FormLabel
                             sx={{
                               display: 'flex',
                               alignItems: 'center',
-                              fontSize: '0.875rem',
-                              fontWeight: 500,
                             }}
                           >
                             type
@@ -1195,14 +1170,12 @@ export const SessionLaunchFormImpl = React.forwardRef<HTMLDivElement, SessionLau
                       </Grid>
 
                       {/* Session name field */}
-                      <Grid container alignItems="center" spacing={2} sx={{ mb: 2 }}>
+                      <Grid container alignItems="center" spacing={1} sx={{ mb: 2 }}>
                         <Grid size={{ xs: 12, sm: 4 }}>
                           <FormLabel
                             sx={{
                               display: 'flex',
                               alignItems: 'center',
-                              fontSize: '0.875rem',
-                              fontWeight: 500,
                             }}
                           >
                             session name
@@ -1226,16 +1199,9 @@ export const SessionLaunchFormImpl = React.forwardRef<HTMLDivElement, SessionLau
                       {/* Resources field - only show for session types that support it */}
                       {supportsResourceConfig && (
                         <>
-                          <Grid container alignItems="center" spacing={2} sx={{ mb: 2 }}>
+                          <Grid container alignItems="center" spacing={1} sx={{ mb: 2 }}>
                             <Grid size={{ xs: 12, sm: 4 }}>
-                              <FormLabel
-                                sx={{
-                                  fontSize: '0.875rem',
-                                  fontWeight: 500,
-                                }}
-                              >
-                                resources
-                              </FormLabel>
+                              <FormLabel>resources</FormLabel>
                             </Grid>
                             <Grid size={{ xs: 12, sm: 8 }}>
                               <FormControl component="fieldset">

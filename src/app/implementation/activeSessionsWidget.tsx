@@ -18,6 +18,10 @@ import { SessionCheckModal } from '@/app/components/SessionCheckModal/SessionChe
 
 const SESSION_CARD_MIN = 320;
 const SESSION_CARD_MAX = 460;
+// Floor that matches a fully-populated SessionCard so skeleton, empty and real
+// states all settle at the same height — prevents the widget from jumping when
+// sessions arrive, change state, or all clear.
+const SESSION_CARD_MIN_HEIGHT = 360;
 
 const gridSx = {
   display: 'grid',
@@ -29,6 +33,7 @@ const gridSx = {
 const cardSx = {
   width: '100%',
   maxWidth: SESSION_CARD_MAX,
+  minHeight: SESSION_CARD_MIN_HEIGHT,
 };
 
 // Hoisted so callers omitting `operatingSessionIds` get a stable Set reference;
@@ -38,7 +43,6 @@ const EMPTY_OPERATING_IDS: Set<string> = new Set();
 export function ActiveSessionsWidgetImpl({
   sessions = [],
   operatingSessionIds = EMPTY_OPERATING_IDS,
-  pollingSessionId = null,
   isLoading = false,
   onRefresh,
   title = 'Active Sessions',
@@ -171,7 +175,7 @@ export function ActiveSessionsWidgetImpl({
           >
             <CardContent
               sx={{
-                minHeight: '200px',
+                minHeight: SESSION_CARD_MIN_HEIGHT,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -207,13 +211,12 @@ export function ActiveSessionsWidgetImpl({
                   key={session.sessionName || `session-${index}`}
                   {...session}
                   isOperating={
+                    // Delete/renew operations OR any session still spinning up
+                    // (Pending without a connectUrl). Decoupled from
+                    // `pollingSessionId` so launching multiple sessions back to
+                    // back doesn't drop the spinner on earlier-or-later cards.
                     !!(session.id && operatingSessionIds.has(session.id)) ||
-                    !!(
-                      session.id &&
-                      pollingSessionId === session.id &&
-                      session.status === 'Pending' &&
-                      !session.connectUrl
-                    )
+                    (session.status === 'Pending' && !session.connectUrl)
                   }
                   disableHover={true}
                   sx={cardSx}
