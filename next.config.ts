@@ -12,6 +12,12 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true,
   },
+  // Transform `import { Foo } from '@mui/material'` into direct subpath imports
+  // at build time. The MUI barrel pulls ~2,225 modules per file otherwise —
+  // 200-800ms cold-start cost. Next 13.5+ preserves TypeScript autocompletion.
+  experimental: {
+    optimizePackageImports: ['@mui/material', '@mui/icons-material'],
+  },
   // Client-exposed keys only. Do not set LOGIN_API/SKAHA_API here — that would
   // bake empty build-time values and override runtime env in standalone/server.
   env: {

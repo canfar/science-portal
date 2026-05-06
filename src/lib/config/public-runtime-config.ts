@@ -27,6 +27,13 @@ export type ServiceNavUrls = {
 export type PublicRuntimeConfig = {
   basePath: string;
   useCanfar: boolean;
+  /**
+   * Reserved feature-flag plumbing for future experimental rollouts. Read from
+   * `NEXT_PUBLIC_EXPERIMENTAL`. No code currently gates on this — the resource
+   * sliders (previously experimental) are now the only resource UI. Keep the
+   * field so existing deployments can flip the env var in advance, and so new
+   * experiments have a place to wire in.
+   */
   experimental: boolean;
   apiTimeout: number;
   devtools: boolean;

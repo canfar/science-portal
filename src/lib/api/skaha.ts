@@ -303,24 +303,6 @@ export async function deleteSession(sessionId: string): Promise<void> {
 }
 
 /**
- * Get platform load statistics
- */
-export async function getPlatformLoad(): Promise<PlatformLoad> {
-  const authHeaders = getAuthHeader();
-  const response = await fetch(`${sessionsApiRoot()}/platform-load`, {
-    method: 'GET',
-    headers: { Accept: 'application/json', ...authHeaders },
-    credentials: 'include',
-  });
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch platform load: ${response.status}`);
-  }
-
-  return response.json();
-}
-
-/**
  * Get available container images grouped by type and project
  */
 export async function getContainerImages(): Promise<ImagesByTypeAndProject> {

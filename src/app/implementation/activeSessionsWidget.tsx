@@ -1,14 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Paper,
   Typography,
   IconButton,
   Box,
   LinearProgress,
-  Stack,
-  useMediaQuery,
   Card,
   CardContent,
 } from '@mui/material';
@@ -18,9 +16,28 @@ import { ActiveSessionsWidgetProps } from '@/app/types/ActiveSessionsWidgetProps
 import { SessionCard } from '@/app/components/SessionCard/SessionCard';
 import { SessionCheckModal } from '@/app/components/SessionCheckModal/SessionCheckModal';
 
+const SESSION_CARD_MIN = 320;
+const SESSION_CARD_MAX = 460;
+
+const gridSx = {
+  display: 'grid',
+  gridTemplateColumns: `repeat(auto-fill, minmax(${SESSION_CARD_MIN}px, 1fr))`,
+  gap: 2,
+  alignItems: 'start',
+} as const;
+
+const cardSx = {
+  width: '100%',
+  maxWidth: SESSION_CARD_MAX,
+};
+
+// Hoisted so callers omitting `operatingSessionIds` get a stable Set reference;
+// otherwise a fresh `new Set()` per render breaks downstream memoization.
+const EMPTY_OPERATING_IDS: Set<string> = new Set();
+
 export function ActiveSessionsWidgetImpl({
   sessions = [],
-  operatingSessionIds = new Set(),
+  operatingSessionIds = EMPTY_OPERATING_IDS,
   pollingSessionId = null,
   isLoading = false,
   onRefresh,
@@ -28,31 +45,10 @@ export function ActiveSessionsWidgetImpl({
   showSessionCount = true,
   maxSessionsToShow,
   emptyMessage = 'No active sessions',
-  layout = 'column',
-  sessionCardMaxWidth = 400,
 }: ActiveSessionsWidgetProps) {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm')); // Changed from 'md' to 'sm' for better mobile-first approach
-  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
   const [showCheckModal, setShowCheckModal] = useState(false);
   const [isChecking, setIsChecking] = useState(false);
-
-  // Determine effective layout based on responsive mode with better breakpoints
-  const effectiveLayout = layout === 'responsive' ? (isMobile ? 'column' : 'row') : layout;
-
-  // Responsive card width based on viewport
-  const responsiveCardMaxWidth = isMobile
-    ? '100%' // Full width on mobile
-    : isTablet
-      ? Math.min(typeof sessionCardMaxWidth === 'number' ? sessionCardMaxWidth : 400, 350) // Smaller max width on tablet
-      : sessionCardMaxWidth;
-
-  // Ensure numeric values for minWidth in row layout
-  const responsiveMinWidth = isMobile
-    ? 280
-    : typeof responsiveCardMaxWidth === 'number'
-      ? responsiveCardMaxWidth
-      : 400;
 
   const displayTitle =
     showSessionCount && sessions.length > 0 ? `${title} (${sessions.length})` : title;
@@ -61,15 +57,29 @@ export function ActiveSessionsWidgetImpl({
 
   const hasMoreSessions = maxSessionsToShow && sessions.length > maxSessionsToShow;
 
+  // Keep refs to in-flight timers so we can cancel on unmount; otherwise
+  // setState fires on an unmounted component when the user navigates away
+  // mid-check.
+  const checkTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (checkTimerRef.current) clearTimeout(checkTimerRef.current);
+      if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+    };
+  }, []);
+
   const handleRefreshClick = () => {
     setShowCheckModal(true);
     setIsChecking(true);
 
-    // Simulate checking process
-    setTimeout(() => {
+    if (checkTimerRef.current) clearTimeout(checkTimerRef.current);
+    checkTimerRef.current = setTimeout(() => {
       setIsChecking(false);
       onRefresh?.();
-      setTimeout(() => {
+      if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = setTimeout(() => {
         setShowCheckModal(false);
       }, 1000);
     }, 2000);
@@ -132,67 +142,29 @@ export function ActiveSessionsWidgetImpl({
       {/* Content - Session Cards */}
       <Box sx={{ marginBottom: theme.spacing(2) }}>
         {isLoading ? (
-          // Show skeleton cards during loading
-          effectiveLayout === 'column' ? (
-            <Stack spacing={2}>
-              {[1, 2, 3].map((index) => (
-                <SessionCard
-                  key={`skeleton-${index}`}
-                  sessionType="notebook"
-                  sessionName=""
-                  status="Running"
-                  containerImage=""
-                  startedTime=""
-                  expiresTime=""
-                  memoryAllocated=""
-                  cpuAllocated=""
-                  loading={true}
-                  sx={{
-                    maxWidth: responsiveCardMaxWidth,
-                    width: isMobile ? '100%' : 'auto',
-                  }}
-                />
-              ))}
-            </Stack>
-          ) : (
-            <Box
-              sx={{
-                display: 'flex',
-                gap: 2,
-                overflowX: 'auto',
-                overflowY: 'hidden',
-                pb: 1,
-              }}
-            >
-              {[1, 2, 3].map((index) => (
-                <SessionCard
-                  key={`skeleton-${index}`}
-                  sessionType="notebook"
-                  sessionName=""
-                  status="Running"
-                  containerImage=""
-                  startedTime=""
-                  expiresTime=""
-                  memoryAllocated=""
-                  cpuAllocated=""
-                  loading={true}
-                  sx={{
-                    minWidth: responsiveMinWidth,
-                    maxWidth: responsiveCardMaxWidth,
-                    flexShrink: 0,
-                  }}
-                />
-              ))}
-            </Box>
-          )
+          <Box sx={gridSx}>
+            {[1, 2, 3].map((index) => (
+              <SessionCard
+                key={`skeleton-${index}`}
+                sessionType="notebook"
+                sessionName=""
+                status="Running"
+                containerImage=""
+                startedTime=""
+                expiresTime=""
+                memoryAllocated=""
+                cpuAllocated=""
+                loading={true}
+                sx={cardSx}
+              />
+            ))}
+          </Box>
         ) : sessions.length === 0 ? (
-          // Show empty state with subtle gradient background - same size as SessionCard
           <Card
             elevation={0}
             variant="outlined"
             sx={{
-              maxWidth: responsiveCardMaxWidth,
-              width: isMobile ? '100%' : 'auto',
+              ...cardSx,
               border: `1px solid ${theme.palette.divider}`,
               cursor: 'default',
             }}
@@ -227,63 +199,9 @@ export function ActiveSessionsWidgetImpl({
               </Typography>
             </CardContent>
           </Card>
-        ) : effectiveLayout === 'column' ? (
-          <Stack spacing={2}>
-            {sessionsToDisplay.map((session, index) => (
-              <SessionCard
-                key={session.sessionName || `session-${index}`}
-                {...session}
-                isOperating={
-                  !!(session.id && operatingSessionIds.has(session.id)) ||
-                  !!(
-                    session.id &&
-                    pollingSessionId === session.id &&
-                    session.status === 'Pending' &&
-                    !session.connectUrl
-                  )
-                }
-                disableHover={true}
-                sx={{
-                  maxWidth: responsiveCardMaxWidth,
-                  width: isMobile ? '100%' : 'auto', // Full width on mobile
-                }}
-              />
-            ))}
-            {hasMoreSessions && (
-              <Typography variant="body2" color="text.secondary" align="center" sx={{ py: 1 }}>
-                And {sessions.length - maxSessionsToShow} more...
-              </Typography>
-            )}
-          </Stack>
         ) : (
-          <Box>
-            <Box
-              sx={{
-                display: 'flex',
-                gap: 2,
-                overflowX: 'auto',
-                overflowY: 'hidden',
-                pb: 1,
-                // Custom scrollbar styling
-                '&::-webkit-scrollbar': {
-                  height: 8,
-                },
-                '&::-webkit-scrollbar-track': {
-                  backgroundColor: theme.palette.action.hover,
-                  borderRadius: 2,
-                },
-                '&::-webkit-scrollbar-thumb': {
-                  backgroundColor: theme.palette.action.disabled,
-                  borderRadius: 2,
-                  '&:hover': {
-                    backgroundColor: theme.palette.action.selected,
-                  },
-                },
-                // Firefox scrollbar
-                scrollbarWidth: 'thin',
-                scrollbarColor: `${theme.palette.action.disabled} ${theme.palette.action.hover}`,
-              }}
-            >
+          <>
+            <Box sx={gridSx}>
               {sessionsToDisplay.map((session, index) => (
                 <SessionCard
                   key={session.sessionName || `session-${index}`}
@@ -298,11 +216,7 @@ export function ActiveSessionsWidgetImpl({
                     )
                   }
                   disableHover={true}
-                  sx={{
-                    minWidth: responsiveMinWidth, // Smaller min width on mobile
-                    maxWidth: responsiveCardMaxWidth,
-                    flexShrink: 0,
-                  }}
+                  sx={cardSx}
                 />
               ))}
             </Box>
@@ -311,7 +225,7 @@ export function ActiveSessionsWidgetImpl({
                 And {sessions.length - maxSessionsToShow} more...
               </Typography>
             )}
-          </Box>
+          </>
         )}
       </Box>
 

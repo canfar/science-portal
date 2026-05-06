@@ -191,7 +191,6 @@ const useSessionEvents = (
       setParseError(hasParseErrors);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch events');
-      console.error('Error fetching events:', err);
     } finally {
       setLoading(false);
     }

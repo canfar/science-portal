@@ -1,50 +1,57 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Slider, Box, useTheme } from '@mui/material';
 import { CanfarRangeProps } from '@/app/types/CanfarRangeProps';
 
+/**
+ * Dumb controlled slider over [min, max] with step=1 by default.
+ *
+ * Performance note: this component is intentionally controlled. To avoid the
+ * parent form re-rendering on every drag tick, host this in a wrapper that
+ * keeps a local "draft" value during drag and only propagates upward on
+ * `onChangeCommitted`. See `ResourceField` for the pattern.
+ */
 export const CanfarRangeImpl = React.forwardRef<HTMLDivElement, CanfarRangeProps>(
-  ({ value, range, onChange, disabled = false, label }, ref) => {
+  ({ value, min, max, step = 1, onChange, onChangeCommitted, disabled = false, label }, ref) => {
     const theme = useTheme();
 
-    const initialValue =
-      range.findIndex((el) => parseInt(String(el)) === parseInt(String(value))) || 0;
-    const [rangePos, setRangePos] = useState(initialValue);
+    const [lo, hi] = min > max ? [max, min] : [min, max];
+    const clamped = Math.min(Math.max(value, lo), hi);
 
     const handleChange = (_event: Event, newValue: number | number[]) => {
-      const position = Array.isArray(newValue) ? newValue[0] : newValue;
-      onChange(parseInt(String(range[position])));
-      setRangePos(position);
+      const next = Array.isArray(newValue) ? newValue[0] : newValue;
+      onChange(next);
     };
 
-    useEffect(() => {
-      if (value !== undefined && value !== null) {
-        const newRangePos = range.findIndex(
-          (el) => parseInt(String(el)) === parseInt(String(value)),
-        );
-        if (newRangePos !== -1) {
-          setRangePos(newRangePos);
-        }
-      }
-    }, [value, range]);
+    const handleCommitted = (
+      _event: Event | React.SyntheticEvent,
+      newValue: number | number[],
+    ) => {
+      if (!onChangeCommitted) return;
+      const next = Array.isArray(newValue) ? newValue[0] : newValue;
+      onChangeCommitted(next);
+    };
 
     return (
       <Box ref={ref} sx={{ width: '100%', px: 1 }}>
         <Slider
-          value={rangePos}
-          min={0}
-          max={range.length - 1}
-          step={1}
+          value={clamped}
+          min={lo}
+          max={hi}
+          step={step}
           onChange={handleChange}
-          disabled={disabled}
+          onChangeCommitted={handleCommitted}
+          disabled={disabled || lo === hi}
           aria-label={label}
+          aria-valuemin={lo}
+          aria-valuemax={hi}
+          aria-valuenow={clamped}
+          aria-valuetext={`${clamped} out of ${hi}`}
           sx={{
             color: theme.palette.primary.main,
             height: 8,
-            '& .MuiSlider-track': {
-              border: 'none',
-            },
+            '& .MuiSlider-track': { border: 'none' },
             '& .MuiSlider-thumb': {
               height: 20,
               width: 20,
@@ -54,9 +61,7 @@ export const CanfarRangeImpl = React.forwardRef<HTMLDivElement, CanfarRangeProps
               '&:focus, &:hover, &.Mui-active, &.Mui-focusVisible': {
                 boxShadow: '0 3px 8px rgba(0, 0, 0, 0.3)',
               },
-              '&:before': {
-                display: 'none',
-              },
+              '&:before': { display: 'none' },
             },
             '& .MuiSlider-rail': {
               color: theme.palette.mode === 'dark' ? '#bfbfbf' : '#dee2e6',

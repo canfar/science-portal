@@ -205,19 +205,10 @@ export const AppBarImpl = React.forwardRef<HTMLDivElement, AppBarProps>(
     // Handle account button click - either open menu or call custom handler
     const handleAccountButtonClick = useCallback(
       (event: React.MouseEvent<HTMLElement>) => {
-        console.log('AppBar button clicked:', {
-          menuItemsLength: menuItems.length,
-          firstItemLabel: menuItems[0]?.label,
-          hasCustomHandler: !!onAccountButtonClick,
-        });
-
         // If there are actual menu items (not just dummy), open the menu
         if (menuItems.length > 0 && menuItems[0].label !== '') {
-          console.log('Opening menu dropdown');
           handleMenuOpen(event);
         } else if (onAccountButtonClick) {
-          // Otherwise call custom click handler
-          console.log('Calling custom click handler');
           onAccountButtonClick();
         }
       },
@@ -312,8 +303,8 @@ export const AppBarImpl = React.forwardRef<HTMLDivElement, AppBarProps>(
         {/* Navigation Links */}
         <Box sx={{ flex: 1, overflow: 'auto' }}>
           <List sx={{ pt: 2 }}>
-            {links.map((link, index) => (
-              <ListItem key={index} sx={{ flexDirection: 'column', alignItems: 'stretch' }}>
+            {links.map((link) => (
+              <ListItem key={link.label} sx={{ flexDirection: 'column', alignItems: 'stretch' }}>
                 {link.menuItems && link.menuItems.length > 0 ? (
                   <Box>
                     <Typography
@@ -394,7 +385,7 @@ export const AppBarImpl = React.forwardRef<HTMLDivElement, AppBarProps>(
           <Box sx={{ borderTop: `1px solid ${theme.palette.divider}` }}>
             <List>
               {menuItems.map((item, index) => (
-                <ListItem key={index}>
+                <ListItem key={item.label}>
                   {item.divider && index > 0 && <Divider />}
                   <Link
                     href={item.href}
@@ -553,7 +544,7 @@ export const AppBarImpl = React.forwardRef<HTMLDivElement, AppBarProps>(
                     }}
                   >
                     {links.map((link, index) => (
-                      <Box key={index} sx={{ position: 'relative' }}>
+                      <Box key={link.label} sx={{ position: 'relative' }}>
                         {link.menuItems && link.menuItems.length > 0 ? (
                           // Dropdown link
                           <>
