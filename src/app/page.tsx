@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { AppBarWithAuth } from '@/app/components/AppBarWithAuth/AppBarWithAuth';
 import { ActiveSessionsWidget } from '@/app/components/ActiveSessionsWidget/ActiveSessionsWidget';
 import { UserStorageWidget } from '@/app/components/UserStorageWidget/UserStorageWidget';
@@ -19,7 +19,6 @@ import {
   useDeleteSession,
   useRenewSession,
   useLaunchSession,
-  useSessionPolling,
 } from '@/lib/hooks/useSessions';
 import { useContainerImages, useImageRepositories, useContext } from '@/lib/hooks/useImages';
 import { STATIC_PLATFORM_LOAD_DATA } from '@/lib/config/static-platform-load';
@@ -54,9 +53,6 @@ export default function SciencePortalPage() {
 
   // Track which sessions are currently being operated on (delete/renew)
   const [operatingSessionIds, setOperatingSessionIds] = useState<Set<string>>(new Set());
-
-  // Track which sessions are being polled after launch
-  const [pollingSessionId, setPollingSessionId] = useState<string | null>(null);
 
   // Fetch active sessions using the hook
   const {
@@ -131,12 +127,7 @@ export default function SciencePortalPage() {
     },
   });
 
-  const { mutateAsync: launchSessionAsync } = useLaunchSession({
-    onSuccess: (newSession) => {
-      // Start polling this session
-      setPollingSessionId(newSession.id);
-    },
-  });
+  const { mutateAsync: launchSessionAsync } = useLaunchSession();
 
   // Wrap the mutation in a function that can be passed to LaunchFormWidget
   const handleLaunchSession = useCallback(
@@ -146,30 +137,14 @@ export default function SciencePortalPage() {
     [launchSessionAsync],
   );
 
-  // Session polling hook for newly launched sessions
-  const { startPolling, stopPolling } = useSessionPolling(pollingSessionId, {
-    interval: 30000, // Poll every 30 seconds
-    onComplete: () => {
-      setPollingSessionId(null);
-    },
-    onError: () => {
-      setPollingSessionId(null);
-    },
-  });
-
-  // Start polling when pollingSessionId changes
-  useEffect(() => {
-    if (pollingSessionId) {
-      startPolling();
-    }
-    return () => {
-      stopPolling();
-    };
-  }, [pollingSessionId, startPolling, stopPolling]);
-
-  // LOADING: show skeletons while auth is unknown, or while authenticated and data is loading/refetching
-  const isLoadingSessions =
-    authLoading || (isAuthenticated && (isLoading || isFetching));
+  // LOADING: show skeletons only on the initial fetch. Background refetches
+  // (driven by refetchInterval while interactive sessions are still Pending)
+  // shouldn't flip the progress bar back to "loading" — that flickers the
+  // whole widget every interval.
+  const isLoadingSessions = authLoading || (isAuthenticated && isLoading);
+  // Suppress the unused-variable warning for `isFetching`; it's intentionally
+  // not driving UI any more.
+  void isFetching;
   const isLoadingLaunchForm =
     authLoading ||
     (isAuthenticated &&
@@ -334,7 +309,6 @@ export default function SciencePortalPage() {
               <ActiveSessionsWidget
                 sessions={activeSessions}
                 operatingSessionIds={operatingSessionIds}
-                pollingSessionId={pollingSessionId}
                 isLoading={isLoadingSessions}
                 onRefresh={handleSessionsRefresh}
                 emptyMessage={
