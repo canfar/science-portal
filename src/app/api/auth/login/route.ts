@@ -12,6 +12,7 @@ import {
   successResponse,
   fetchExternalApi,
   forwardCookies,
+  copyCookies,
   validateMethod,
   methodNotAllowed,
 } from '@/app/api/lib/api-utils';
@@ -227,12 +228,18 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
     };
   }
 
-  // Return user data and token to client (token will be stored client-side)
+  // Return user data and token to client (token will be stored client-side).
+  // Also forward upstream's Set-Cookie back to the browser so the
+  // `.canfar.net`-scoped `CADC_SSO` cookie is seeded — this is what gives us
+  // single-sign-on with other CANFAR apps. In production the portal is on
+  // `*.canfar.net`, so the browser accepts the cookie. On localhost the cookie
+  // has `Domain=.canfar.net` and is rejected; the Bearer-token-in-sessionStorage
+  // path keeps working as a dev fallback.
   const loginResponse: LoginResponse = {
     user: data,
     token: token,
   };
 
   logger.logSuccess(HTTP_STATUS.OK, { user: data, tokenLength: token.length });
-  return successResponse(loginResponse);
+  return copyCookies(response, successResponse(loginResponse));
 });

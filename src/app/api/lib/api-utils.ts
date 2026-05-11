@@ -198,8 +198,9 @@ export async function fetchExternalApi(
 }
 
 /**
- * Forwards cookies from client request to external API
- * @deprecated Use forwardAuthHeader instead for Bearer token authentication
+ * Forwards the incoming `Cookie` header onto an outbound upstream request.
+ * Used by CANFAR mode so the upstream (ws-cadc.canfar.net) can verify the
+ * `.canfar.net`-scoped `CADC_SSO` cookie.
  */
 export function forwardCookies(clientRequest: NextRequest): HeadersInit {
   const cookieHeader = clientRequest.headers.get('cookie');
@@ -207,54 +208,41 @@ export function forwardCookies(clientRequest: NextRequest): HeadersInit {
 }
 
 /**
- * Forwards Authorization header from client request to external API
+ * Build auth headers to forward to the upstream service.
  *
- * In OIDC mode: Extracts access token from NextAuth session and sends as Bearer token
- * In CANFAR mode: Forwards the Authorization header from the client
- *
- * @param clientRequest - The incoming Next.js request
- * @returns Headers object with Authorization header if available
+ * - OIDC mode: extracts the NextAuth session's access token and returns
+ *   `Authorization: Bearer <jwt>`.
+ * - CANFAR mode: returns both the client's `Authorization` header (if any —
+ *   sessionStorage Bearer fallback used in local dev) **and** the client's
+ *   `Cookie` header (the actual production SSO signal: `.canfar.net`-scoped
+ *   `CADC_SSO`). Either one is sufficient for upstream to authenticate the
+ *   caller; the cookie path is what unlocks single-sign-on across CANFAR apps.
  */
 export async function forwardAuthHeader(clientRequest: NextRequest): Promise<HeadersInit> {
   const isOIDC = process.env.NEXT_USE_CANFAR !== 'true';
-
-  console.log('🔧 forwardAuthHeader called');
-  console.log('   Mode:', isOIDC ? 'OIDC' : 'CANFAR');
 
   if (isOIDC) {
     // In OIDC mode, get the JWT from NextAuth session (server-side)
     const { auth } = await import('@/auth');
     const session = await auth();
 
-    console.log('   Session:', session ? 'present' : 'missing');
-    console.log(
-      '   Access token:',
-      session?.accessToken ? `${session.accessToken.substring(0, 30)}...` : 'missing',
-    );
-
     if (session?.accessToken) {
-      console.log('✅ Using JWT from NextAuth session');
       return { Authorization: `Bearer ${session.accessToken}` };
     }
-
-    console.warn('⚠️  No session or access token in OIDC mode');
     return {};
   }
 
-  // In CANFAR mode, forward the Authorization header from the client request
+  // CANFAR mode: forward both auth signals. Upstream will use whichever it
+  // recognises. Cookie is the SSO path (Set-Cookie issued by the access
+  // service on `.canfar.net`); Authorization is the sessionStorage fallback
+  // still useful for local dev where `.canfar.net` cookies can't reach
+  // localhost.
   const authHeader = clientRequest.headers.get('authorization');
-  console.log(
-    '   Client Authorization header:',
-    authHeader ? `${authHeader.substring(0, 30)}...` : 'missing',
-  );
-
-  if (authHeader) {
-    console.log('✅ Forwarding Authorization header from client (CANFAR mode)');
-    return { Authorization: authHeader };
-  }
-
-  console.warn('⚠️  No Authorization header from client (CANFAR mode)');
-  return {};
+  const cookieHeaders = forwardCookies(clientRequest);
+  return {
+    ...(authHeader ? { Authorization: authHeader } : {}),
+    ...cookieHeaders,
+  };
 }
 
 /**

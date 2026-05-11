@@ -7,6 +7,11 @@
 
 import { saveToken, getAuthHeader } from '@/lib/auth/token-storage';
 import { getRuntimeBasePath } from '@/lib/config/runtime-public-snapshot';
+import {
+  ACCESS_LOGOUT_PATH,
+  CANFAR_ACCESS_HOST_FALLBACK,
+  CANFAR_DOMAIN_SUFFIX,
+} from '@/lib/config/site-config';
 
 function authApiRoot(): string {
   return `${getRuntimeBasePath()}/api/auth`;
@@ -72,24 +77,33 @@ export async function login(credentials: LoginCredentials): Promise<User> {
 }
 
 /**
- * Logout current user
+ * Logout current user via the CANFAR access service.
  *
- * Clears the authentication token from storage and notifies the server.
+ * Navigates the browser to `https://<canfar-host>/access/logout?target=<return-url>`.
+ * The access service:
+ *   1. invalidates the server-side session token,
+ *   2. issues `Set-Cookie: CADC_SSO=…; Domain=.canfar.net; Max-Age=0` to clear
+ *      the `.canfar.net`-scoped SSO cookie (so other CANFAR apps see the user
+ *      as logged out too),
+ *   3. redirects to `target`.
+ *
+ * `sessionStorage` Bearer token is cleared client-side first as the dev
+ * fallback path; the page navigates away so the function never returns.
  */
 export async function logout(): Promise<void> {
   const { removeToken } = await import('@/lib/auth/token-storage');
-
-  const response = await fetch(`${authApiRoot()}/logout`, {
-    method: 'POST',
-    credentials: 'include',
-  });
-
-  // Clear token regardless of server response
   removeToken();
 
-  if (!response.ok) {
-    throw new Error(`Logout failed: ${response.status}`);
-  }
+  // Return target: current portal URL (path includes basePath; strip query string).
+  const { origin, pathname } = window.location;
+  const target = `${origin}${pathname}`;
+
+  // The access service lives at the host root (NOT under our basePath). On
+  // production canfar.net hosts we use the portal's own origin; locally we
+  // bounce off the canonical fallback so the service can clear the
+  // `.canfar.net` cookie and then redirect back to localhost.
+  const accessHost = origin.includes(CANFAR_DOMAIN_SUFFIX) ? origin : CANFAR_ACCESS_HOST_FALLBACK;
+  window.location.href = `${accessHost}${ACCESS_LOGOUT_PATH}?target=${encodeURIComponent(target)}`;
 }
 
 /**

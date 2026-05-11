@@ -84,22 +84,16 @@ export function AppBarWithAuth({
   );
 
   const handleLogout = useCallback(() => {
-    // Remove stored credentials, then run the logout mutation. We force a hard
-    // reload from `onSuccess` so every widget (sessions, storage, launch form,
-    // platform-load) resets cleanly — relying purely on auth-state observation
-    // is racy in CANFAR mode against production: between the cookie clear, the
-    // mutation's `queryClient.clear()`, and the auth-status refetch there's a
-    // brief window where `isAuthenticated` doesn't flip in a way React Query's
-    // subscribers observe consistently. `useLogoutReset` is still wired in
-    // page.tsx as a safety net for non-button-driven auth transitions.
+    // CANFAR mode: useLogout's mutationFn navigates the browser to the access
+    // service `/access/logout?target=…`, which invalidates the session, clears
+    // the `.canfar.net` cookie, and redirects back to the portal. The portal
+    // remounts fresh — that IS the reset; no manual `window.location.href`
+    // override needed (it would race with the access-service redirect).
+    // OIDC mode: NextAuth's `signOut()` handles the navigation itself.
+    // `useLogoutReset` in page.tsx remains as a safety net for non-button
+    // auth transitions (e.g. server-side session expiry).
     removeCredentials();
-    logout(undefined, {
-      onSuccess: () => {
-        const url = new URL(window.location.href);
-        url.search = '';
-        window.location.href = url.toString();
-      },
-    });
+    logout();
   }, [logout]);
 
   const handleUpdateProfile = useCallback(() => {

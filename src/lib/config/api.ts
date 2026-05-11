@@ -12,7 +12,8 @@ export function buildApiRoutes(basePath: string) {
   return {
     auth: {
       login: `${prefix}/api/auth/login`,
-      logout: `${prefix}/api/auth/logout`,
+      // logout is handled by a redirect to the CANFAR access service (see
+      // `logout()` in src/lib/api/login.ts); no BFF route for it.
       status: `${prefix}/api/auth/status`,
       user: (username: string) => `${prefix}/api/auth/user/${username}`,
       permissions: `${prefix}/api/auth/permissions`,
