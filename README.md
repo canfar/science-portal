@@ -123,6 +123,7 @@ Configure the following environment variables in `.env.local`:
 | `NEXT_PUBLIC_LOGIN_API` | Authentication API endpoint |
 | `NEXT_PUBLIC_SKAHA_API` | Session/compute API endpoint |
 | `NEXT_PUBLIC_API_TIMEOUT` | API request timeout (default: 30000ms) |
+| `NEXT_PUBLIC_SRCNET_LOGO_URL` | Optional. SRCNet header logo image URL or path (OIDC mode). When unset, defaults to `{NEXT_PUBLIC_BASE_PATH}/SRCNetLogo.png` |
 | `AUTH_SECRET` | NextAuth secret key |
 | `NEXT_USE_CANFAR` | Toggle between CANFAR/OIDC auth mode |
 

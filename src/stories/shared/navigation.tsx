@@ -157,6 +157,8 @@ export const getSupportMenuItems = () =>
   navigationItems.find((item) => item.label === 'Support')?.menuItems || [];
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+const srcNetLogoSrc =
+  process.env.NEXT_PUBLIC_SRCNET_LOGO_URL || `${basePath}/SRCNetLogo.png`;
 
 // CANFAR logo component
 export const CanfarLogo = ({ height = 40 }: { height?: number }) => (
@@ -167,7 +169,7 @@ export const CanfarLogo = ({ height = 40 }: { height?: number }) => (
 // SRCNet logo component (for OIDC mode)
 export const SRCNetLogo = ({ height = 40 }: { height?: number }) => (
   /* eslint-disable-next-line @next/next/no-img-element */
-  <img src={`${basePath}/SRCNetLogo.png`} alt="SRCNet Logo" style={{ height }} />
+  <img src={srcNetLogoSrc} alt="SRCNet Logo" style={{ height }} />
 );
 
 // Convert navigation items to AppBar format
