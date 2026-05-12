@@ -64,17 +64,16 @@ export function useSessions(
       }
       return failureCount < 3;
     },
-    // Refetch only while an *interactive* session is still spinning up. Headless
-    // batch jobs can sit Pending for hours and would otherwise keep the loop
-    // alive forever. As soon as no interactive session is transitional, the
-    // auto-refetch turns off and we wait for explicit user action again.
+    // Refetch only while an *interactive* session is in a transitional state
+    // (Pending). Headless batch jobs can sit Pending for hours and would
+    // otherwise keep the loop alive forever. NOTE: don't use `connectUrl` as
+    // part of the transitional check — Skaha sets it as soon as the route is
+    // allocated, well before the pod is actually Running, so Pending sessions
+    // routinely have a connectUrl already. Status is the only reliable signal.
     refetchInterval: (query) => {
       const data = query.state.data;
       const hasTransitional = data?.some(
-        (s) =>
-          s.sessionType !== 'headless' &&
-          s.status === 'Pending' &&
-          !s.connectUrl,
+        (s) => s.sessionType !== 'headless' && s.status === 'Pending',
       );
       return hasTransitional ? 10000 : false;
     },
