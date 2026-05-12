@@ -19,10 +19,7 @@ import { Close as CloseIcon, Visibility, VisibilityOff } from '@mui/icons-materi
 import { TextField } from '@/app/components/TextField/TextField';
 import { Checkbox } from '@/app/components/Checkbox/Checkbox';
 import { LoginModalProps, LoginFormData, LoginFormErrors } from '@/app/types/LoginModalProps';
-
-const FORGOT_ACCOUNT_URL =
-  'https://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/en/auth/resetPassword.html';
-const REQUEST_ACCOUNT_URL = 'https://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/en/auth/request.html';
+import { RESET_PASSWORD_URL, REQUEST_ACCOUNT_URL } from '@/lib/config/site-config';
 
 export const LoginModalImpl = React.forwardRef<HTMLDivElement, LoginModalProps>(
   (
@@ -311,7 +308,7 @@ export const LoginModalImpl = React.forwardRef<HTMLDivElement, LoginModalProps>(
                   </Link>
                 ) : (
                   <Link
-                    href={FORGOT_ACCOUNT_URL}
+                    href={RESET_PASSWORD_URL}
                     target="_blank"
                     rel="noopener noreferrer"
                     underline="hover"

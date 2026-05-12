@@ -41,6 +41,9 @@ import {
 import {
   DEFAULT_CORES_NUMBER,
   DEFAULT_RAM_NUMBER,
+  DEFAULT_MEMORY_OPTIONS,
+  DEFAULT_CORE_OPTIONS,
+  DEFAULT_IMAGE_NAMES,
   supportsCustomResources,
   DESKTOP_TYPE,
   FIREFLY_TYPE,
@@ -71,12 +74,6 @@ function TabPanel(props: TabPanelProps) {
     </div>
   );
 }
-
-const DEFAULT_MEMORY_OPTIONS = [
-  1, 2, 4, 6, 8, 10, 12, 14, 16, 20, 24, 26, 28, 30, 32, 36, 40, 44, 48, 56, 64, 80, 92, 112, 128,
-  140, 170, 192,
-];
-const DEFAULT_CORE_OPTIONS = Array.from({ length: 16 }, (_, i) => i + 1);
 
 export const SessionLaunchFormImpl = React.forwardRef<HTMLDivElement, SessionLaunchFormProps>(
   (
@@ -251,25 +248,40 @@ export const SessionLaunchFormImpl = React.forwardRef<HTMLDivElement, SessionLau
       }
     }, [effectiveRegistry, imagesByTypeForRegistry, formData.project, formData.type, setUrlParams]);
 
-    // Auto-select first image for current project within the effective registry
+    // Auto-select an image for the current project within the effective registry.
+    // Prefer the per-session-type default (DEFAULT_IMAGE_NAMES, mirrors legacy
+    // science-portal/src/react/utilities/constants.js) when an image with that
+    // exact `name` is present; otherwise fall back to a tag-agnostic match on
+    // `imageName`; otherwise the first available image.
     useEffect(() => {
       if (!effectiveRegistry || availableImages.length === 0) {
         return;
       }
       const currentValid = availableImages.some((img) => img.id === formData.containerImage);
       if (!formData.containerImage || !currentValid) {
-        const first = availableImages[0];
+        const desired =
+          DEFAULT_IMAGE_NAMES[formData.type as keyof typeof DEFAULT_IMAGE_NAMES];
+        const desiredBase = desired?.split(':')[0];
+        const exactMatch = desired
+          ? availableImages.find((img) => img.name === desired)
+          : undefined;
+        const baseMatch =
+          !exactMatch && desiredBase
+            ? availableImages.find((img) => img.imageName === desiredBase)
+            : undefined;
+        const picked = exactMatch ?? baseMatch ?? availableImages[0];
         setFormData((prev) => ({
           ...prev,
-          containerImage: first.id,
+          containerImage: picked.id,
         }));
-        setUrlParams({ image: first.id });
+        setUrlParams({ image: picked.id });
       }
     }, [
       effectiveRegistry,
       availableImages,
       formData.containerImage,
       formData.project,
+      formData.type,
       setUrlParams,
     ]);
 

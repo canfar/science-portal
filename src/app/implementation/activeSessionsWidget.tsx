@@ -212,11 +212,13 @@ export function ActiveSessionsWidgetImpl({
                   {...session}
                   isOperating={
                     // Delete/renew operations OR any session still spinning up
-                    // (Pending without a connectUrl). Decoupled from
-                    // `pollingSessionId` so launching multiple sessions back to
-                    // back doesn't drop the spinner on earlier-or-later cards.
+                    // (status === Pending). Decoupled from `pollingSessionId`
+                    // so launching multiple sessions back to back doesn't drop
+                    // the spinner on earlier-or-later cards. Don't AND with
+                    // `connectUrl` — Skaha sets it during Pending too, well
+                    // before the pod is Running.
                     !!(session.id && operatingSessionIds.has(session.id)) ||
-                    (session.status === 'Pending' && !session.connectUrl)
+                    session.status === 'Pending'
                   }
                   disableHover={true}
                   sx={cardSx}
