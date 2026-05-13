@@ -5,8 +5,8 @@
  */
 
 // Session resource defaults
-export const DEFAULT_CORES_NUMBER = 2;
-export const DEFAULT_RAM_NUMBER = 8;
+export const DEFAULT_CORES_NUMBER = 1;
+export const DEFAULT_RAM_NUMBER = 1;
 export const DEFAULT_GPU_NUMBER = 0;
 
 // Fallback option lists for the resource sliders / stepper buttons when the
