@@ -14,9 +14,12 @@ import {
   successResponse,
   fetchExternalApi,
   forwardAuthHeader,
+  oidcBearerAuthMissingResponse,
+  parseSuccessJsonBody,
 } from '@/app/api/lib/api-utils';
 import { serverApiConfig } from '@/app/api/lib/server-config';
 import { createLogger } from '@/app/api/lib/logger';
+import { HTTP_STATUS } from '@/app/api/lib/http-constants';
 import type { PlatformLoad, SkahaStatsResponse } from '@/lib/api/skaha';
 import { getPublicRuntimeConfigFromEnv } from '@/lib/config/public-runtime-config';
 
@@ -35,6 +38,10 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
   }
 
   const authHeaders = await forwardAuthHeader(request);
+  const authDenied = oidcBearerAuthMissingResponse(authHeaders);
+  if (authDenied) {
+    return authDenied;
+  }
 
   const response = await fetchExternalApi(
     `${serverApiConfig.skaha.baseUrl}/v1/session?view=stats`,
@@ -53,7 +60,11 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
     return errorResponse('Failed to fetch platform load', response.status);
   }
 
-  const data: SkahaStatsResponse = await response.json();
+  const data = await parseSuccessJsonBody<SkahaStatsResponse>(response);
+  if (data === null) {
+    logger.logError(HTTP_STATUS.BAD_GATEWAY, 'Invalid JSON from platform stats');
+    return errorResponse('Invalid response from platform stats', HTTP_STATUS.BAD_GATEWAY);
+  }
 
   // Transform SKAHA stats response to PlatformLoad format
   // Use ISO string for consistent serialization and to avoid hydration mismatch

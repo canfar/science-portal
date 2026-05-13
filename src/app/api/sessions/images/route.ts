@@ -14,8 +14,11 @@ import {
   successResponse,
   fetchExternalApi,
   forwardAuthHeader,
+  oidcBearerAuthMissingResponse,
+  parseSuccessJsonBody,
 } from '@/app/api/lib/api-utils';
 import { serverApiConfig } from '@/app/api/lib/server-config';
+import { HTTP_STATUS } from '@/app/api/lib/http-constants';
 import { groupImagesByTypeAndProject, type RawImage } from '@/lib/utils/image-parser';
 
 /**
@@ -45,6 +48,10 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
   }
 
   const authHeaders = await forwardAuthHeader(request);
+  const authDenied = oidcBearerAuthMissingResponse(authHeaders);
+  if (authDenied) {
+    return authDenied;
+  }
 
   const response = await fetchExternalApi(
     `${serverApiConfig.skaha.baseUrl}/v1/image`,
@@ -62,7 +69,10 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
     return errorResponse('Failed to fetch container images', response.status);
   }
 
-  const rawImages: RawImage[] = await response.json();
+  const rawImages = await parseSuccessJsonBody<RawImage[]>(response);
+  if (rawImages === null || !Array.isArray(rawImages)) {
+    return errorResponse('Invalid response from image service', HTTP_STATUS.BAD_GATEWAY);
+  }
 
   // Transform the raw images into grouped structure
   const groupedImages = groupImagesByTypeAndProject(rawImages);

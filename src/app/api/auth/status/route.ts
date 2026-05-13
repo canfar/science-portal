@@ -23,6 +23,7 @@ import { serverApiConfig } from '@/app/api/lib/server-config';
 import { createLogger } from '@/app/api/lib/logger';
 import { HTTP_STATUS } from '@/app/api/lib/http-constants';
 import { getPublicRuntimeConfigFromEnv } from '@/lib/config/public-runtime-config';
+import { isOIDCAuth } from '@/lib/config/auth-config';
 
 export interface User {
   username: string;
@@ -105,9 +106,7 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
 
   logger.logRequest(request);
 
-  // Check if using OIDC mode
-  const isOIDC = process.env.NEXT_USE_CANFAR !== 'true';
-  if (isOIDC) {
+  if (isOIDCAuth()) {
     // In OIDC mode, decode the JWT token to get user info
     // instead of calling external whoami endpoint
 

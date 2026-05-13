@@ -49,6 +49,8 @@ export interface LoginResponse {
 export interface AuthStatus {
   authenticated: boolean;
   user?: User;
+  /** When true, Skaha BFF calls may proceed (OIDC: server session has access token). */
+  sessionReady?: boolean;
 }
 
 /**

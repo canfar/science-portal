@@ -46,6 +46,8 @@ export default function SciencePortalPage() {
   // OIDC token mirror: useAuthStatus → useAuth syncs session.accessToken to localStorage
   const { data: authStatus, isLoading: authLoading } = useAuthStatus();
   const isAuthenticated = authStatus?.authenticated ?? false;
+  /** OIDC: waits for /api/auth/session to confirm accessToken; CANFAR: same as authenticated. */
+  const sessionReadyForSkaha = authStatus?.sessionReady ?? false;
   const showLoggedOutCopy = !authLoading && !isAuthenticated;
 
   // On logout transition, drop React Query cache + URL state + reload.
@@ -60,7 +62,7 @@ export default function SciencePortalPage() {
     isLoading,
     isFetching,
     refetch: refetchSessions,
-  } = useSessions(isAuthenticated);
+  } = useSessions(sessionReadyForSkaha);
 
   // Platform load: live stats disabled (CADC-15555 / opencadc/science-portal#158) — static placeholder + overlay
 
@@ -70,14 +72,14 @@ export default function SciencePortalPage() {
     isLoading: isLoadingImages,
     isFetching: isFetchingImages,
     refetch: refetchImages,
-  } = useContainerImages(isAuthenticated);
+  } = useContainerImages(sessionReadyForSkaha);
 
   const {
     data: imageRepositories = [],
     isLoading: isLoadingRepositories,
     isFetching: isFetchingRepositories,
     refetch: refetchRepositories,
-  } = useImageRepositories(isAuthenticated);
+  } = useImageRepositories(sessionReadyForSkaha);
 
   // Fetch context (available cores, RAM, GPU options)
   const {
@@ -85,7 +87,7 @@ export default function SciencePortalPage() {
     isLoading: isLoadingContext,
     isFetching: isFetchingContext,
     refetch: refetchContext,
-  } = useContext(isAuthenticated);
+  } = useContext(sessionReadyForSkaha);
 
   // Mutation hooks for session actions. Errors are surfaced to the user via the
   // mutation state in each consumer (SessionCard / LaunchFormWidget); no need

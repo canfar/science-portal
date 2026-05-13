@@ -14,6 +14,8 @@ import {
   successResponse,
   fetchExternalApi,
   forwardAuthHeader,
+  oidcBearerAuthMissingResponse,
+  parseSuccessJsonBody,
 } from '@/app/api/lib/api-utils';
 import { serverApiConfig } from '@/app/api/lib/server-config';
 import { createLogger } from '@/app/api/lib/logger';
@@ -36,6 +38,10 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
   }
 
   const authHeaders = await forwardAuthHeader(request);
+  const authDenied = oidcBearerAuthMissingResponse(authHeaders);
+  if (authDenied) {
+    return authDenied;
+  }
 
   logger.info(`Fetching image repositories from ${serverApiConfig.skaha.baseUrl}/v1/repository`);
 
@@ -61,7 +67,11 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
     return errorResponse('Failed to fetch image repositories', response.status);
   }
 
-  const rawResponse = await response.json();
+  const rawResponse = await parseSuccessJsonBody<unknown>(response);
+  if (rawResponse === null) {
+    logger.logError(HTTP_STATUS.BAD_GATEWAY, 'Invalid JSON from repository service');
+    return errorResponse('Invalid response from repository service', HTTP_STATUS.BAD_GATEWAY);
+  }
 
   // Transform response: SKAHA API returns array of strings ["images.canfar.net"]
   // but we need array of objects [{ host: "images.canfar.net" }]

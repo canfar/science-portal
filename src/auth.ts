@@ -101,11 +101,20 @@ export const authConfig: NextAuthConfig = {
     async jwt({ token, user, account }) {
       // Initial sign in
       if (account && user) {
+        let accessTokenExpiresMs = 0;
+        if (account.expires_at && typeof account.expires_at === 'number') {
+          accessTokenExpiresMs = account.expires_at * 1000;
+        } else {
+          const expiresIn = (account as { expires_in?: number }).expires_in;
+          if (typeof expiresIn === 'number' && expiresIn > 0) {
+            accessTokenExpiresMs = Date.now() + expiresIn * 1000;
+          }
+        }
         return {
           ...token,
           accessToken: account.access_token,
           refreshToken: account.refresh_token,
-          accessTokenExpires: account.expires_at ? account.expires_at * 1000 : 0,
+          accessTokenExpires: accessTokenExpiresMs,
           user,
         };
       }
@@ -163,10 +172,25 @@ async function refreshAccessToken(token: TokenWithRefresh): Promise<TokenWithRef
       throw refreshedTokens;
     }
 
+    const expiresInRaw = refreshedTokens.expires_in;
+    const expiresIn =
+      typeof expiresInRaw === 'number' && expiresInRaw > 0 ? expiresInRaw : null;
+    let accessTokenExpires: number;
+    if (expiresIn != null) {
+      accessTokenExpires = Date.now() + expiresIn * 1000;
+    } else if (
+      typeof token.accessTokenExpires === 'number' &&
+      token.accessTokenExpires > Date.now()
+    ) {
+      accessTokenExpires = token.accessTokenExpires;
+    } else {
+      accessTokenExpires = Date.now() + 3600 * 1000;
+    }
+
     return {
       ...token,
       accessToken: refreshedTokens.access_token,
-      accessTokenExpires: Date.now() + refreshedTokens.expires_in * 1000,
+      accessTokenExpires,
       refreshToken: refreshedTokens.refresh_token ?? token.refreshToken,
       error: undefined,
     };

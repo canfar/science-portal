@@ -13,6 +13,7 @@ import {
   errorResponse,
   fetchExternalApi,
   forwardAuthHeader,
+  oidcBearerAuthMissingResponse,
 } from '@/app/api/lib/api-utils';
 import { HTTP_STATUS } from '@/app/api/lib/http-constants';
 import { serverApiConfig } from '@/app/api/lib/server-config';
@@ -33,6 +34,10 @@ export const GET = withErrorHandling(
     }
 
     const authHeaders = await forwardAuthHeader(request);
+    const authDenied = oidcBearerAuthMissingResponse(authHeaders);
+    if (authDenied) {
+      return authDenied;
+    }
 
     const response = await fetchExternalApi(
       `${serverApiConfig.skaha.baseUrl}/v1/session/${sessionId}?view=events`,

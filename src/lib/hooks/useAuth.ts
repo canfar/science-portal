@@ -40,6 +40,7 @@ function useAuthBasePath(): string {
 export const authKeys = {
   all: ['auth'] as const,
   status: () => [...authKeys.all, 'status'] as const,
+  oidcBootstrap: () => [...authKeys.all, 'oidc-bootstrap'] as const,
   user: (username: string) => [...authKeys.all, 'user', username] as const,
   permission: (username: string, resource: string, permission: string) =>
     [...authKeys.all, 'permission', username, resource, permission] as const,
@@ -51,7 +52,7 @@ export const authKeys = {
  */
 export function useAuthStatus(options?: Omit<UseQueryOptions<AuthStatus>, 'queryKey' | 'queryFn'>) {
   const { data: session, status } = useSession();
-  const { useCanfar: isCanfar } = usePublicRuntimeConfig();
+  const { useCanfar: isCanfar, basePath } = usePublicRuntimeConfig();
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -76,17 +77,36 @@ export function useAuthStatus(options?: Omit<UseQueryOptions<AuthStatus>, 'query
     ...options,
   });
 
+  type SessionPayload = { user?: unknown; accessToken?: string; expires?: string } | null;
+
+  const sessionBootstrap = useQuery({
+    queryKey: authKeys.oidcBootstrap(),
+    queryFn: async (): Promise<SessionPayload> => {
+      const url = `${basePath || ''}/api/auth/session`;
+      const res = await fetch(url, { credentials: 'include' });
+      if (!res.ok) {
+        throw new Error(`Session bootstrap failed: ${res.status}`);
+      }
+      return res.json();
+    },
+    enabled: !isCanfar && status === 'authenticated',
+    staleTime: 2 * 60 * 1000,
+    retry: 1,
+  });
+
   // For OIDC mode, use NextAuth session directly (no React Query wrapper)
   // This ensures immediate updates when session state changes
   useEffect(() => {
-    if (!isCanfar && status === 'authenticated' && session?.accessToken) {
-      // Store the access token in localStorage for API calls
-      // Using dynamic import to avoid circular dependency issues
+    if (isCanfar) {
+      return;
+    }
+    const token = sessionBootstrap.data?.accessToken ?? session?.accessToken;
+    if (status === 'authenticated' && token) {
       import('@/lib/auth/token-storage').then(({ saveToken }) => {
-        saveToken(session.accessToken as string);
+        saveToken(token);
       });
     }
-  }, [isCanfar, status, session?.accessToken]);
+  }, [isCanfar, status, sessionBootstrap.data?.accessToken, session?.accessToken]);
 
   useEffect(() => {
     if (!isCanfar && status === 'unauthenticated') {
@@ -98,31 +118,49 @@ export function useAuthStatus(options?: Omit<UseQueryOptions<AuthStatus>, 'query
 
   // In OIDC mode, directly return NextAuth session state (no React Query)
   if (!isCanfar) {
-    const oidcAuthStatus: AuthStatus =
-      status === 'authenticated' && session?.user
-        ? {
-            authenticated: true,
-            user: {
-              username: session.user.username || session.user.email?.split('@')[0] || 'user',
-              email: session.user.email || undefined,
-              displayName: session.user.name || undefined,
-              firstName: session.user.firstName || undefined,
-              lastName: session.user.lastName || undefined,
-            },
-          }
-        : { authenticated: false };
+    const oidcSessionReady =
+      status === 'authenticated' &&
+      sessionBootstrap.isSuccess &&
+      typeof sessionBootstrap.data?.accessToken === 'string' &&
+      sessionBootstrap.data.accessToken.length > 0 &&
+      session?.error !== 'RefreshAccessTokenError';
 
-    // Return in React Query format for compatibility
+    let oidcAuthStatus: AuthStatus;
+    if (status === 'authenticated' && session?.user) {
+      oidcAuthStatus = {
+        authenticated: true,
+        sessionReady: oidcSessionReady,
+        user: {
+          username: session.user.username || session.user.email?.split('@')[0] || 'user',
+          email: session.user.email || undefined,
+          displayName: session.user.name || undefined,
+          firstName: session.user.firstName || undefined,
+          lastName: session.user.lastName || undefined,
+        },
+      };
+    } else {
+      oidcAuthStatus = { authenticated: false, sessionReady: false };
+    }
+
+    const isLoading =
+      status === 'loading' ||
+      (status === 'authenticated' && (sessionBootstrap.isPending || sessionBootstrap.isFetching));
+
     return {
       data: oidcAuthStatus,
-      isLoading: status === 'loading',
-      isError: false,
-      error: null,
+      isLoading,
+      isError: sessionBootstrap.isError,
+      error: sessionBootstrap.error ?? null,
       refetch: () => Promise.resolve({ data: oidcAuthStatus }),
     } as ReturnType<typeof useQuery<AuthStatus>>;
   }
 
-  return canfarAuthStatus;
+  return {
+    ...canfarAuthStatus,
+    data: canfarAuthStatus.data
+      ? { ...canfarAuthStatus.data, sessionReady: canfarAuthStatus.data.authenticated }
+      : undefined,
+  } as ReturnType<typeof useQuery<AuthStatus>>;
 }
 
 /**

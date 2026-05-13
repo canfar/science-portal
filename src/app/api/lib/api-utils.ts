@@ -6,6 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { isOIDCAuth } from '@/lib/config/auth-config';
 import { HTTP_STATUS, HTTP_STATUS_NAMES, API_TIMEOUTS } from './http-constants';
 
 /**
@@ -124,12 +125,10 @@ export async function fetchExternalApi(
 
   try {
     // Don't send credentials (cookies) in OIDC mode - only Bearer tokens
-    const isOIDC = process.env.NEXT_USE_CANFAR !== 'true';
-
     const response = await fetch(url, {
       ...options,
       signal: controller.signal,
-      credentials: isOIDC ? 'omit' : 'include', // omit cookies in OIDC mode
+      credentials: isOIDCAuth() ? 'omit' : 'include', // omit cookies in OIDC mode
     });
 
     clearTimeout(timeoutId);
@@ -219,9 +218,7 @@ export function forwardCookies(clientRequest: NextRequest): HeadersInit {
  *   caller; the cookie path is what unlocks single-sign-on across CANFAR apps.
  */
 export async function forwardAuthHeader(clientRequest: NextRequest): Promise<HeadersInit> {
-  const isOIDC = process.env.NEXT_USE_CANFAR !== 'true';
-
-  if (isOIDC) {
+  if (isOIDCAuth()) {
     // In OIDC mode, get the JWT from NextAuth session (server-side)
     const { auth } = await import('@/auth');
     const session = await auth();
@@ -243,6 +240,40 @@ export async function forwardAuthHeader(clientRequest: NextRequest): Promise<Hea
     ...(authHeader ? { Authorization: authHeader } : {}),
     ...cookieHeaders,
   };
+}
+
+/**
+ * In OIDC mode, Skaha calls require a Bearer from the NextAuth session. When it is missing,
+ * return 401 instead of calling upstream unauthenticated (which often returns non-JSON and
+ * becomes a misleading 500 after `response.json()`).
+ */
+export function oidcBearerAuthMissingResponse(authHeaders: HeadersInit): NextResponse | null {
+  if (!isOIDCAuth()) {
+    return null;
+  }
+  const authorization = (authHeaders as Record<string, string>).Authorization;
+  if (authorization?.startsWith('Bearer ') && authorization.length > 7) {
+    return null;
+  }
+  return errorResponse(
+    'Authentication required: no access token in session',
+    HTTP_STATUS.UNAUTHORIZED,
+  );
+}
+
+/**
+ * Parse a fetch Response body as JSON after success; avoids throwing on HTML/plain errors.
+ */
+export async function parseSuccessJsonBody<T>(response: Response): Promise<T | null> {
+  const text = await response.text();
+  if (!text.trim()) {
+    return null;
+  }
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    return null;
+  }
 }
 
 /**

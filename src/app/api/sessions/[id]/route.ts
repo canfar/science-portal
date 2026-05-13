@@ -15,6 +15,8 @@ import {
   successResponse,
   fetchExternalApi,
   forwardAuthHeader,
+  oidcBearerAuthMissingResponse,
+  parseSuccessJsonBody,
 } from '@/app/api/lib/api-utils';
 import { HTTP_STATUS } from '@/app/api/lib/http-constants';
 import { serverApiConfig } from '@/app/api/lib/server-config';
@@ -36,6 +38,10 @@ export const GET = withErrorHandling(
     }
 
     const authHeaders = await forwardAuthHeader(request);
+    const authDenied = oidcBearerAuthMissingResponse(authHeaders);
+    if (authDenied) {
+      return authDenied;
+    }
 
     const response = await fetchExternalApi(
       `${serverApiConfig.skaha.baseUrl}/v1/session/${sessionId}`,
@@ -54,7 +60,11 @@ export const GET = withErrorHandling(
       return errorResponse('Session not found', response.status);
     }
 
-    const session: Session = await response.json();
+    const session = await parseSuccessJsonBody<Session>(response);
+    if (session === null) {
+      logger.logError(HTTP_STATUS.BAD_GATEWAY, 'Invalid JSON from session service');
+      return errorResponse('Invalid response from session service', HTTP_STATUS.BAD_GATEWAY);
+    }
     logger.info(`Retrieved session ${sessionId}`);
     logger.logSuccess(HTTP_STATUS.OK, session);
     return successResponse(session);
@@ -76,6 +86,10 @@ export const DELETE = withErrorHandling(
     }
 
     const authHeaders = await forwardAuthHeader(request);
+    const authDenied = oidcBearerAuthMissingResponse(authHeaders);
+    if (authDenied) {
+      return authDenied;
+    }
 
     const response = await fetchExternalApi(
       `${serverApiConfig.skaha.baseUrl}/v1/session/${sessionId}`,

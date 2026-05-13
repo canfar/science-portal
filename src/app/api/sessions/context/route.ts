@@ -14,10 +14,13 @@ import {
   successResponse,
   fetchExternalApi,
   forwardAuthHeader,
+  oidcBearerAuthMissingResponse,
+  parseSuccessJsonBody,
 } from '@/app/api/lib/api-utils';
 import { HTTP_STATUS } from '@/app/api/lib/http-constants';
 import { serverApiConfig } from '@/app/api/lib/server-config';
 import { createLogger } from '@/app/api/lib/logger';
+import type { ContextResponse } from '@/lib/api/skaha';
 import { getPublicRuntimeConfigFromEnv } from '@/lib/config/public-runtime-config';
 
 /**
@@ -40,6 +43,10 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
   }
 
   const authHeaders = await forwardAuthHeader(request);
+  const authDenied = oidcBearerAuthMissingResponse(authHeaders);
+  if (authDenied) {
+    return authDenied;
+  }
 
   const response = await fetchExternalApi(
     `${serverApiConfig.skaha.baseUrl}/v1/context`,
@@ -58,7 +65,11 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
     return errorResponse('Failed to fetch context', response.status);
   }
 
-  const context = await response.json();
+  const context = await parseSuccessJsonBody<ContextResponse>(response);
+  if (context === null) {
+    logger.logError(HTTP_STATUS.BAD_GATEWAY, 'Invalid JSON from context service');
+    return errorResponse('Invalid response from context service', HTTP_STATUS.BAD_GATEWAY);
+  }
   logger.info('Successfully retrieved context information');
   logger.logSuccess(HTTP_STATUS.OK, context);
   // Log the fetched GPU options

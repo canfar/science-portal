@@ -8,6 +8,7 @@
 
 import { NextRequest } from 'next/server';
 import { auth } from '@/auth';
+import { isOIDCAuth } from '@/lib/config/auth-config';
 import {
   withErrorHandling,
   successResponse,
@@ -21,9 +22,7 @@ import { serverApiConfig } from '@/app/api/lib/server-config';
  * Returns the current session status in NextAuth format
  */
 export const GET = withErrorHandling(async (request: NextRequest) => {
-  const isOIDC = process.env.NEXT_USE_CANFAR !== 'true';
-
-  if (isOIDC) {
+  if (isOIDCAuth()) {
     // In OIDC mode, use NextAuth session
     const session = await auth();
 

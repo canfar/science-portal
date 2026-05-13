@@ -14,9 +14,12 @@ import {
   successResponse,
   fetchExternalApi,
   forwardAuthHeader,
+  oidcBearerAuthMissingResponse,
+  parseSuccessJsonBody,
 } from '@/app/api/lib/api-utils';
 import { serverApiConfig } from '@/app/api/lib/server-config';
 import { createLogger } from '@/app/api/lib/logger';
+import { HTTP_STATUS } from '@/app/api/lib/http-constants';
 import type { SkahaSessionResponse } from '@/lib/api/skaha';
 import { getPublicRuntimeConfigFromEnv } from '@/lib/config/public-runtime-config';
 
@@ -44,6 +47,10 @@ export const POST = withErrorHandling(
     logger.info(`Renewing session: ${sessionId}`);
 
     const authHeaders = await forwardAuthHeader(request);
+    const authDenied = oidcBearerAuthMissingResponse(authHeaders);
+    if (authDenied) {
+      return authDenied;
+    }
 
     // SKAHA API: POST /v1/session/{sessionID} with action=renew as form data
     const response = await fetchExternalApi(
@@ -98,7 +105,11 @@ export const POST = withErrorHandling(
         );
       }
 
-      const session: SkahaSessionResponse = await sessionResponse.json();
+      const session = await parseSuccessJsonBody<SkahaSessionResponse>(sessionResponse);
+      if (session === null) {
+        logger.logError(HTTP_STATUS.BAD_GATEWAY, 'Invalid JSON after renew');
+        return errorResponse('Invalid response when fetching session after renew', HTTP_STATUS.BAD_GATEWAY);
+      }
       logger.info(
         `Successfully renewed session: ${session.name}, new expiry: ${session.expiryTime}`,
       );

@@ -15,6 +15,8 @@ import {
   successResponse,
   fetchExternalApi,
   forwardAuthHeader,
+  oidcBearerAuthMissingResponse,
+  parseSuccessJsonBody,
   getRequestBody,
 } from '@/app/api/lib/api-utils';
 import { serverApiConfig } from '@/app/api/lib/server-config';
@@ -38,6 +40,10 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
   }
 
   const authHeaders = await forwardAuthHeader(request);
+  const authDenied = oidcBearerAuthMissingResponse(authHeaders);
+  if (authDenied) {
+    return authDenied;
+  }
   console.log('📨 Session GET route - authHeaders received:', authHeaders);
 
   const finalHeaders = {
@@ -60,7 +66,11 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
     return errorResponse('Failed to fetch sessions', response.status);
   }
 
-  const sessions: SkahaSessionResponse[] = await response.json();
+  const sessions = await parseSuccessJsonBody<SkahaSessionResponse[]>(response);
+  if (sessions === null || !Array.isArray(sessions)) {
+    logger.logError(HTTP_STATUS.BAD_GATEWAY, 'Invalid JSON from session service');
+    return errorResponse('Invalid response from session service', HTTP_STATUS.BAD_GATEWAY);
+  }
   logger.info(`Retrieved ${sessions.length} session(s)`);
   logger.logSuccess(HTTP_STATUS.OK, { count: sessions.length });
   return successResponse(sessions);
@@ -132,6 +142,10 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
   }
 
   const authHeaders = await forwardAuthHeader(request);
+  const authDenied = oidcBearerAuthMissingResponse(authHeaders);
+  if (authDenied) {
+    return authDenied;
+  }
 
   // Build headers for the request
   const headers: HeadersInit = {
